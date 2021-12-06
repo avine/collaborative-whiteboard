@@ -93,7 +93,7 @@
       "projectType": "library",
       "root": "projects/collaborative-whiteboard",
       "sourceRoot": "projects/collaborative-whiteboard/src",
-      "prefix": "lib",
+      "prefix": "cw",
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:ng-packagr",
