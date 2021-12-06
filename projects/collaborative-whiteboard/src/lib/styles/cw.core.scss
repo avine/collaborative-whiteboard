@@ -191,10 +191,6 @@ cw-whiteboard {
   box-shadow: 0 0 6px 2px rgba(0, 0, 0, 0.125);
 }
 
-.cw-whiteboard__canvas-draw {
-  background-color: $cw-canvas-draw-bg-color;
-}
-
 .cw-whiteboard__canvas-cut {
   position: absolute;
   top: 0;

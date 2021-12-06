@@ -2,7 +2,6 @@
   <cw-canvas
     [canvasSize]="canvasSize"
     [drawOptions]="drawOptions"
-    class="cw-whiteboard__canvas-draw"
     [showGuides]="showGuides && !showCutTool"
     [broadcast]="service.broadcast$ | async"
     (draw)="service.emit($event)"
