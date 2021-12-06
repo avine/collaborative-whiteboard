@@ -1,4 +1,5 @@
-import { Subscription } from 'rxjs';
+import { fromEvent, of, Subscription } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
 
 import { Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 
@@ -27,8 +28,9 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
 
   @Output() emit = new EventEmitter<DrawTransport>();
 
-  @ViewChild('canvasContainer', { static: true, read: ElementRef })
-  canvasContainer!: ElementRef;
+  @ViewChild('canvasContainer', { static: true, read: ElementRef }) canvasContainer!: ElementRef<HTMLElement>;
+
+  canvasContainerOverflow!: string;
 
   canvasSize = getDefaultCanvasSize();
 
@@ -65,9 +67,11 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
       // In other words, we need the data emitted by `broadcastHistoryCut$`to be ready eagerly.
       this.service.broadcastHistoryCut$.subscribe((broadcastHistoryCut) => {
         this.broadcastHistoryCut = broadcastHistoryCut;
-      })
+      }),
+      this.handleWindowResize()
     );
 
+    this.initCanvasContainerOverflow();
     if (this.fitParentElement) {
       this.fitCanvasSizeToParentElement();
     }
@@ -77,15 +81,33 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
     this.subscriptions.forEach((subscription) => subscription.unsubscribe());
   }
 
+  private handleWindowResize() {
+    if (!window) {
+      return of().subscribe();
+    }
+    return fromEvent(window, 'resize').pipe(debounceTime(250)).subscribe(() => {
+      if (this.fitParentElement) {
+        this.fitCanvasSizeToParentElement();
+        this.service.redraw();
+      }
+    });
+  }
+
+  private initCanvasContainerOverflow() {
+    this.canvasContainerOverflow = this.canvasContainer.nativeElement.style.overflow;
+  }
+
   private fitCanvasSizeToParentElement() {
-    const element = this.canvasContainer.nativeElement as HTMLElement;
+    const element = this.canvasContainer.nativeElement;
     // Fit the container
     element.style.width = '100%';
     element.style.height = '100%';
+    element.style.overflow = 'hidden';
     // Freeze both container and canvas sizes
     const { width, height } = element.getBoundingClientRect();
     element.style.width = `${width}px`;
     element.style.height = `${height}px`;
+    element.style.overflow = this.canvasContainerOverflow;
     this.canvasSize = { width, height };
   }
 }
