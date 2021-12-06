@@ -65,26 +65,27 @@ export class CwCanvasComponent implements AfterViewInit, OnChanges {
   constructor(private ngZone: NgZone, private changeDetectorRef: ChangeDetectorRef) {}
 
   ngAfterViewInit() {
-    this.initMouseMoveListener();
+    this.initMoveListeners();
     this.applyCanvasSize();
     this.initContext();
 
     if (this.broadcast) {
-      this.broadcastHandler();
+      this.handleBroadcast();
     }
   }
 
   ngOnChanges({ canvasSize, broadcast }: SimpleChanges) {
-    if (canvasSize && canvasSize.currentValue && !canvasSize.firstChange) {
+    // Note: Skip the `.firstChange` because `this.context` is not yet available
+    if (canvasSize?.currentValue && !canvasSize.firstChange) {
       this.applyCanvasSize();
     }
-    if (broadcast && broadcast.currentValue && !broadcast.firstChange) {
-      this.broadcastHandler();
+    if (broadcast?.currentValue && !broadcast.firstChange) {
+      this.handleBroadcast();
     }
   }
 
-  private initMouseMoveListener() {
-    // Prevent unnecessary changes detection
+  private initMoveListeners() {
+    // Prevent unnecessary change detection
     this.ngZone.runOutsideAngular(() => {
       this.canvasRef.nativeElement.addEventListener('touchmove', this.drawMove.bind(this));
       this.canvasRef.nativeElement.addEventListener('mousemove', this.drawMove.bind(this));
@@ -103,19 +104,21 @@ export class CwCanvasComponent implements AfterViewInit, OnChanges {
     // Actually, the only way to change the value of `canvasSize` is when its @Input() changes.
     // And emitting the value we just received seems to be useless!
     // But we still need to do this, so that the wrapping component can react to this change asynchronously.
+    //
+    // TODO: the canvasSize should update itself its container size changes. So, we need this!
     this.canvasSizeChange.emit(this.canvasSize);
   }
 
   private initContext() {
     if (this.canvasRef.nativeElement.getContext) {
-      this.context = this.canvasRef.nativeElement.getContext('2d') as CanvasRenderingContext2D;
+      this.context = this.canvasRef.nativeElement.getContext('2d');
       this.setDefaultContext();
     } else {
       console.error('Canvas NOT supported!');
     }
   }
 
-  private broadcastHandler() {
+  private handleBroadcast() {
     this.updateBroadcastBuffer();
     this.flushBroadcastBuffer();
   }
@@ -133,7 +136,7 @@ export class CwCanvasComponent implements AfterViewInit, OnChanges {
     const id = ++this.broadcastId; // Do this on top (and NOT inside the `else` statement)
     if (!this.broadcast.animate || !window) {
       while (this.broadcastBuffer.length) {
-        this.drawHandler(this.broadcastBuffer.shift() as DrawEvent);
+        this.handleDraw(this.broadcastBuffer.shift() as DrawEvent);
       }
     } else {
       const steps = this.broadcastBuffer.length;
@@ -142,7 +145,7 @@ export class CwCanvasComponent implements AfterViewInit, OnChanges {
           if (this.broadcastBuffer.length) {
             const count = this.flushCount(this.broadcastBuffer.length, steps);
             for (let i = 0; i < count; i++) {
-              this.drawHandler(this.broadcastBuffer.shift());
+              this.handleDraw(this.broadcastBuffer.shift());
             }
             window.requestAnimationFrame(step);
           } else {
@@ -163,7 +166,7 @@ export class CwCanvasComponent implements AfterViewInit, OnChanges {
     return Math.min(count, remain);
   }
 
-  private drawHandler(event: DrawEvent) {
+  private handleDraw(event: DrawEvent) {
     switch (event.type) {
       case 'point': {
         this.drawPoint(event.data, event.options);
@@ -237,13 +240,13 @@ export class CwCanvasComponent implements AfterViewInit, OnChanges {
   /**
    * @returns The number of touches for touch event or 0 for mouse event
    */
-  private touchEventHandler(e: CanvasEvent): number {
+  private handleTouchEvent(e: CanvasEvent): number {
     const isTouchEvent = e.type === 'touchstart' || e.type === 'touchmove' || e.type === 'touchend';
     if (isTouchEvent) {
       const touchesLength = (e as TouchEvent).touches.length;
       if (touchesLength === 1) {
         // Prevent "mouse" event from being fired when "touch" event is detected.
-        // Notice that only "single-touch" event is considered as draw event.
+        // Notice that only "single-touch" event is considered a draw event.
         e.preventDefault();
       }
       return touchesLength;
@@ -265,9 +268,9 @@ export class CwCanvasComponent implements AfterViewInit, OnChanges {
   }
 
   drawStart(e: CanvasEvent) {
-    const touchesLength = this.touchEventHandler(e); // Do this on top (NOT in the "if" statement)
+    const touchesLength = this.handleTouchEvent(e); // Do this on top (NOT in the "if" statement)
     if (touchesLength > 1) {
-      return; // Remember that only "single-touch" event is considered as draw event.
+      return; // Remember that only "single-touch" event is considered a draw event.
     }
     if (!this.drawDisabled) {
       this.lineSerieBuffer = this.getCanvasPoint(e, touchesLength);
@@ -275,7 +278,7 @@ export class CwCanvasComponent implements AfterViewInit, OnChanges {
   }
 
   drawMove(e: CanvasEvent) {
-    const touchesLength = this.touchEventHandler(e); // Do this on top (NOT in the "if" statement)
+    const touchesLength = this.handleTouchEvent(e); // Do this on top (NOT in the "if" statement)
     if (this.lineSerieBuffer.length) {
       const fromX = this.lineSerieBuffer[this.lineSerieBuffer.length - 2];
       const fromY = this.lineSerieBuffer[this.lineSerieBuffer.length - 1];
@@ -289,7 +292,7 @@ export class CwCanvasComponent implements AfterViewInit, OnChanges {
   }
 
   drawEnd(e: CanvasEvent) {
-    this.touchEventHandler(e); // Do this on top (NOT in the "if" statement)
+    this.handleTouchEvent(e); // Do this on top (NOT in the "if" statement)
     if (this.lineSerieBuffer.length === 2) {
       const data = this.canvasPointAdjustment(this.lineSerieBuffer as CanvasPoint);
       this.drawPoint(data);

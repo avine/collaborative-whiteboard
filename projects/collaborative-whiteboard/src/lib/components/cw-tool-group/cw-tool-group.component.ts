@@ -108,7 +108,7 @@ export class CwToolGroupComponent implements AfterViewInit, OnDestroy {
   }
 
   private closeContent(tool: CwToolComponent) {
-    this.activeTools.get(tool).dispose();
+    this.activeTools.get(tool)?.dispose();
     this.activeTools.delete(tool);
   }
 
