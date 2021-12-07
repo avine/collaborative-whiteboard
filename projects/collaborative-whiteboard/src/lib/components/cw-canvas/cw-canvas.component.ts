@@ -111,7 +111,7 @@ export class CwCanvasComponent implements AfterViewInit, OnChanges {
 
   private initContext() {
     if (this.canvasRef.nativeElement.getContext) {
-      this.context = this.canvasRef.nativeElement.getContext('2d');
+      this.context = this.canvasRef.nativeElement.getContext('2d') as CanvasRenderingContext2D;
       this.setDefaultContext();
     } else {
       console.error('Canvas NOT supported!');
@@ -145,7 +145,7 @@ export class CwCanvasComponent implements AfterViewInit, OnChanges {
           if (this.broadcastBuffer.length) {
             const count = this.flushCount(this.broadcastBuffer.length, steps);
             for (let i = 0; i < count; i++) {
-              this.handleDraw(this.broadcastBuffer.shift());
+              this.handleDraw(this.broadcastBuffer.shift() as DrawEvent);
             }
             window.requestAnimationFrame(step);
           } else {
@@ -181,7 +181,7 @@ export class CwCanvasComponent implements AfterViewInit, OnChanges {
         break;
       }
       case 'clear': {
-        this.drawClear(event.data);
+        this.drawClear(event.data || [0, 0, this.canvasSize.width, this.canvasSize.height]);
         break;
       }
       default: {
@@ -229,8 +229,8 @@ export class CwCanvasComponent implements AfterViewInit, OnChanges {
     this.applyDrawOptions();
   }
 
-  private drawClear([fromX = 0, fromY = 0, toX = this.canvasSize.width, toY = this.canvasSize.height]: CanvasLine) {
-    this.context.clearRect(fromX, fromY, toX, toY);
+  private drawClear(canvasLine: CanvasLine) {
+    this.context.clearRect(...canvasLine);
   }
 
   private emit(event: DrawEvent) {
@@ -297,7 +297,7 @@ export class CwCanvasComponent implements AfterViewInit, OnChanges {
       const data = this.canvasPointAdjustment(this.lineSerieBuffer as CanvasPoint);
       this.drawPoint(data);
       this.emit({
-        owner: null,
+        owner: '',
         type: 'point',
         options: this.drawOptions,
         data,
@@ -305,7 +305,7 @@ export class CwCanvasComponent implements AfterViewInit, OnChanges {
     } else if (this.lineSerieBuffer.length > 2) {
       const data = this.lineSerieBuffer as CanvasLineSerie;
       this.emit({
-        owner: null,
+        owner: '',
         type: 'lineSerie',
         options: this.drawOptions,
         data,

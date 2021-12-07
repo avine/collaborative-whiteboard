@@ -9,7 +9,7 @@ type ThemeName = 'light' | 'dark';
 export class ThemeService {
   private renderer = this.rendererFactory.createRenderer(null, null);
 
-  private themeName: ThemeName;
+  private themeName!: ThemeName;
 
   get name() {
     return this.themeName;

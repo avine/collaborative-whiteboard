@@ -71,7 +71,9 @@ export class CwService {
   constructor() {}
 
   private pushHistory(event: DrawEvent) {
-    event.options = { ...event.options }; // Make this immutable!
+    if ('options' in event) {
+      event.options = { ...event.options }; // Make this immutable!
+    }
     const hash = getHash(event);
     this.historyMap.set(hash, event);
   }
@@ -82,10 +84,12 @@ export class CwService {
   }
 
   private popHistory(hash = this.getOwnerLastHash()): DrawEvent | void {
-    const removed = this.historyMap.get(hash);
-    if (removed) {
-      this.historyMap.delete(hash);
-      return removed;
+    if (hash) {
+      const removed = this.historyMap.get(hash);
+      if (removed) {
+        this.historyMap.delete(hash);
+        return removed;
+      }
     }
   }
 
@@ -146,14 +150,12 @@ export class CwService {
     return events.filter(event => event.owner === this.owner);
   }
 
-  private getOwnerLastHash(): string {
-    let lastHash: string;
+  private getOwnerLastHash(): string | void {
     for (const [hash, event] of this.historyMap.entries()) {
       if (event.owner === this.owner) {
-        lastHash = hash;
+        return hash;
       }
     }
-    return lastHash;
   }
 
   private broadcastAdd(events: DrawEvent[]) {

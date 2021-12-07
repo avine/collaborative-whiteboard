@@ -16,7 +16,7 @@ export class AppComponent implements OnDestroy {
 
   popup: 'update' | '' = '';
 
-  subscription: Subscription;
+  subscription!: Subscription;
 
   constructor(@Inject(WINDOW) private window: Window) {}
 

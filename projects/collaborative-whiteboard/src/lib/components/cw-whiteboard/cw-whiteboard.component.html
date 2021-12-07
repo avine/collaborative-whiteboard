@@ -3,7 +3,7 @@
     [canvasSize]="canvasSize"
     [drawOptions]="drawOptions"
     [showGuides]="showGuides && !showCutTool"
-    [broadcast]="service.broadcast$ | async"
+    [broadcast]="(service.broadcast$ | async) || { animate: false, events: [] }"
     (draw)="service.emit($event)"
   ></cw-canvas>
 

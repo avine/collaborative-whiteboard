@@ -6,7 +6,7 @@ const colors = ['#000', '#333', '#666', '#999', '#ccc', '#fff'];
 
 const getColor = () => colors[getNumber(colors.length - 1)];
 
-export const getDrawEvent = (owner: Owner = null): DrawEvent => ({
+export const getDrawEvent = (owner: Owner = ''): DrawEvent => ({
   type: 'point',
   data: [getNumber(), getNumber()],
   options: { lineWidth: getNumber(20), strokeStyle: getColor() },
@@ -15,7 +15,7 @@ export const getDrawEvent = (owner: Owner = null): DrawEvent => ({
 
 export const getDrawEventsWithMapping = ({
   eventsNumber = 2,
-  owner = null,
+  owner = '',
   action = 'add',
   animate = true,
 }: {

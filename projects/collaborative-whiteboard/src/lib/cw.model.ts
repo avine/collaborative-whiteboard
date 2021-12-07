@@ -21,27 +21,29 @@ export interface DrawOptions {
 export interface DrawBase {
   owner: Owner;
   type: DrawType;
-  options: DrawOptions;
 }
 
 export interface DrawPoint extends DrawBase {
   type: 'point';
   data: CanvasPoint;
+  options: DrawOptions;
 }
 
 export interface DrawLine extends DrawBase {
   type: 'line';
   data: CanvasLine;
+  options: DrawOptions;
 }
 
 export interface DrawLineSerie extends DrawBase {
   type: 'lineSerie';
   data: CanvasLineSerie;
+  options: DrawOptions;
 }
 
 export interface DrawClear extends DrawBase {
   type: 'clear';
-  data: CanvasLine;
+  data?: CanvasLine;
 }
 
 export type DrawEvent = DrawPoint | DrawLine | DrawLineSerie | DrawClear;

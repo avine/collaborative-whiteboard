@@ -35,16 +35,9 @@ export const getDefaultDrawOptions = (): DrawOptions => ({
   strokeStyle: defaultColor,
 });
 
-export const getEmptyDrawOptions = (): DrawOptions => ({
-  lineWidth: undefined,
-  strokeStyle: undefined,
-});
-
 export const getClearEvent = (): DrawClear => ({
-  owner: null,
+  owner: '',
   type: 'clear',
-  options: getEmptyDrawOptions(),
-  data: [undefined, undefined, undefined, undefined],
 });
 
 export const drawLineSerieToLinesMapper = (events: DrawEvent[]): DrawEvent[] => {

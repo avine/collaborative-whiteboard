@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import {
   DrawEvent,
   DrawEventsBroadcast,
@@ -10,14 +10,10 @@ import {
   templateUrl: './canvas-mirror.component.html',
   styleUrls: ['./canvas-mirror.component.scss'],
 })
-export class CanvasMirrorComponent implements OnInit {
-  drawEventsBroadcast: DrawEventsBroadcast;
+export class CanvasMirrorComponent {
+  drawEventsBroadcast!: DrawEventsBroadcast;
 
   animate = true;
-
-  constructor() {}
-
-  ngOnInit() {}
 
   broadcast(drawEvent: DrawEvent) {
     this.drawEventsBroadcast = drawEventsBroadcastMapper(
