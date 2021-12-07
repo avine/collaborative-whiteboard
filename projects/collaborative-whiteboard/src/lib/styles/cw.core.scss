@@ -78,9 +78,12 @@ cw-color-picker {
   display: block;
 }
 
-.cw-color-picker {
+.cw-color-picker__row {
+  display: flex;
+}
+
+.cw-color-picker__col {
   position: relative;
-  display: inline-block;
   overflow: hidden;
   width: $cw-color-picker-width;
   height: $cw-color-picker-width;
@@ -90,7 +93,7 @@ cw-color-picker {
   cursor: pointer;
 }
 
-.cw-color-picker--selected:after {
+.cw-color-picker__col--selected:after {
   content: '';
   position: absolute;
   left: ($cw-color-picker-width - $cw-color-picker-width-active) * 0.5;
@@ -100,13 +103,13 @@ cw-color-picker {
   border-radius: 50%;
   background-color: $cw-surface-color;
   transform-origin: center;
-  //animation: cwColorPickerSelected $cw-color-picker-anim-duration linear;
+  animation: cwColorPickerSelected $cw-color-picker-anim-duration linear;
 }
 
-//@keyframes cwColorPickerSelected {
-//  from { transform: scale(0); }
-//  to { transform: scale(1); }
-//}
+@keyframes cwColorPickerSelected {
+  from { transform: scale(0); }
+  to { transform: scale(1); }
+}
 
 .cw-tool-content {
   position: relative;

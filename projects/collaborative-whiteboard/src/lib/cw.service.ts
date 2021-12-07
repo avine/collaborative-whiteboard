@@ -47,7 +47,7 @@ export class CwService {
 
   emit$ = this.emit$$.asObservable();
 
-  owner!: Owner;
+  owner: Owner = '';
 
   constructor() {}
 
@@ -132,7 +132,9 @@ export class CwService {
   }
 
   private getOwnerLastHash(): string | void {
-    for (const [hash, event] of this.historyMap.entries()) {
+    const historyMapEntries = Array.from(this.historyMap.entries());
+    for (let i = historyMapEntries.length - 1; i >= 0; i--) {
+      const [hash, event] = historyMapEntries[i];
       if (event.owner === this.owner) {
         return hash;
       }

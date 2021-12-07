@@ -25,6 +25,14 @@ export const getDefaultColors = () => [
 
 export const defaultColor = '#29B6F6';
 
+export const getColorsMatrix = (colors = getDefaultColors(), maxColorsPerRow = 6) => {
+  const matrix: string[][] = [];
+  while (colors.length) {
+    matrix.push(colors.splice(0, maxColorsPerRow));
+  }
+  return matrix;
+};
+
 export const getDefaultCanvasSize = (): CanvasSize => ({
   width: 300,
   height: 300,
