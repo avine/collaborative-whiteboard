@@ -1,4 +1,4 @@
-@import './mixins.scss';
+@use './mixins.scss' as *;
 
 @include themes {
   $track-color: map-get($app-theme, pale-color);

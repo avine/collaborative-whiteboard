@@ -1,4 +1,4 @@
-@import './cw.variables.scss';
+@use './cw.variables' as *;
 
 .cw-button--less {
   border: none;

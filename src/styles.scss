@@ -1,9 +1,9 @@
+@use './app/styles/base.scss';
+
+@use './app/styles/app.scss';
+
+@use './app/styles/input-range.scss';
+
+@use './app/styles/collaborative-whiteboard.scss';
+
 @import '~@angular/cdk/overlay-prebuilt.css';
-
-@import './app/styles/base.scss';
-
-@import './app/styles/app.scss';
-
-@import './app/styles/input-range.scss';
-
-@import './app/styles/collaborative-whiteboard.scss';

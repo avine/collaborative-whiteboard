@@ -1,4 +1,4 @@
-@import './mixins.scss';
+@use './mixins.scss' as *;
 
 @include themes {
   $cw-primary-color: map-get($app-theme, primary-color);

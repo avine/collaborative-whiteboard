@@ -1,3 +1,5 @@
+@use './mixins.scss' as *;
+
 .app-button {
   cursor: pointer;
   outline: none;

@@ -1,5 +1,5 @@
-@import './variables.light.scss';
-@import './variables.dark.scss';
+@use './variables.light.scss' as light;
+@use './variables.dark.scss' as dark;
 
 // Usage
 // -----
@@ -10,9 +10,9 @@
 
 @mixin theme($name: light) {
   @if $name == light {
-    $app-theme: $app-theme-light !global;
+    $app-theme: light.$app-theme-light !global;
   } @else {
-    $app-theme: $app-theme-dark !global;
+    $app-theme: dark.$app-theme-dark !global;
   }
 
   .theme--#{$name} {
@@ -33,9 +33,9 @@
 
 @mixin ngTheme($name: light) {
   @if $name == light {
-    $app-theme: $app-theme-light !global;
+    $app-theme: light.$app-theme-light !global;
   } @else {
-    $app-theme: $app-theme-dark !global;
+    $app-theme: dark.$app-theme-dark !global;
   }
 
   :host-context(.theme--#{$name}) {
