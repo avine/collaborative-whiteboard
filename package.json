@@ -5,6 +5,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "build:docs": "ng build --base-href='/cw/' --output-path='docs'",
     "watch": "ng build --watch --configuration development",
     "test": "jest",
     "lint": "ng lint",
