@@ -38,8 +38,8 @@ cw-color-picker {
 .cw-color-picker--selected:after {
   content: '';
   position: absolute;
-  left: ($cw-color-picker-width - $cw-color-picker-width-active) / 2;
-  top: ($cw-color-picker-width - $cw-color-picker-width-active) / 2;
+  left: ($cw-color-picker-width - $cw-color-picker-width-active) * 0.5;
+  top: ($cw-color-picker-width - $cw-color-picker-width-active) * 0.5;
   width: $cw-color-picker-width-active;
   height: $cw-color-picker-width-active;
   border-radius: 50%;
