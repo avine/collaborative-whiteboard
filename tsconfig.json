@@ -8,9 +8,7 @@
         "dist/collaborative-whiteboard/collaborative-whiteboard",
         "dist/collaborative-whiteboard"
       ],
-      "@collaborative-whiteboard": [
-        "projects/collaborative-whiteboard/src/public-api.ts"
-      ]
+      "@collaborative-whiteboard": ["projects/collaborative-whiteboard/src/public-api.ts"]
     },
     "outDir": "./dist/out-tsc",
     "forceConsistentCasingInFileNames": true,

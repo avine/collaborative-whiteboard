@@ -25,13 +25,7 @@ import { WhiteboardComponent } from './pages/whiteboard/whiteboard.component';
     TextComponent,
     WhiteboardComponent,
   ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    FormsModule,
-    FontAwesomeModule,
-    CollaborativeWhiteboardModule,
-  ],
+  imports: [BrowserModule, AppRoutingModule, FormsModule, FontAwesomeModule, CollaborativeWhiteboardModule],
   providers: [],
   bootstrap: [AppComponent],
 })

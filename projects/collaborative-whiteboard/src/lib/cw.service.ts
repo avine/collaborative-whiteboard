@@ -3,20 +3,8 @@ import { first, map } from 'rxjs/operators';
 
 import { Injectable } from '@angular/core';
 
-import {
-  CutRange,
-  CutRangeArg,
-  DrawEvent,
-  DrawEventsBroadcast,
-  DrawTransport,
-  Owner,
-} from './cw.model';
-import {
-  drawEventsBroadcastMapper,
-  getClearEvent,
-  getHash,
-  normalizeCutRange,
-} from './cw.operator';
+import { CutRange, CutRangeArg, DrawEvent, DrawEventsBroadcast, DrawTransport, Owner } from './cw.model';
+import { drawEventsBroadcastMapper, getClearEvent, getHash, normalizeCutRange } from './cw.operator';
 
 @Injectable()
 export class CwService {
@@ -42,24 +30,17 @@ export class CwService {
 
   history$ = this.history$$.asObservable();
 
-  historyCut$ = this.history$$.pipe(
-    map(history => this.getOwnerDrawEvents(history)),
-  );
+  historyCut$ = this.history$$.pipe(map((history) => this.getOwnerDrawEvents(history)));
 
-  historyCutLength$ = this.historyCut$.pipe(
-    map(historyCut => historyCut.length),
-  );
+  historyCutLength$ = this.historyCut$.pipe(map((historyCut) => historyCut.length));
 
   cutRange$ = this.cutRange$$.asObservable();
 
-  broadcastHistoryCut$ = combineLatest([
-    this.historyCut$,
-    this.cutRange$$,
-  ]).pipe(
+  broadcastHistoryCut$ = combineLatest([this.historyCut$, this.cutRange$$]).pipe(
     map(([historyCut, [from, to]]) => {
       const slice = [getClearEvent(), ...historyCut.slice(from, to + 1)];
       return drawEventsBroadcastMapper(slice);
-    }),
+    })
   );
 
   broadcast$ = this.broadcast$$.asObservable();
@@ -103,7 +84,7 @@ export class CwService {
 
   private dropHistoryRedoAgainst(events: DrawEvent[]) {
     let redos: DrawEvent[] = [];
-    events.forEach(event => {
+    events.forEach((event) => {
       const hash = getHash(event);
       while (redos.length || this.historyRedo.length) {
         if (!redos.length) {
@@ -147,7 +128,7 @@ export class CwService {
   }
 
   private getOwnerDrawEvents(events: DrawEvent[]) {
-    return events.filter(event => event.owner === this.owner);
+    return events.filter((event) => event.owner === this.owner);
   }
 
   private getOwnerLastHash(): string | void {
@@ -160,7 +141,7 @@ export class CwService {
 
   private broadcastAdd(events: DrawEvent[]) {
     events = this.normalizeEvents(events);
-    events.forEach(event => this.pushHistory(event));
+    events.forEach((event) => this.pushHistory(event));
     const ownerEvents = this.getOwnerDrawEvents(events);
     if (ownerEvents.length) {
       this.dropHistoryRedoAgainst(ownerEvents);
@@ -171,15 +152,13 @@ export class CwService {
 
   private broadcastRemove(events: DrawEvent[]) {
     events = this.normalizeEvents(events);
-    const removed = events.filter(event => this.pullHistory(event));
+    const removed = events.filter((event) => this.pullHistory(event));
     if (removed.length) {
       const ownerEvents = this.getOwnerDrawEvents(removed);
       if (ownerEvents.length) {
         this.pushHistoryRedo(ownerEvents);
       }
-      this.broadcast$$.next(
-        drawEventsBroadcastMapper([getClearEvent(), ...this.history]),
-      );
+      this.broadcast$$.next(drawEventsBroadcastMapper([getClearEvent(), ...this.history]));
       this.emitHistory();
     }
   }
@@ -192,9 +171,7 @@ export class CwService {
   // Note that since the whiteboard is collaborative, the clear event should NOT
   // be broadcast through the network, otherwise all users' events will be deleted.
   private normalizeEvents(events: DrawEvent[]) {
-    return events.map(event =>
-      event.type === 'clear' ? getClearEvent() : event,
-    );
+    return events.map((event) => (event.type === 'clear' ? getClearEvent() : event));
   }
 
   /**
@@ -229,9 +206,7 @@ export class CwService {
     const event = this.popHistory();
     if (event) {
       this.pushHistoryRedo([event]);
-      this.broadcast$$.next(
-        drawEventsBroadcastMapper([getClearEvent(), ...this.history]),
-      );
+      this.broadcast$$.next(drawEventsBroadcastMapper([getClearEvent(), ...this.history]));
       this.emit$$.next({ action: 'remove', events: [event] });
       this.emitHistory();
     }
@@ -240,7 +215,7 @@ export class CwService {
   redo() {
     const events = this.popHistoryRedo();
     if (events) {
-      events.forEach(event => this.pushHistory(event));
+      events.forEach((event) => this.pushHistory(event));
       this.broadcast$$.next(drawEventsBroadcastMapper(events, true));
       this.emit$$.next({ action: 'add', events });
       this.emitHistory();
@@ -248,12 +223,10 @@ export class CwService {
   }
 
   cut(events: DrawEvent[]) {
-    const removed = events.filter(event => this.pullHistory(event));
+    const removed = events.filter((event) => this.pullHistory(event));
     if (removed.length) {
       this.pushHistoryRedo(removed);
-      this.broadcast$$.next(
-        drawEventsBroadcastMapper([getClearEvent(), ...this.history]),
-      );
+      this.broadcast$$.next(drawEventsBroadcastMapper([getClearEvent(), ...this.history]));
       this.emit$$.next({ action: 'remove', events: removed });
       this.emitHistory();
     }
@@ -264,9 +237,7 @@ export class CwService {
    */
   cutByRange(data: CutRangeArg) {
     const [from, to] = normalizeCutRange(data);
-    this.historyCut$
-      .pipe(first())
-      .subscribe(historyCut => this.cut(historyCut.slice(from, to + 1)));
+    this.historyCut$.pipe(first()).subscribe((historyCut) => this.cut(historyCut.slice(from, to + 1)));
   }
 
   undoAll() {

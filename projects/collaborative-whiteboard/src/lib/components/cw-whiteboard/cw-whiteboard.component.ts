@@ -85,12 +85,14 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
     if (!window) {
       return of().subscribe();
     }
-    return fromEvent(window, 'resize').pipe(debounceTime(250)).subscribe(() => {
-      if (this.fitParentElement) {
-        this.fitCanvasSizeToParentElement();
-        this.service.redraw(false);
-      }
-    });
+    return fromEvent(window, 'resize')
+      .pipe(debounceTime(250))
+      .subscribe(() => {
+        if (this.fitParentElement) {
+          this.fitCanvasSizeToParentElement();
+          this.service.redraw(false);
+        }
+      });
   }
 
   private initCanvasContainerOverflow() {

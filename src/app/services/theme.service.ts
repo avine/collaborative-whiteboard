@@ -15,19 +15,13 @@ export class ThemeService {
     return this.themeName;
   }
 
-  constructor(
-    @Inject(DOCUMENT) private document: Document,
-    private rendererFactory: RendererFactory2,
-  ) {
+  constructor(@Inject(DOCUMENT) private document: Document, private rendererFactory: RendererFactory2) {
     this.setTheme();
   }
 
   setTheme(name: ThemeName = 'light') {
     const oldName: ThemeName = name === 'light' ? 'dark' : 'light';
-    this.renderer.removeClass(
-      this.document.documentElement,
-      `theme--${oldName}`,
-    );
+    this.renderer.removeClass(this.document.documentElement, `theme--${oldName}`);
     this.renderer.addClass(this.document.documentElement, `theme--${name}`);
     this.themeName = name;
   }
