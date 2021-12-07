@@ -7,6 +7,61 @@
   font: inherit;
 }
 
+.cw-control {
+  text-align: center;
+}
+
+.cw-control + .cw-control {
+  margin-top: 1.5rem;
+}
+
+.cw-control__label {
+  display: block;
+  position: relative;
+  margin-bottom: 0.5em;
+  padding-left: 0.75em;
+  text-align: left;
+  font-size: 0.85em;
+
+  &::before {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    left: 0;
+    border-top: 1px solid $cw-border-color;
+    content: '';
+  }
+}
+
+.cw-control__label-inner {
+  display: inline-block;
+  padding: 0 0.75em 0 0.5em;
+  background-color: $cw-surface-color;
+  position: relative;
+}
+
+.cw-control__field {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.cw-control__number {
+  display: inline-block;
+  min-width: 1.5rem;
+  margin-left: 0.5rem;
+  text-align: right;
+}
+
+.cw-control__button {
+  outline: none;
+  padding: 0.35rem 0.7rem;
+  border-radius: $cw-border-radius;
+  border: none;
+  background-color: $cw-primary-color;
+  color: white;
+  font: inherit;
+}
+
 .cw-canvas {
   display: block;
   background: inherit;
@@ -52,48 +107,6 @@ cw-color-picker {
 //  from { transform: scale(0); }
 //  to { transform: scale(1); }
 //}
-
-.cw-cut__controller + .cw-cut__controller {
-  margin-top: 1.5rem;
-}
-
-.cw-cut__field {
-  display: inline-block;
-  vertical-align: middle;
-}
-
-.cw-cut__number {
-  display: inline-block;
-  min-width: 1.5rem;
-  margin-left: 0.5rem;
-  text-align: right;
-}
-
-.cw-cut__button {
-  outline: none;
-  padding: 0.35rem 0.7rem;
-  border-radius: $cw-border-radius;
-  border: none;
-  background-color: $cw-primary-color;
-  color: white;
-  font: inherit;
-}
-
-.cw-draw-line__controller + .cw-draw-line__controller {
-  margin-top: 1.5rem;
-}
-
-.cw-draw-line__field {
-  display: inline-block;
-  vertical-align: middle;
-}
-
-.cw-draw-line__number {
-  display: inline-block;
-  min-width: 1.5rem;
-  margin-left: 0.5rem;
-  text-align: right;
-}
 
 .cw-tool-content {
   position: relative;

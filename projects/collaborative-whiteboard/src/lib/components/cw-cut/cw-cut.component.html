@@ -1,6 +1,10 @@
-<div class="cw-cut__controller">
+<div class="cw-control">
+  <div class="cw-control__label">
+    <span class="cw-control__label-inner">Position</span>
+  </div>
+
   <input
-    class="cw-cut__field"
+    class="cw-control__field"
     type="range"
     min="1"
     [max]="cutLastPosition"
@@ -8,12 +12,16 @@
     (ngModelChange)="updateCutRange()"
   />
 
-  <span class="cw-cut__number">{{ cutPosition }}</span>
+  <span class="cw-control__number">{{ cutPosition }}</span>
+</div>
 
-  <br />
+<div class="cw-control">
+  <div class="cw-control__label">
+    <span class="cw-control__label-inner">Spread</span>
+  </div>
 
   <input
-    class="cw-cut__field"
+    class="cw-control__field"
     type="range"
     min="1"
     [max]="cutLastPosition"
@@ -21,9 +29,9 @@
     (ngModelChange)="updateCutRange()"
   />
 
-  <span class="cw-cut__number">{{ cutSpread }}</span>
+  <span class="cw-control__number">{{ cutSpread }}</span>
 </div>
 
-<div class="cw-cut__controller">
-  <button type="button" class="cw-cut__button" (click)="cut()">Cut</button>
+<div class="cw-control">
+  <button type="button" class="cw-control__button" (click)="cut()">Cut</button>
 </div>
