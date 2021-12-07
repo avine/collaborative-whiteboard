@@ -203,7 +203,7 @@ export class CwCanvasComponent implements AfterViewInit, OnChanges {
   private drawPoint([x, y]: CanvasPoint, options?: DrawOptions) {
     this.applyDrawOptions(options);
     this.context.beginPath();
-    this.context.arc(x, y, 0, 0, Math.PI * 2);
+    this.context.arc(x, y, 1, 0, Math.PI * 2, true);
     this.context.stroke();
     this.applyDrawOptions();
   }
