@@ -23,7 +23,7 @@ export class ThemeService {
     this.setTheme();
   }
 
-  setTheme(name: ThemeName = 'light') {
+  setTheme(name: ThemeName = 'dark') {
     const oldName: ThemeName = name === 'light' ? 'dark' : 'light';
     this.renderer.removeClass(this.document.documentElement, `theme--${oldName}`);
     this.renderer.addClass(this.document.documentElement, `theme--${name}`);

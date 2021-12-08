@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { faTint, faUser, faEllipsisV } from '@fortawesome/free-solid-svg-icons';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component } from '@angular/core';
+import { faEllipsisV, faMoon, faSun, faUserCircle } from '@fortawesome/free-solid-svg-icons';
 
 import { ThemeService } from '../../services/theme.service';
 
@@ -10,11 +10,35 @@ import { ThemeService } from '../../services/theme.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HeaderComponent {
-  themeIcon = faTint;
-  userIcon = faUser;
   burger = faEllipsisV;
+  darkThemeIcon = faMoon;
+  lightThemeIcon = faSun;
+  userIcon = faUserCircle;
 
   isDropdownClosed = true;
 
-  constructor(public themeService: ThemeService) {}
+  private delay!: any;
+
+  private readonly DELAY = 400;
+
+  constructor(public themeService: ThemeService, private changeDetectorRef: ChangeDetectorRef) {}
+
+  toggleDropDown() {
+    this.isDropdownClosed = !this.isDropdownClosed;
+  }
+
+  closeDropdown() {
+    this.isDropdownClosed = true;
+  }
+
+  delayCloseDropDown() {
+    this.delay = setTimeout(() => {
+      this.closeDropdown();
+      this.changeDetectorRef.detectChanges();
+    }, this.DELAY);
+  }
+
+  cancelDelay() {
+    clearTimeout(this.delay);
+  }
 }

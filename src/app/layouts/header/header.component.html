@@ -1,39 +1,29 @@
 <div class="logo" routerLink="/home">CW</div>
 
-<div class="dropdown">
+<div class="dropdown" (mouseenter)="cancelDelay()" (mouseleave)="delayCloseDropDown()">
   <div class="menu dropdown__burger">
-    <a class="menu-link" [class.menu-link--active]="!isDropdownClosed" (click)="isDropdownClosed = !isDropdownClosed">
+    <a class="menu-link" [class.menu-link--active]="!isDropdownClosed" (click)="toggleDropDown()">
       <fa-icon class="menu-link-icon" [icon]="burger"></fa-icon>
       <span class="menu-link-sm">Menu</span>
     </a>
   </div>
   <div class="menu dropdown__content" [class.dropdown__content--closed]="isDropdownClosed">
-    <a class="menu-link" routerLinkActive="menu-link--active" (click)="isDropdownClosed = true" routerLink="/home"
-      >Home</a
-    >
-    <a
-      class="menu-link"
-      routerLinkActive="menu-link--active"
-      (click)="isDropdownClosed = true"
-      routerLink="/canvas-basic"
-      >Basic</a
-    >
-    <a
-      class="menu-link"
-      routerLinkActive="menu-link--active"
-      (click)="isDropdownClosed = true"
-      routerLink="/canvas-mirror"
-      >Mirror</a
-    >
-    <a class="menu-link" routerLinkActive="menu-link--active" (click)="isDropdownClosed = true" routerLink="/whiteboard"
-      >Whiteboard</a
-    >
+    <a class="menu-link" routerLinkActive="menu-link--active" (click)="closeDropdown()" routerLink="/home"> Home </a>
+    <a class="menu-link" routerLinkActive="menu-link--active" (click)="closeDropdown()" routerLink="/canvas-basic">
+      Basic
+    </a>
+    <a class="menu-link" routerLinkActive="menu-link--active" (click)="closeDropdown()" routerLink="/canvas-mirror">
+      Mirror
+    </a>
+    <a class="menu-link" routerLinkActive="menu-link--active" (click)="closeDropdown()" routerLink="/whiteboard">
+      Whiteboard
+    </a>
   </div>
 </div>
 
 <div class="menu">
   <a class="menu-link menu-link--capitalize" (click)="themeService.switchTheme()">
-    <fa-icon class="menu-link-icon" [icon]="themeIcon"></fa-icon>
+    <fa-icon class="menu-link-icon" [icon]="themeService.name === 'light' ? darkThemeIcon : lightThemeIcon"></fa-icon>
     <span class="menu-link-sm">{{ themeService.altName }}</span>
   </a>
 

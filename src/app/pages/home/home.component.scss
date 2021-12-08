@@ -22,6 +22,12 @@
   font-size: 4rem;
 }
 
+@media (max-width: 640px) {
+  .title {
+    font-size: 3rem;
+  }
+}
+
 .github {
   display: block;
   margin-top: 4.5rem;
