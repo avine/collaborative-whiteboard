@@ -15,6 +15,10 @@ export class ThemeService {
     return this.themeName;
   }
 
+  get altName() {
+    return this.themeName === 'light' ? 'dark' : 'light';
+  }
+
   constructor(@Inject(DOCUMENT) private document: Document, private rendererFactory: RendererFactory2) {
     this.setTheme();
   }

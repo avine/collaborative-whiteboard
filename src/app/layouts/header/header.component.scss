@@ -26,6 +26,34 @@
   // As flex container
   display: flex;
   flex-wrap: nowrap;
+
+  user-select: none;
+}
+
+.dropdown__burger {
+  display: none;
+}
+
+@media (max-width: 480px) {
+  .dropdown__burger {
+    display: flex;
+  }
+
+  .dropdown__content {
+    flex-direction: column;
+    position: absolute;
+    top: 100%;
+    box-shadow: 0 6px 6px -3px rgba(0, 0, 0, 0.15);
+    border-radius: 0 0 3px 3px;
+    border: 1px solid var(--app-border-color);
+    border-top-color: var(--app-primary-color);
+    background-color: var(--app-header-background-color);
+    text-align: left;
+  }
+
+  .dropdown__content--closed {
+    display: none;
+  }
 }
 
 .menu-link {
