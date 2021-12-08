@@ -6,12 +6,24 @@
   padding: 0.35rem 0.7rem;
   border-radius: 3px;
   border: none;
+  background-color: var(--app-primary-color);
   color: white;
   font: inherit;
 }
 
 @include themes {
-  .app-button {
-    background-color: map-get($app-theme, primary-color);
-  }
+  --app-primary-color: #{map-get($app-theme, primary-color)};
+  --app-link-color: #{map-get($app-theme, link-color)};
+  --app-link-active-color: #{map-get($app-theme, link-active-color)};
+  --app-background-color: #{map-get($app-theme, background-color)};
+  --app-text-color: #{map-get($app-theme, text-color)};
+  --app-pale-color: #{map-get($app-theme, pale-color)};
+  --app-border-color: #{map-get($app-theme, border-color)};
+  --app-surface-color: #{map-get($app-theme, surface-color)};
+  --app-header-border-color: #{map-get($app-theme, header-border-color)};
+  --app-header-background-color: #{map-get($app-theme, header-background-color)};
+  --app-header-link-color: #{map-get($app-theme, header-link-color)};
+  --app-header-link-active-color: #{map-get($app-theme, header-link-active-color)};
+  --app-canvas-draw-bg-color: #{map-get($app-theme, canvas-draw-bg-color)};
+  --app-canvas-cut-bg-color: #{map-get($app-theme, canvas-cut-bg-color)};
 }

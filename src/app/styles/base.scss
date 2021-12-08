@@ -6,6 +6,8 @@ html,
 body {
   height: 100%;
   -webkit-tap-highlight-color: transparent;
+  background-color: var(--app-background-color);
+  color: var(--app-text-color);
 }
 
 body {
@@ -22,6 +24,7 @@ a {
   &:visited {
     cursor: pointer;
     text-decoration: none;
+    color: var(--app-link-color);
     transition: color 150ms ease;
   }
 
@@ -29,30 +32,11 @@ a {
   &:active,
   &:focus {
     text-decoration: underline;
+    color: var(--app-link-active-color);
   }
 }
 
 input,
 option {
   font-family: inherit;
-}
-
-@include themes {
-  body {
-    background-color: map-get($app-theme, background-color);
-    color: map-get($app-theme, text-color);
-  }
-
-  a {
-    &,
-    &:visited {
-      color: map-get($app-theme, link-color);
-    }
-
-    &:hover,
-    &:active,
-    &:focus {
-      color: map-get($app-theme, link-active-color);
-    }
-  }
 }

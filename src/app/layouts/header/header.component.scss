@@ -34,7 +34,18 @@
   text-overflow: ellipsis;
   padding: 0 0.75rem;
   text-decoration: none;
+  color: var(--app-header-link-color);
   transition: background-color ease 150ms, color ease 150ms;
+
+  &:hover {
+    background-color: rgba(160, 160, 160, 0.1);
+    color: var(--app-text-color);
+  }
+}
+
+.menu-link--active {
+  background-color: transparent !important;
+  color: var(--app-header-link-active-color) !important;
 }
 
 .menu-link--capitalize {
@@ -47,19 +58,4 @@
 
 .menu-link-sm {
   font-size: 0.825em;
-}
-
-@include ngThemes {
-  .menu-link {
-    color: map-get($app-theme, header-link-color);
-    &:hover {
-      background-color: rgba(160, 160, 160, 0.1);
-      color: map-get($app-theme, text-color);
-    }
-  }
-
-  .menu-link--active {
-    background-color: transparent !important;
-    color: map-get($app-theme, header-link-active-color) !important;
-  }
 }

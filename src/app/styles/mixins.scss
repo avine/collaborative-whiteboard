@@ -10,9 +10,9 @@
 
 @mixin theme($name: light) {
   @if $name == light {
-    $app-theme: light.$app-theme-light !global;
+    $app-theme: light.$app-theme !global;
   } @else {
-    $app-theme: dark.$app-theme-dark !global;
+    $app-theme: dark.$app-theme !global;
   }
 
   .theme--#{$name} {
@@ -33,9 +33,9 @@
 
 @mixin ngTheme($name: light) {
   @if $name == light {
-    $app-theme: light.$app-theme-light !global;
+    $app-theme: light.$app-theme !global;
   } @else {
-    $app-theme: dark.$app-theme-dark !global;
+    $app-theme: dark.$app-theme !global;
   }
 
   :host-context(.theme--#{$name}) {

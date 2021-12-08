@@ -31,8 +31,6 @@
   }
 }
 
-@include ngThemes {
-  .highlight {
-    color: map-get($app-theme, primary-color);
-  }
+.highlight {
+  color: var(--app-primary-color);
 }
