@@ -22,7 +22,10 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
     this.service.owner = owner;
   }
 
-  @Input() set broadcast(transport: DrawTransport) {
+  @Input() set broadcast(transport: DrawTransport | null) {
+    if (!transport) {
+      return;
+    }
     this.service.broadcast(transport);
   }
 

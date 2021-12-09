@@ -1,1 +1,6 @@
-<cw-whiteboard dragBoundarySelector=".main"></cw-whiteboard>
+<cw-whiteboard
+  #component
+  dragBoundarySelector=".main"
+  [broadcast]="broadcastFromHistory$ | async"
+  (emit)="storeHistory(component.service.history)"
+></cw-whiteboard>

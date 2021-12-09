@@ -106,7 +106,7 @@ export class CwService {
     });
   }
 
-  private get history(): DrawEvent[] {
+  get history(): DrawEvent[] {
     return Array.from(this.historyMap.values());
   }
 
