@@ -1,3 +1,6 @@
+import { fromEvent, Subscription } from 'rxjs';
+import { throttleTime } from 'rxjs/operators';
+
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
@@ -8,6 +11,7 @@ import {
   Input,
   NgZone,
   OnChanges,
+  OnDestroy,
   Output,
   SimpleChanges,
   ViewChild,
@@ -37,7 +41,7 @@ type CanvasEvent = MouseEvent | TouchEvent;
   styleUrls: ['./cw-canvas.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CwCanvasComponent implements AfterViewInit, OnChanges {
+export class CwCanvasComponent implements OnChanges, AfterViewInit, OnDestroy {
   @Input() canvasSize = getDefaultCanvasSize();
 
   @Output() canvasSizeChange = new EventEmitter<CanvasSize>();
@@ -62,17 +66,9 @@ export class CwCanvasComponent implements AfterViewInit, OnChanges {
 
   private lineSerieBuffer: number[] = [];
 
+  private readonly subscriptions = new Subscription();
+
   constructor(private ngZone: NgZone, private changeDetectorRef: ChangeDetectorRef) {}
-
-  ngAfterViewInit() {
-    this.initMoveListeners();
-    this.applyCanvasSize();
-    this.initContext();
-
-    if (this.broadcast) {
-      this.handleBroadcast();
-    }
-  }
 
   ngOnChanges({ canvasSize, broadcast }: SimpleChanges) {
     // Note: Skip the `.firstChange` because `this.context` is not yet available
@@ -84,11 +80,33 @@ export class CwCanvasComponent implements AfterViewInit, OnChanges {
     }
   }
 
+  ngAfterViewInit() {
+    this.initMoveListeners();
+    this.applyCanvasSize();
+    this.initContext();
+
+    if (this.broadcast) {
+      this.handleBroadcast();
+    }
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.unsubscribe();
+  }
+
   private initMoveListeners() {
     // Prevent unnecessary change detection
     this.ngZone.runOutsideAngular(() => {
-      this.canvasRef.nativeElement.addEventListener('touchmove', this.drawMove.bind(this));
-      this.canvasRef.nativeElement.addEventListener('mousemove', this.drawMove.bind(this));
+      this.subscriptions.add(
+        fromEvent<TouchEvent>(this.canvasRef.nativeElement, 'touchmove')
+          .pipe(throttleTime(10))
+          .subscribe((event) => this.drawMove(event))
+      );
+      this.subscriptions.add(
+        fromEvent<MouseEvent>(this.canvasRef.nativeElement, 'mousemove')
+          .pipe(throttleTime(10))
+          .subscribe((event) => this.drawMove(event))
+      );
     });
   }
 
