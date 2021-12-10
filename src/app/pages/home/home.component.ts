@@ -1,15 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { faGlassCheers } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent {
   logoIcon = faGlassCheers;
-
-  constructor() {}
-
-  ngOnInit() {}
 }

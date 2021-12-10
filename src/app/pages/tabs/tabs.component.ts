@@ -1,16 +1,13 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 @Component({
   selector: 'app-tabs',
   templateUrl: './tabs.component.html',
   styleUrls: ['./tabs.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TabsComponent implements OnInit {
+export class TabsComponent {
   active2 = true;
-
-  constructor() {}
-
-  ngOnInit() {}
 
   alert(txt: number, active: boolean) {
     console.log('Alert!', txt, active);

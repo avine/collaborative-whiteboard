@@ -1,12 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 @Component({
   selector: 'app-canvas-basic',
   templateUrl: './canvas-basic.component.html',
   styleUrls: ['./canvas-basic.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CanvasBasicComponent implements OnInit {
-  constructor() {}
-
-  ngOnInit() {}
-}
+export class CanvasBasicComponent {}

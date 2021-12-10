@@ -6,6 +6,7 @@ import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { ComponentPortal } from '@angular/cdk/portal';
 import {
   AfterViewInit,
+  ChangeDetectionStrategy,
   Component,
   ContentChildren,
   Input,
@@ -22,6 +23,7 @@ import { CwToolComponent } from '../cw-tool/cw-tool.component';
   selector: 'cw-tool-group',
   templateUrl: './cw-tool-group.component.html',
   styleUrls: ['./cw-tool-group.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CwToolGroupComponent implements AfterViewInit, OnDestroy {
   @Input() layoutVertical = false;

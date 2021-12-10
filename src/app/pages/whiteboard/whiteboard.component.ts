@@ -1,7 +1,7 @@
 import { Subject } from 'rxjs';
 
 import { DOCUMENT } from '@angular/common';
-import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import { DrawEvent, DrawTransport } from '@collaborative-whiteboard';
 
 @Component({

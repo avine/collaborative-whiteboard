@@ -1,6 +1,6 @@
 import { Subscription } from 'rxjs';
 
-import { Component, Inject, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Inject, OnDestroy } from '@angular/core';
 import { faDownload, faUserCircle } from '@fortawesome/free-solid-svg-icons';
 
 import { WINDOW } from './providers/window.provider';
@@ -9,6 +9,7 @@ import { WINDOW } from './providers/window.provider';
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent implements OnDestroy {
   userIcon = faUserCircle;

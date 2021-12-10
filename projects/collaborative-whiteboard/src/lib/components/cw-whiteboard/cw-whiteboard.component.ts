@@ -1,7 +1,7 @@
 import { fromEvent, of, Subscription } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 
-import { Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 
 import { DrawEventsBroadcast, DrawTransport, Owner } from '../../cw.model';
 import { getDefaultCanvasSize, getDefaultDrawOptions } from '../../cw.operator';
@@ -11,6 +11,7 @@ import { CwService } from '../../cw.service';
   selector: 'cw-whiteboard',
   templateUrl: './cw-whiteboard.component.html',
   styleUrls: ['./cw-whiteboard.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [CwService],
 })
 export class CwWhiteboardComponent implements OnInit, OnDestroy {
@@ -49,7 +50,7 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
 
   subscriptions: Subscription[] = [];
 
-  constructor(public service: CwService) {}
+  constructor(public service: CwService, private changeDetectorRef: ChangeDetectorRef) {}
 
   ngOnInit() {
     this.subscriptions.push(
@@ -67,9 +68,10 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
       // Because this canvas is rendered conditionally, the following error was thrown:
       // "ExpressionChangedAfterItHasBeenCheckedError"
       //
-      // In other words, we need the data emitted by `broadcastHistoryCut$`to be ready eagerly.
+      // In other words, we need the data emitted by `broadcastHistoryCut$` to be ready eagerly.
       this.service.broadcastHistoryCut$.subscribe((broadcastHistoryCut) => {
         this.broadcastHistoryCut = broadcastHistoryCut;
+        this.changeDetectorRef.detectChanges();
       }),
       this.handleWindowResize()
     );
