@@ -13,7 +13,6 @@ import {
 @Component({
   selector: 'cw-tool',
   templateUrl: './cw-tool.component.html',
-  styleUrls: ['./cw-tool.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CwToolComponent implements OnChanges {

@@ -34,7 +34,6 @@ type CanvasEvent = MouseEvent | TouchEvent;
 @Component({
   selector: 'cw-canvas',
   templateUrl: './cw-canvas.component.html',
-  styleUrls: ['./cw-canvas.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CwCanvasComponent implements OnChanges, AfterViewInit, OnDestroy {

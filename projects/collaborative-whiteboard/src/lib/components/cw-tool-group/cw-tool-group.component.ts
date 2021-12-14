@@ -22,7 +22,6 @@ import { CwToolComponent } from '../cw-tool/cw-tool.component';
 @Component({
   selector: 'cw-tool-group',
   templateUrl: './cw-tool-group.component.html',
-  styleUrls: ['./cw-tool-group.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CwToolGroupComponent implements AfterViewInit, OnDestroy {

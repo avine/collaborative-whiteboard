@@ -3,7 +3,6 @@ import { ChangeDetectionStrategy, Component, Input, Output, TemplateRef, EventEm
 @Component({
   selector: 'cw-tool-content',
   templateUrl: './cw-tool-content.component.html',
-  styleUrls: ['./cw-tool-content.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CwToolContentComponent {

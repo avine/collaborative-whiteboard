@@ -8,7 +8,6 @@ import { CutRange } from '../../cw.types';
 @Component({
   selector: 'cw-cut',
   templateUrl: './cw-cut.component.html',
-  styleUrls: ['./cw-cut.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CwCutComponent implements OnInit, OnDestroy {

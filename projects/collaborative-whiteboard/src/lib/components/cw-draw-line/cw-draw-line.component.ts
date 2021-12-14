@@ -6,7 +6,6 @@ import { DrawOptions } from '../../cw.types';
 @Component({
   selector: 'cw-draw-line',
   templateUrl: './cw-draw-line.component.html',
-  styleUrls: ['./cw-draw-line.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CwDrawLineComponent {

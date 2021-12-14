@@ -21,7 +21,6 @@ import { DrawEventsBroadcast, DrawTransport, Owner } from '../../cw.types';
 @Component({
   selector: 'cw-whiteboard',
   templateUrl: './cw-whiteboard.component.html',
-  styleUrls: ['./cw-whiteboard.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [CwService],
 })
