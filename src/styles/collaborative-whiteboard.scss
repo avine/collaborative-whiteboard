@@ -1,6 +1,6 @@
 @use './mixins.scss' as *;
 
-@use '../../../../projects/collaborative-whiteboard/src/lib/styles/cw.core.scss';
+@use '../../projects/collaborative-whiteboard/src/lib/styles/cw.core.scss';
 
 @include themes {
   --cw-primary-color: #{map-get($app-theme, primary-color)};

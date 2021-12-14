@@ -1,0 +1,23 @@
+:host {
+  display: flex;
+  height: 100%;
+}
+
+.container {
+  margin: auto;
+}
+
+.canvas-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  border: 1px solid var(--app-border-color);
+}
+
+.canvas-source {
+  background-color: var(--app-background-color);
+}
+
+.canvas-target {
+  background-color: var(--app-surface-color);
+}

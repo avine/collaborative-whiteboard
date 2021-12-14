@@ -1,0 +1,10 @@
+:host {
+  display: flex;
+  height: 100%;
+}
+
+.canvas {
+  margin: auto;
+  border: 1px solid var(--app-border-color);
+  background-color: var(--app-background-color);
+}
