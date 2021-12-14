@@ -17,6 +17,7 @@ import {
   ViewChild,
 } from '@angular/core';
 
+import { getDefaultCanvasSize, getDefaultDrawOptions } from '../../cw.config';
 import {
   CanvasLine,
   CanvasLineSerie,
@@ -25,13 +26,8 @@ import {
   DrawEvent,
   DrawEventsBroadcast,
   DrawOptions,
-} from '../../cw.model';
-import {
-  getClearEvent,
-  getDefaultCanvasSize,
-  getDefaultDrawOptions,
-  keepDrawEventsAfterClearEvent,
-} from '../../cw.operator';
+} from '../../cw.types';
+import { getClearEvent, keepDrawEventsAfterClearEvent } from '../../cw.utils';
 
 type CanvasEvent = MouseEvent | TouchEvent;
 

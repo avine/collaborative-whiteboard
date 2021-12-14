@@ -1,29 +1,7 @@
 import { MD5 } from 'object-hash';
 
-import { CanvasSize, CutRange, CutRangeArg, DrawClear, DrawEvent, DrawEventsBroadcast, DrawOptions } from './cw.model';
-
-export const getDefaultColors = () => [
-  '#EF5350',
-  '#EC407A',
-  '#AB47BC',
-  '#7E57C2',
-  '#5C6BC0',
-  '#42A5F5',
-  '#29B6F6',
-  '#26C6DA',
-  '#26A69A',
-  '#66BB6A',
-  '#9CCC65',
-  '#D4E157',
-  '#FFEE58',
-  '#FFCA28',
-  '#FFA726',
-  '#FF7043',
-  '#8D6E63',
-  '#BDBDBD',
-];
-
-export const defaultColor = '#29B6F6';
+import { getDefaultColors } from './cw.config';
+import { CutRange, CutRangeArg, DrawClear, DrawEvent, DrawEventsBroadcast } from './cw.types';
 
 export const getColorsMatrix = (colors = getDefaultColors(), maxColorsPerRow = 6) => {
   const matrix: string[][] = [];
@@ -33,22 +11,12 @@ export const getColorsMatrix = (colors = getDefaultColors(), maxColorsPerRow = 6
   return matrix;
 };
 
-export const getDefaultCanvasSize = (): CanvasSize => ({
-  width: 300,
-  height: 300,
-});
-
-export const getDefaultDrawOptions = (): DrawOptions => ({
-  lineWidth: 4,
-  strokeStyle: defaultColor,
-});
-
 export const getClearEvent = (): DrawClear => ({
   owner: '',
   type: 'clear',
 });
 
-export const drawLineSerieToLinesMapper = (events: DrawEvent[]): DrawEvent[] => {
+export const mapDrawLineSerieToLines = (events: DrawEvent[]): DrawEvent[] => {
   const result: DrawEvent[] = [];
   events.forEach((event) => {
     if (event.type === 'lineSerie') {
@@ -68,9 +36,9 @@ export const drawLineSerieToLinesMapper = (events: DrawEvent[]): DrawEvent[] => 
   return result;
 };
 
-export const drawEventsBroadcastMapper = (events: DrawEvent[], animate = false): DrawEventsBroadcast => ({
+export const mapToDrawEventsBroadcast = (events: DrawEvent[], animate = false): DrawEventsBroadcast => ({
   animate,
-  events: animate ? drawLineSerieToLinesMapper(events) : events,
+  events: animate ? mapDrawLineSerieToLines(events) : events,
 });
 
 export const normalizeCutRange = (data: CutRangeArg): CutRange => {

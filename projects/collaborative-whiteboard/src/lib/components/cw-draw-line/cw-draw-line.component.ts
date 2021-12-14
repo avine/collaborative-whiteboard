@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 
-import { DrawOptions } from '../../cw.model';
-import { getDefaultDrawOptions } from '../../cw.operator';
+import { getDefaultDrawOptions } from '../../cw.config';
+import { DrawOptions } from '../../cw.types';
 
 @Component({
   selector: 'cw-draw-line',

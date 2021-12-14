@@ -2,8 +2,8 @@ import { combineLatest, Subscription } from 'rxjs';
 
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 
-import { CutRange } from '../../cw.model';
 import { CwService } from '../../cw.service';
+import { CutRange } from '../../cw.types';
 
 @Component({
   selector: 'cw-cut',

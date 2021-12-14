@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { DrawEvent, DrawEventsBroadcast, drawEventsBroadcastMapper } from '@collaborative-whiteboard';
+import { DrawEvent, DrawEventsBroadcast, mapToDrawEventsBroadcast } from '@collaborative-whiteboard';
 
 @Component({
   selector: 'app-canvas-mirror',
@@ -13,6 +13,6 @@ export class CanvasMirrorComponent {
   animate = true;
 
   broadcast(drawEvent: DrawEvent) {
-    this.drawEventsBroadcast = drawEventsBroadcastMapper([drawEvent], this.animate);
+    this.drawEventsBroadcast = mapToDrawEventsBroadcast([drawEvent], this.animate);
   }
 }

@@ -33,4 +33,4 @@ const features = [
   exports: [features],
   entryComponents: [CwToolContentComponent],
 })
-export class CollaborativeWhiteboardModule {}
+export class CwModule {}

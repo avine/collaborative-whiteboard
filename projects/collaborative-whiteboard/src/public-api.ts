@@ -2,10 +2,11 @@
  * Public API Surface of collaborative-whiteboard
  */
 
-export * from './lib/collaborative-whiteboard.module';
+export * from './lib/cw.module';
 
-export * from './lib/cw.model';
-export * from './lib/cw.operator';
+export * from './lib/cw.types';
+export * from './lib/cw.config';
+export * from './lib/cw.utils';
 export * from './lib/cw.service';
 
 export * from './lib/components/cw-canvas/cw-canvas.component';

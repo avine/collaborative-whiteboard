@@ -1,4 +1,4 @@
-import { DrawAction, DrawEvent, DrawEventsBroadcast, DrawTransport, Owner } from './cw.model';
+import { DrawAction, DrawEvent, DrawEventsBroadcast, DrawTransport, Owner } from './cw.types';
 
 const getNumber = (max = 1000) => Math.round(Math.random() * max);
 

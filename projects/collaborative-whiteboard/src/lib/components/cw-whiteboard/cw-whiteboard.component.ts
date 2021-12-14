@@ -1,11 +1,22 @@
 import { fromEvent, of, Subscription } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  EventEmitter,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+  ViewChild,
+} from '@angular/core';
 
-import { DrawEventsBroadcast, DrawTransport, Owner } from '../../cw.model';
-import { getDefaultCanvasSize, getDefaultDrawOptions } from '../../cw.operator';
+import { getDefaultCanvasSize, getDefaultDrawOptions } from '../../cw.config';
 import { CwService } from '../../cw.service';
+import { DrawEventsBroadcast, DrawTransport, Owner } from '../../cw.types';
 
 @Component({
   selector: 'cw-whiteboard',

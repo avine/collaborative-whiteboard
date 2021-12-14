@@ -2,10 +2,10 @@ import { first, take } from 'rxjs/operators';
 
 import { TestBed } from '@angular/core/testing';
 
-import { DrawEvent, DrawEventsBroadcast, DrawTransport } from './cw.model';
-import { getDrawEvent, getDrawEventsWithMapping } from './cw.model.mock';
-import { getClearEvent } from './cw.operator';
+import { getClearEvent } from './cw.utils';
 import { CwService } from './cw.service';
+import { DrawEvent, DrawEventsBroadcast, DrawTransport } from './cw.types';
+import { getDrawEvent, getDrawEventsWithMapping } from './cw.types.mock';
 
 describe('CwService', () => {
   beforeEach(() =>
@@ -23,7 +23,7 @@ describe('CwService', () => {
     it('should emit empty array even when no event occured', () => {
       const service: CwService = TestBed.get(CwService);
       const historyHandler = jest.fn();
-      const expected = [];
+      const expected: DrawEvent[] = [];
 
       // Given
       service.history$.pipe(take(1)).subscribe(historyHandler);

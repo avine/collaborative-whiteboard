@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
-import { CollaborativeWhiteboardModule } from '@collaborative-whiteboard';
+import { CwModule } from '@collaborative-whiteboard';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -25,7 +25,7 @@ import { WhiteboardComponent } from './pages/whiteboard/whiteboard.component';
     TextComponent,
     WhiteboardComponent,
   ],
-  imports: [BrowserModule, AppRoutingModule, FormsModule, FontAwesomeModule, CollaborativeWhiteboardModule],
+  imports: [BrowserModule, AppRoutingModule, FormsModule, FontAwesomeModule, CwModule],
   providers: [],
   bootstrap: [AppComponent],
 })
