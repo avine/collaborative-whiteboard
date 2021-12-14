@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component } from '@angular/core';
 import { faEllipsisV, faMoon, faSun, faUserCircle } from '@fortawesome/free-solid-svg-icons';
 
-import { ThemeService } from '../../services/theme.service';
+import { ThemeService } from './theme.service';
 
 @Component({
   selector: 'app-header',

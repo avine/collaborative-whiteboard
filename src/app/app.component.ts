@@ -1,9 +1,6 @@
-import { Subscription } from 'rxjs';
-
-import { ChangeDetectionStrategy, Component, Inject, OnDestroy } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import { faDownload, faUserCircle } from '@fortawesome/free-solid-svg-icons';
-
-import { WINDOW } from './providers/window.provider';
 
 @Component({
   selector: 'app-root',
@@ -11,24 +8,18 @@ import { WINDOW } from './providers/window.provider';
   styleUrls: ['./app.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppComponent implements OnDestroy {
+export class AppComponent {
   userIcon = faUserCircle;
   update = faDownload;
 
   popup: 'update' | '' = '';
 
-  subscription!: Subscription;
-
-  constructor(@Inject(WINDOW) private window: Window) {}
-
-  ngOnDestroy() {
-    this.subscription.unsubscribe();
-  }
+  constructor(@Inject(DOCUMENT) private document: Document) {}
 
   closePopup(reload = false) {
     this.popup = '';
-    if (reload && this.window) {
-      this.window.location.reload();
+    if (reload) {
+      this.document.defaultView?.location.reload();
     }
   }
 }

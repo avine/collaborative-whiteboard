@@ -1,7 +1,7 @@
 import { DOCUMENT } from '@angular/common';
 import { Inject, Injectable, RendererFactory2 } from '@angular/core';
 
-type ThemeName = 'light' | 'dark';
+import { ThemeName } from './theme.config';
 
 @Injectable({
   providedIn: 'root',
