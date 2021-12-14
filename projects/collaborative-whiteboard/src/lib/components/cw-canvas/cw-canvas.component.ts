@@ -118,7 +118,6 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit, OnDestroy {
     // And emitting the value we just received seems to be useless!
     // But we still need to do this, so that the wrapping component can react to this change asynchronously.
     //
-    // TODO: the canvasSize should update itself its container size changes. So, we need this!
     this.canvasSizeChange.emit(this.canvasSize);
   }
 

@@ -1,8 +1,8 @@
 <div class="container">
   <div class="canvas-container">
-    <cw-canvas class="canvas-source" (draw)="broadcast($event)"></cw-canvas>
+    <cw-canvas class="canvas canvas--source" (draw)="broadcast($event)"></cw-canvas>
 
-    <cw-canvas class="canvas-target" [drawDisabled]="true" [broadcast]="drawEventsBroadcast"></cw-canvas>
+    <cw-canvas class="canvas canvas--target" [drawDisabled]="true" [broadcast]="drawEventsBroadcast"></cw-canvas>
   </div>
 
   <br /><br />

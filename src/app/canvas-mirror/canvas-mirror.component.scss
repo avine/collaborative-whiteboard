@@ -11,13 +11,18 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  border: 1px solid var(--app-border-color);
 }
 
-.canvas-source {
+.canvas {
+  border-width: 1px 0 0 1px;
+  border-style: solid;
+  border-color: var(--app-border-color);
+}
+
+.canvas--source {
   background-color: var(--app-background-color);
 }
 
-.canvas-target {
+.canvas--target {
   background-color: var(--app-surface-color);
 }
