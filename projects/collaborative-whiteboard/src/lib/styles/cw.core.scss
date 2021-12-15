@@ -188,10 +188,19 @@ cw-icon {
   color: var(--cw-text-color);
 }
 
+.cw-tool-group__action--tool {
+  transition: background-color ease var(--cw-anim-duration-fast), color ease var(--cw-anim-duration-fast);
+
+  &:hover {
+    background-color: rgba(160, 160, 160, 0.133);
+  }
+}
+
 .cw-tool-group__action:active,
-.cw-tool-group__action--active {
-  background-color: transparent !important;
-  color: var(--cw-primary-color) !important;
+.cw-tool-group__action--active,
+.cw-tool-group__action--active:hover {
+  background-color: transparent;
+  color: var(--cw-primary-color);
 }
 
 .cw-tool-group__action--drag {
@@ -199,16 +208,7 @@ cw-icon {
   transition: opacity var(--cw-anim-duration-slow) ease;
 
   &:hover {
-    color: var(--cw-text-color);
     opacity: 1;
-  }
-}
-
-.cw-tool-group__action--tool {
-  transition: background-color ease var(--cw-anim-duration-fast), color ease var(--cw-anim-duration-fast);
-
-  &:hover {
-    background-color: rgba(var(--cw-primary-color), 0.1);
     color: var(--cw-text-color);
   }
 }

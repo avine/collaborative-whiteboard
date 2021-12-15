@@ -151,12 +151,4 @@ export class CwToolGroupComponent implements AfterViewInit, OnDestroy {
     this.collapse = !this.collapse;
     this.storageService.setLocal(addStorageKeySuffix(StorageKey.ToolGroupCollapse, this.name), this.collapse);
   }
-
-  /**
-   * Because the tool group is resizable, we need to clean the cached dimensions of the preview element.
-   */
-  cleanCachedDimensions({ source }: { source: CdkDrag }) {
-    // HACK: https://stackoverflow.com/questions/55098093/angular-cdk-drag-and-drop-boundary
-    source['_dragRef']['_previewRect'] = null; // tslint:disable-line: no-string-literal
-  }
 }
