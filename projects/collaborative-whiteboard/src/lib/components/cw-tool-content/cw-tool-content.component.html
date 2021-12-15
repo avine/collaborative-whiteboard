@@ -1,4 +1,10 @@
-<div class="cw-tool-content" cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragBoundary="body">
+<div
+  class="cw-tool-content"
+  cdkDrag
+  cdkDragRootElement=".cdk-overlay-pane"
+  cdkDragBoundary="body"
+  (mouseenter)="focused.emit()"
+>
   <div class="cw-tool-content__header">
     <button class="cw-tool-content__action cw-button--less" cdkDragHandle>
       <cw-icon icon="drag"></cw-icon>

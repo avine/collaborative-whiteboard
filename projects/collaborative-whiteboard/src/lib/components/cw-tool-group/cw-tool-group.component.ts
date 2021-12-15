@@ -1,7 +1,6 @@
 import { Subscription } from 'rxjs';
-import { first } from 'rxjs/operators';
+import { first, startWith } from 'rxjs/operators';
 
-import { CdkDrag } from '@angular/cdk/drag-drop';
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { ComponentPortal } from '@angular/cdk/portal';
 import {
@@ -38,12 +37,14 @@ export class CwToolGroupComponent implements AfterViewInit, OnDestroy {
   @ViewChild('portal', { read: ViewContainerRef })
   portal!: ViewContainerRef;
 
-  private activeTools = new Map<CwToolComponent, OverlayRef>();
+  private activeTools = new Map<CwToolComponent, { overlayRef: OverlayRef; focusedSubscription: Subscription }>();
 
   private activeChangeSubscriptions: Subscription[] = [];
   private toolsChangeSubscription!: Subscription;
 
   collapse = this.storageService.getLocal(addStorageKeySuffix(StorageKey.ToolGroupCollapse, this.name), false);
+
+  private overlayZIndex = 1000;
 
   constructor(
     private storageService: StorageService,
@@ -113,11 +114,15 @@ export class CwToolGroupComponent implements AfterViewInit, OnDestroy {
     componentRef.instance.title = tool.title;
     componentRef.instance.content = tool.content;
     componentRef.instance.dispose.pipe(first()).subscribe(() => this.toggleActive(tool));
-    this.activeTools.set(tool, overlayRef);
+    const focusedSubscription = componentRef.instance.focused.pipe(startWith(true)).subscribe(() => {
+      overlayRef.hostElement.style.zIndex = (++this.overlayZIndex).toString();
+    });
+    this.activeTools.set(tool, { overlayRef, focusedSubscription });
   }
 
   private closeContent(tool: CwToolComponent) {
-    this.activeTools.get(tool)?.dispose();
+    this.activeTools.get(tool)?.overlayRef.dispose();
+    this.activeTools.get(tool)?.focusedSubscription.unsubscribe();
     this.activeTools.delete(tool);
 
     // "Close" action might be triggered from outside this component

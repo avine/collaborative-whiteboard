@@ -10,5 +10,7 @@ export class CwToolContentComponent {
 
   @Input() content!: TemplateRef<any>;
 
+  @Output() focused = new EventEmitter<void>();
+
   @Output() dispose = new EventEmitter<void>();
 }
