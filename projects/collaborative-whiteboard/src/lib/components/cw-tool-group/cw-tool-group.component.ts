@@ -7,6 +7,7 @@ import { ComponentPortal } from '@angular/cdk/portal';
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   ContentChildren,
   Input,
@@ -41,7 +42,7 @@ export class CwToolGroupComponent implements AfterViewInit, OnDestroy {
 
   collapse = false;
 
-  constructor(private overlay: Overlay) {}
+  constructor(private overlay: Overlay, private changeDetectorRef: ChangeDetectorRef) {}
 
   ngAfterViewInit() {
     this.subscribeToActiveChange();
@@ -111,10 +112,12 @@ export class CwToolGroupComponent implements AfterViewInit, OnDestroy {
   private closeContent(tool: CwToolComponent) {
     this.activeTools.get(tool)?.dispose();
     this.activeTools.delete(tool);
+
+    // "Close" action might be triggered from outside this component
+    this.changeDetectorRef.detectChanges();
   }
 
   private closeAllContent() {
-    const tools = this.tools.toArray();
     for (const tool of this.activeTools.keys()) {
       this.closeContent(tool);
     }
