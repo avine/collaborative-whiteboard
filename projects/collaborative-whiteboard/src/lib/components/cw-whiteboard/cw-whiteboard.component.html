@@ -18,7 +18,12 @@
   ></cw-canvas>
 </div>
 
-<cw-tool-group [layoutVertical]="true" [dragBoundarySelector]="dragBoundarySelector" class="cw-whiteboard__tools">
+<cw-tool-group
+  [name]="toolGroupName"
+  [layoutVertical]="toolGroupLayoutVertical"
+  [dragBoundarySelector]="dragBoundarySelector"
+  class="cw-whiteboard__tools"
+>
   <cw-tool [content]="drawLineTool" title="Draw line" [(active)]="showDrawLineTool">
     <cw-icon icon="drawLine"></cw-icon>
   </cw-tool>
@@ -39,7 +44,7 @@
     <cw-icon icon="undoAll"></cw-icon>
   </cw-tool>
 
-  <cw-tool title="Guides" [noContentSwitchMode]="true" [(active)]="showGuides">
+  <cw-tool title="Guides" [noContentSwitchMode]="true" [(active)]="showGuides" (activeChange)="storeShowGuides($event)">
     <cw-icon icon="guides"></cw-icon>
   </cw-tool>
 

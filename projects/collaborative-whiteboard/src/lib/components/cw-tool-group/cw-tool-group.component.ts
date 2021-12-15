@@ -17,6 +17,7 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 
+import { addStorageKeySuffix, StorageKey, StorageService } from '../../utils/storage';
 import { CwToolContentComponent } from '../cw-tool-content/cw-tool-content.component';
 import { CwToolComponent } from '../cw-tool/cw-tool.component';
 
@@ -26,6 +27,8 @@ import { CwToolComponent } from '../cw-tool/cw-tool.component';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CwToolGroupComponent implements AfterViewInit, OnDestroy {
+  @Input() name!: string;
+
   @Input() layoutVertical = false;
 
   @Input() dragBoundarySelector!: string;
@@ -40,9 +43,13 @@ export class CwToolGroupComponent implements AfterViewInit, OnDestroy {
   private activeChangeSubscriptions: Subscription[] = [];
   private toolsChangeSubscription!: Subscription;
 
-  collapse = false;
+  collapse = this.storageService.getLocal(addStorageKeySuffix(StorageKey.ToolGroupCollapse, this.name), false);
 
-  constructor(private overlay: Overlay, private changeDetectorRef: ChangeDetectorRef) {}
+  constructor(
+    private storageService: StorageService,
+    private overlay: Overlay,
+    private changeDetectorRef: ChangeDetectorRef
+  ) {}
 
   ngAfterViewInit() {
     this.subscribeToActiveChange();
@@ -123,6 +130,14 @@ export class CwToolGroupComponent implements AfterViewInit, OnDestroy {
     }
   }
 
+  toggleLayoutVertical() {
+    this.layoutVertical = !this.layoutVertical;
+    this.storageService.setLocal(
+      addStorageKeySuffix(StorageKey.ToolGroupLayoutVertical, this.name),
+      this.layoutVertical
+    );
+  }
+
   toggleActive(tool: CwToolComponent) {
     if (tool.content || tool.noContentSwitchMode) {
       tool.active = !tool.active;
@@ -130,6 +145,11 @@ export class CwToolGroupComponent implements AfterViewInit, OnDestroy {
     } else {
       tool.activeChange.emit(true);
     }
+  }
+
+  toggleCollapse() {
+    this.collapse = !this.collapse;
+    this.storageService.setLocal(addStorageKeySuffix(StorageKey.ToolGroupCollapse, this.name), this.collapse);
   }
 
   /**

@@ -17,6 +17,7 @@ import {
 import { getDefaultCanvasSize, getDefaultDrawOptions } from '../../cw.config';
 import { CwService } from '../../cw.service';
 import { DrawEventsBroadcast, DrawTransport, Owner } from '../../cw.types';
+import { addStorageKeySuffix, StorageKey, StorageService } from '../../utils/storage';
 
 @Component({
   selector: 'cw-whiteboard',
@@ -48,19 +49,31 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
 
   canvasSize = getDefaultCanvasSize();
 
-  drawOptions = getDefaultDrawOptions();
+  drawOptions = this.storageService.getLocal(StorageKey.DrawOptions, getDefaultDrawOptions());
+
+  // note: if there's more than one tool-group then set a different name for each one of them
+  toolGroupName = '';
+
+  toolGroupLayoutVertical = this.storageService.getLocal(
+    addStorageKeySuffix(StorageKey.ToolGroupLayoutVertical, this.toolGroupName),
+    true
+  );
 
   showDrawLineTool = false;
 
   showCutTool = false;
 
-  showGuides = true;
+  showGuides = this.storageService.getLocal(StorageKey.ShowGuides, true);
 
   broadcastHistoryCut!: DrawEventsBroadcast;
 
   subscriptions: Subscription[] = [];
 
-  constructor(public service: CwService, private changeDetectorRef: ChangeDetectorRef) {}
+  constructor(
+    public service: CwService,
+    private storageService: StorageService,
+    private changeDetectorRef: ChangeDetectorRef
+  ) {}
 
   ngOnInit() {
     this.subscriptions.push(
@@ -126,5 +139,9 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
     element.style.height = `${height}px`;
     element.style.overflow = this.canvasContainerOverflow;
     this.canvasSize = { width, height };
+  }
+
+  storeShowGuides(showGuides: boolean) {
+    this.storageService.setLocal(StorageKey.ShowGuides, showGuides);
   }
 }

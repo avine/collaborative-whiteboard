@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from 
 
 import { getDefaultDrawOptions } from '../../cw.config';
 import { DrawOptions } from '../../cw.types';
+import { StorageKey, StorageService } from '../../utils/storage';
 
 @Component({
   selector: 'cw-draw-line',
@@ -15,7 +16,10 @@ export class CwDrawLineComponent {
 
   @Output() drawOptionsChange = new EventEmitter<DrawOptions>();
 
+  constructor(private storageService: StorageService) {}
+
   emit() {
     this.drawOptionsChange.emit(this.drawOptions);
+    this.storageService.setLocal(StorageKey.DrawOptions, this.drawOptions);
   }
 }

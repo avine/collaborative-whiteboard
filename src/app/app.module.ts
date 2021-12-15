@@ -25,7 +25,7 @@ import { WhiteboardComponent } from './whiteboard/whiteboard.component';
     TextComponent,
     WhiteboardComponent,
   ],
-  imports: [BrowserModule, AppRoutingModule, FormsModule, FontAwesomeModule, CwModule],
+  imports: [BrowserModule, AppRoutingModule, FormsModule, FontAwesomeModule, CwModule.forRoot()],
   providers: [],
   bootstrap: [AppComponent],
 })

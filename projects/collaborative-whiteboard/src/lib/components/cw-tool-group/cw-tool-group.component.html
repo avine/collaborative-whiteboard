@@ -8,7 +8,7 @@
   <button
     class="cw-tool-group__action cw-tool-group__action--drag cw-button--less"
     title="Drag / Change direction"
-    (dblclick)="layoutVertical = !layoutVertical"
+    (dblclick)="toggleLayoutVertical()"
   >
     <cw-icon icon="drag" cdkDragHandle></cw-icon>
   </button>
@@ -29,7 +29,7 @@
     class="cw-tool-group__action cw-tool-group__action--tool cw-button--less"
     [class.cw-tool-group__action--active]="collapse"
     [title]="collapse ? 'Expand' : 'Collapse'"
-    (click)="collapse = !collapse"
+    (click)="toggleCollapse()"
   >
     <cw-icon [icon]="collapse ? 'expand' : 'collapse'"></cw-icon>
   </button>

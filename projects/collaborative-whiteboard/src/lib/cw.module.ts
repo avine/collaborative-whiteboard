@@ -2,7 +2,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { PortalModule } from '@angular/cdk/portal';
 import { CommonModule } from '@angular/common';
-import { NgModule } from '@angular/core';
+import { ModuleWithProviders, NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import { CwCanvasComponent } from './components/cw-canvas/cw-canvas.component';
@@ -14,6 +14,7 @@ import { CwToolContentComponent } from './components/cw-tool-content/cw-tool-con
 import { CwToolGroupComponent } from './components/cw-tool-group/cw-tool-group.component';
 import { CwToolComponent } from './components/cw-tool/cw-tool.component';
 import { CwWhiteboardComponent } from './components/cw-whiteboard/cw-whiteboard.component';
+import { StorageService } from './utils/storage';
 
 const features = [
   CwCanvasComponent,
@@ -33,4 +34,12 @@ const features = [
   exports: [features],
   entryComponents: [CwToolContentComponent],
 })
-export class CwModule {}
+export class CwModule {
+  static forRoot(): ModuleWithProviders<CwModule> {
+    return { ngModule: CwModule, providers: [StorageService] }
+  }
+
+  static forChild(): ModuleWithProviders<CwModule> {
+    return { ngModule: CwModule }
+  }
+}
