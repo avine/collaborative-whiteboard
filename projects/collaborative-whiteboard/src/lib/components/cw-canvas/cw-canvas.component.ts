@@ -257,7 +257,7 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit, OnDestroy {
     if (isTouchEvent) {
       const touchesLength = (e as TouchEvent).touches.length;
       if (touchesLength === 1) {
-        // Prevent "mouse" event from being fired when "touch" event is detected.
+        // Prevent further "mouse" event from being fired when "touch" event is detected.
         // Notice that only "single-touch" event is considered a draw event.
         e.preventDefault();
       }

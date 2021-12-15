@@ -13,4 +13,10 @@ export class CwToolContentComponent {
   @Output() focused = new EventEmitter<void>();
 
   @Output() dispose = new EventEmitter<void>();
+
+  handleTouchEvent(event: Event) {
+    // Prevent further "mouse" event from being fired when "touch" event is detected.
+    event.preventDefault();
+    this.focused.emit();
+  }
 }

@@ -4,6 +4,7 @@
   cdkDragRootElement=".cdk-overlay-pane"
   cdkDragBoundary="body"
   (mouseenter)="focused.emit()"
+  (touchstart)="handleTouchEvent($event)"
 >
   <div class="cw-tool-content__header">
     <button class="cw-tool-content__action cw-button--less" cdkDragHandle>
