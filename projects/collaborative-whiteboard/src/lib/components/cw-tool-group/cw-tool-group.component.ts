@@ -18,6 +18,7 @@ import {
 
 import { addStorageKeySuffix, StorageKey, StorageService } from '../../utils/storage';
 import { CwToolContentComponent } from '../cw-tool-content/cw-tool-content.component';
+import { ToolContentPosition } from '../cw-tool-content/cw-tool-content.types';
 import { CwToolComponent } from '../cw-tool/cw-tool.component';
 
 @Component({
@@ -37,7 +38,9 @@ export class CwToolGroupComponent implements AfterViewInit, OnDestroy {
   @ViewChild('portal', { read: ViewContainerRef })
   portal!: ViewContainerRef;
 
-  private activeTools = new Map<CwToolComponent, { overlayRef: OverlayRef; focusedSubscription: Subscription }>();
+  private activeTools = new Map<CwToolComponent, { overlayRef: OverlayRef; subscriptions: Subscription }>();
+
+  private toolPositions = new Map<CwToolComponent, ToolContentPosition>();
 
   private activeChangeSubscriptions: Subscription[] = [];
   private toolsChangeSubscription!: Subscription;
@@ -108,21 +111,40 @@ export class CwToolGroupComponent implements AfterViewInit, OnDestroy {
   }
 
   private openContent(tool: CwToolComponent) {
-    const positionStrategy = this.overlay.position().global().centerHorizontally().centerVertically();
+    // positionStrategy
+    const positionStrategy = this.overlay.position().global();
+    const toolPosition = this.toolPositions.get(tool);
+    if (!toolPosition) {
+      positionStrategy.centerHorizontally().centerVertically();
+    } else {
+      positionStrategy.top(`${toolPosition.top}px`).left(`${toolPosition.left}px`);
+    }
     const overlayRef = this.overlay.create({ positionStrategy });
+
+    // componentRef
     const componentRef = overlayRef.attach(new ComponentPortal(CwToolContentComponent));
     componentRef.instance.title = tool.title;
     componentRef.instance.content = tool.content;
     componentRef.instance.dispose.pipe(first()).subscribe(() => this.toggleActive(tool));
-    const focusedSubscription = componentRef.instance.focused.pipe(startWith(true)).subscribe(() => {
-      overlayRef.hostElement.style.zIndex = (++this.overlayZIndex).toString();
-    });
-    this.activeTools.set(tool, { overlayRef, focusedSubscription });
+
+    // subscriptions
+    const subscriptions = new Subscription();
+    subscriptions.add(
+      componentRef.instance.focused.pipe(startWith(true)).subscribe(() => {
+        overlayRef.hostElement.style.zIndex = (++this.overlayZIndex).toString();
+      })
+    );
+    subscriptions.add(
+      componentRef.instance.position.subscribe((position) => {
+        this.toolPositions.set(tool, position);
+      })
+    );
+    this.activeTools.set(tool, { overlayRef, subscriptions });
   }
 
   private closeContent(tool: CwToolComponent) {
     this.activeTools.get(tool)?.overlayRef.dispose();
-    this.activeTools.get(tool)?.focusedSubscription.unsubscribe();
+    this.activeTools.get(tool)?.subscriptions.unsubscribe();
     this.activeTools.delete(tool);
 
     // "Close" action might be triggered from outside this component
