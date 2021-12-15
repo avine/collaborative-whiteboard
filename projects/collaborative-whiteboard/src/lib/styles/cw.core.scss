@@ -40,16 +40,19 @@
   position: relative;
 }
 
-.cw-control__field {
-  display: inline-block;
-  vertical-align: middle;
+.cw-control__block {
+  display: flex;
+  justify-content: space-between;
 }
 
 .cw-control__number {
-  display: inline-block;
-  min-width: 1.5rem;
   margin-left: 0.5rem;
+  min-width: 1.5rem;
   text-align: right;
+}
+
+.cw-control__number--large {
+  min-width: 2.5rem;
 }
 
 .cw-control__button {
