@@ -139,6 +139,7 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
     element.style.height = `${height}px`;
     element.style.overflow = this.canvasContainerOverflow;
     this.canvasSize = { width, height };
+    this.changeDetectorRef.detectChanges();
   }
 
   storeShowGuides(showGuides: boolean) {
