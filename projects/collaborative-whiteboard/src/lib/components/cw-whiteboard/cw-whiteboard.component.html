@@ -1,5 +1,6 @@
 <div class="cw-whiteboard__canvas" #canvasContainer>
   <cw-canvas
+    #canvas
     [canvasSize]="canvasSize"
     [drawOptions]="drawOptions"
     class="cw-whiteboard__canvas-draw"
@@ -50,6 +51,10 @@
 
   <cw-tool title="Redraw" (activeChange)="service.redraw()">
     <cw-icon icon="redraw"></cw-icon>
+  </cw-tool>
+
+  <cw-tool title="Redraw" (activeChange)="download(canvas.canvasRef.nativeElement)">
+    <cw-icon icon="download"></cw-icon>
   </cw-tool>
 </cw-tool-group>
 

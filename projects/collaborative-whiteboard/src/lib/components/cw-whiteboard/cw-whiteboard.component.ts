@@ -1,12 +1,14 @@
 import { fromEvent, of, Subscription } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 
+import { DOCUMENT } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
   ElementRef,
   EventEmitter,
+  Inject,
   Input,
   OnDestroy,
   OnInit,
@@ -72,7 +74,8 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
   constructor(
     public service: CwService,
     private storageService: StorageService,
-    private changeDetectorRef: ChangeDetectorRef
+    private changeDetectorRef: ChangeDetectorRef,
+    @Inject(DOCUMENT) private document: Document
   ) {}
 
   ngOnInit() {
@@ -144,5 +147,15 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
 
   storeShowGuides(showGuides: boolean) {
     this.storageService.setLocal(StorageKey.ShowGuides, showGuides);
+  }
+
+  download(htmlCanvasElement: HTMLCanvasElement) {
+    const link = this.document.createElement('a');
+    link.href = htmlCanvasElement.toDataURL('image/png');
+    link.download = 'collaborative-whiteboard.png';
+
+    this.document.body.appendChild(link);
+    link.click();
+    this.document.body.removeChild(link);
   }
 }

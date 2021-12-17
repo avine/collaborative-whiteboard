@@ -17,5 +17,6 @@ export class CwIconComponent {
     | 'expand'
     | 'collapse'
     | 'drag'
-    | 'dispose';
+    | 'dispose'
+    | 'download';
 }
