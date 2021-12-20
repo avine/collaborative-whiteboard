@@ -15,7 +15,8 @@ export type DrawType = 'point' | 'line' | 'lineSerie' | 'clear';
 
 export interface DrawOptions {
   lineWidth: number;
-  strokeStyle: string;
+  color: string;
+  opacity: number;
 }
 
 export interface DrawBase {

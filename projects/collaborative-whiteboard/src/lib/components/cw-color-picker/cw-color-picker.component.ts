@@ -16,6 +16,8 @@ export class CwColorPickerComponent {
 
   @Input() color!: string;
 
+  @Input() opacity = 1;
+
   @Output() colorChange = new EventEmitter<string>();
 
   updateColor(color: string) {

@@ -38,7 +38,8 @@ export const mapDrawLineSerieToLines = (events: DrawEvent[]): DrawEvent[] => {
 
 export const mapToDrawEventsBroadcast = (events: DrawEvent[], animate = false): DrawEventsBroadcast => ({
   animate,
-  events: animate ? mapDrawLineSerieToLines(events) : events,
+  // ! FIXME: animation is currently disabled
+  events: animate && false ? mapDrawLineSerieToLines(events) : events,
 });
 
 export const normalizeCutRange = (data: CutRangeArg): CutRange => {

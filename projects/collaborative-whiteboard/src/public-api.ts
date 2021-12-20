@@ -18,3 +18,5 @@ export * from './lib/components/cw-tool/cw-tool.component';
 export * from './lib/components/cw-tool-content/cw-tool-content.component';
 export * from './lib/components/cw-tool-group/cw-tool-group.component';
 export * from './lib/components/cw-whiteboard/cw-whiteboard.component';
+
+export * from './lib/components/cw-canvas/cw-pointer.directive';

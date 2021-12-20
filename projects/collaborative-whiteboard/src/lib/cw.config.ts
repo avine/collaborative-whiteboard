@@ -1,27 +1,28 @@
 import { CanvasSize, DrawClear, DrawOptions } from './cw.types';
 
+// RGB colors
 export const getDefaultColors = () => [
-  '#EF5350',
-  '#EC407A',
-  '#AB47BC',
-  '#7E57C2',
-  '#5C6BC0',
-  '#42A5F5',
-  '#29B6F6',
-  '#26C6DA',
-  '#26A69A',
-  '#66BB6A',
-  '#9CCC65',
-  '#D4E157',
-  '#FFEE58',
-  '#FFCA28',
-  '#FFA726',
-  '#FF7043',
-  '#8D6E63',
-  '#BDBDBD',
+  '239, 83, 80',
+  '236, 64, 122',
+  '171, 71, 188',
+  '126, 87, 194',
+  '92, 107, 192',
+  '66, 165, 245',
+  '41, 182, 246',
+  '38, 198, 218',
+  '38, 166, 154',
+  '102, 187, 106',
+  '156, 204, 101',
+  '212, 225, 87',
+  '255, 238, 88',
+  '255, 202, 40',
+  '255, 167, 38',
+  '255, 112, 67',
+  '141, 110, 99',
+  '189, 189, 189',
 ];
 
-export const defaultColor = '#29B6F6';
+export const defaultColor = '41, 182, 246';
 
 export const getDefaultCanvasSize = (): CanvasSize => ({
   width: 300,
@@ -30,5 +31,6 @@ export const getDefaultCanvasSize = (): CanvasSize => ({
 
 export const getDefaultDrawOptions = (): DrawOptions => ({
   lineWidth: 4,
-  strokeStyle: defaultColor,
+  color: defaultColor,
+  opacity: 1,
 });

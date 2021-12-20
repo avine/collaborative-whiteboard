@@ -1,9 +1,10 @@
 <div *ngFor="let colors of colorsMatrix" class="cw-color-picker__row">
   <button
-    *ngFor="let clr of colors; trackBy: trackByColor"
-    [style.backgroundColor]="clr"
+    *ngFor="let currColor of colors; trackBy: trackByColor"
+    [title]="currColor"
+    [style.backgroundColor]="'rgba(' + currColor + ', ' + opacity + ')'"
     class="cw-color-picker__col cw-button--less"
-    [class.cw-color-picker__col--selected]="clr === color"
-    (click)="updateColor(clr)"
+    [class.cw-color-picker__col--selected]="currColor === color"
+    (click)="updateColor(currColor)"
   ></button>
 </div>

@@ -1,6 +1,3 @@
-import { fromEvent, Subscription } from 'rxjs';
-import { throttleTime } from 'rxjs/operators';
-
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
@@ -9,37 +6,24 @@ import {
   ElementRef,
   EventEmitter,
   Input,
-  NgZone,
   OnChanges,
-  OnDestroy,
   Output,
   SimpleChanges,
   ViewChild,
 } from '@angular/core';
 
 import { getDefaultCanvasSize, getDefaultDrawOptions } from '../../cw.config';
-import {
-  CanvasLine,
-  CanvasLineSerie,
-  CanvasPoint,
-  CanvasSize,
-  DrawEvent,
-  DrawEventsBroadcast,
-  DrawOptions,
-} from '../../cw.types';
+import { CanvasLine, CanvasLineSerie, CanvasPoint, DrawEvent, DrawEventsBroadcast, DrawOptions } from '../../cw.types';
 import { getClearEvent, keepDrawEventsAfterClearEvent } from '../../cw.utils';
-
-type CanvasEvent = MouseEvent | TouchEvent;
+import { applyOn } from './cw-canvas.utils';
 
 @Component({
   selector: 'cw-canvas',
   templateUrl: './cw-canvas.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CwCanvasComponent implements OnChanges, AfterViewInit, OnDestroy {
+export class CwCanvasComponent implements OnChanges, AfterViewInit {
   @Input() canvasSize = getDefaultCanvasSize();
-
-  @Output() canvasSizeChange = new EventEmitter<CanvasSize>();
 
   @Input() showGuides = true;
 
@@ -51,19 +35,19 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit, OnDestroy {
 
   @Output() draw = new EventEmitter<DrawEvent>();
 
-  @ViewChild('canvas') canvasRef!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('canvasDraw') canvasDrawRef!: ElementRef<HTMLCanvasElement>;
 
-  private context!: CanvasRenderingContext2D;
+  @ViewChild('canvasPreview') canvasPreviewRef!: ElementRef<HTMLCanvasElement>;
+
+  private contextDraw!: CanvasRenderingContext2D;
+
+  private contextPreview!: CanvasRenderingContext2D;
 
   private broadcastId = 0;
 
   private broadcastBuffer: DrawEvent[] = [];
 
-  private lineSerieBuffer: number[] = [];
-
-  private readonly subscriptions = new Subscription();
-
-  constructor(private ngZone: NgZone, private changeDetectorRef: ChangeDetectorRef) {}
+  constructor(private changeDetectorRef: ChangeDetectorRef) {}
 
   ngOnChanges({ canvasSize, broadcast }: SimpleChanges) {
     // Note: Skip the `.firstChange` because `this.context` is not yet available
@@ -76,7 +60,6 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit() {
-    this.initMoveListeners();
     this.applyCanvasSize();
     this.initContext();
 
@@ -85,49 +68,33 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit, OnDestroy {
     }
   }
 
-  ngOnDestroy() {
-    this.subscriptions.unsubscribe();
-  }
-
-  private initMoveListeners() {
-    // Prevent unnecessary change detection
-    this.ngZone.runOutsideAngular(() => {
-      this.subscriptions.add(
-        fromEvent<TouchEvent>(this.canvasRef.nativeElement, 'touchmove')
-          .pipe(throttleTime(10))
-          .subscribe((event) => this.drawMove(event))
-      );
-      this.subscriptions.add(
-        fromEvent<MouseEvent>(this.canvasRef.nativeElement, 'mousemove')
-          .pipe(throttleTime(10))
-          .subscribe((event) => this.drawMove(event))
-      );
-    });
-  }
-
   private applyCanvasSize() {
-    this.canvasRef.nativeElement.width = this.canvasSize.width;
-    this.canvasRef.nativeElement.height = this.canvasSize.height;
-    if (this.context) {
+    applyOn([this.canvasDrawRef.nativeElement, this.canvasPreviewRef.nativeElement], (canvas) => {
+      canvas.width = this.canvasSize.width;
+      canvas.height = this.canvasSize.height;
+    });
+
+    if (this.contextDraw) {
       // Changing the canvas size will reset its context...
       this.setDefaultContext();
     }
-    // FIXME: is this really necessary ?
-    // ---------------------------------
-    // Actually, the only way to change the value of `canvasSize` is when its @Input() changes.
-    // And emitting the value we just received seems to be useless!
-    // But we still need to do this, so that the wrapping component can react to this change asynchronously.
-    //
-    this.canvasSizeChange.emit(this.canvasSize);
   }
 
   private initContext() {
-    if (this.canvasRef.nativeElement.getContext) {
-      this.context = this.canvasRef.nativeElement.getContext('2d') as CanvasRenderingContext2D;
+    if (this.canvasDrawRef.nativeElement.getContext) {
+      this.contextDraw = this.canvasDrawRef.nativeElement.getContext('2d') as CanvasRenderingContext2D;
+      this.contextPreview = this.canvasPreviewRef.nativeElement.getContext('2d') as CanvasRenderingContext2D;
       this.setDefaultContext();
     } else {
       console.error('Canvas NOT supported!');
     }
+  }
+
+  private setDefaultContext() {
+    applyOn([this.contextDraw, this.contextPreview], (context) => {
+      context.lineCap = 'round';
+      context.lineJoin = 'round';
+    });
   }
 
   private handleBroadcast() {
@@ -193,7 +160,7 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit, OnDestroy {
         break;
       }
       case 'clear': {
-        this.drawClear(event.data || [0, 0, this.canvasSize.width, this.canvasSize.height]);
+        this.drawClear(event.data);
         break;
       }
       default: {
@@ -203,126 +170,88 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit, OnDestroy {
     }
   }
 
-  private setDefaultContext() {
-    this.context.lineCap = 'round';
-    this.context.lineJoin = 'round';
+  private drawPoint([x, y]: CanvasPoint, options?: DrawOptions, context = this.contextDraw) {
+    this.applyDrawOptions(options);
+    context.beginPath();
+    context.arc(x + this.offset, y + this.offset, 1, 0, Math.PI * 2, true);
+    context.stroke();
+    this.applyDrawOptions();
+  }
+
+  private drawLine([fromX, fromY, toX, toY]: CanvasLine, options?: DrawOptions, context = this.contextDraw) {
+    this.applyDrawOptions(options);
+    context.beginPath();
+    context.moveTo(fromX + this.offset, fromY + this.offset);
+    context.lineTo(toX + this.offset, toY + this.offset);
+    context.stroke();
+    this.applyDrawOptions();
+  }
+
+  private drawLineSerie(serie: CanvasLineSerie, options?: DrawOptions, context = this.contextDraw) {
+    this.applyDrawOptions(options);
+    context.beginPath();
+    context.moveTo(serie[0] + this.offset, serie[1] + this.offset);
+    context.lineTo(serie[2] + this.offset, serie[3] + this.offset);
+    for (let i = 4; i < serie.length; i = i + 2) {
+      context.lineTo(serie[i] + this.offset, serie[i + 1] + this.offset);
+    }
+    context.stroke();
+    this.applyDrawOptions();
+  }
+
+  private drawClear(
+    canvasLine: CanvasLine = [0, 0, this.canvasSize.width, this.canvasSize.height],
+    context = this.contextDraw
+  ) {
+    context.clearRect(...canvasLine);
   }
 
   private applyDrawOptions(options = this.drawOptions) {
-    Object.assign(this.context, options);
-  }
-
-  private drawPoint([x, y]: CanvasPoint, options?: DrawOptions) {
-    this.applyDrawOptions(options);
-    this.context.beginPath();
-    this.context.arc(x, y, 1, 0, Math.PI * 2, true);
-    this.context.stroke();
-    this.applyDrawOptions();
-  }
-
-  private drawLine([fromX, fromY, toX, toY]: CanvasLine, options?: DrawOptions) {
-    this.applyDrawOptions(options);
-    this.context.beginPath();
-    this.context.moveTo(fromX, fromY);
-    this.context.lineTo(toX, toY);
-    this.context.stroke();
-    this.applyDrawOptions();
-  }
-
-  private drawLineSerie(serie: CanvasLineSerie, options?: DrawOptions) {
-    this.applyDrawOptions(options);
-    this.context.beginPath();
-    this.context.moveTo(serie[0], serie[1]);
-    this.context.lineTo(serie[2], serie[3]);
-    for (let i = 4; i < serie.length; i = i + 2) {
-      this.context.lineTo(serie[i], serie[i + 1]);
-    }
-    this.context.stroke();
-    this.applyDrawOptions();
-  }
-
-  private drawClear(canvasLine: CanvasLine) {
-    this.context.clearRect(...canvasLine);
+    applyOn([this.contextDraw, this.contextPreview], (context) => {
+      context.lineWidth = options.lineWidth;
+      context.strokeStyle = `rgba(${options.color}, ${options.opacity})`;
+    });
   }
 
   private emit(event: DrawEvent) {
     this.draw.emit(event);
   }
 
-  /**
-   * @returns The number of touches for touch event or 0 for mouse event
-   */
-  private handleTouchEvent(e: CanvasEvent): number {
-    const isTouchEvent = e.type === 'touchstart' || e.type === 'touchmove' || e.type === 'touchend';
-    if (isTouchEvent) {
-      const touchesLength = (e as TouchEvent).touches.length;
-      if (touchesLength === 1) {
-        // Prevent further "mouse" event from being fired when "touch" event is detected.
-        // Notice that only "single-touch" event is considered a draw event.
-        e.preventDefault();
-      }
-      return touchesLength;
+  drawStart(canvasPoint: CanvasPoint) {
+    if (this.drawDisabled) {
+      return;
     }
-    return 0;
+    this.drawPoint(canvasPoint, undefined, this.contextPreview);
   }
 
-  private getCanvasPoint(e: CanvasEvent, touchesLength: number): CanvasPoint {
-    const { clientX: eventX, clientY: eventY } = touchesLength === 1 ? (e as TouchEvent).touches[0] : (e as MouseEvent);
-    const { left: canvasX, top: canvasY } = this.canvasRef.nativeElement.getBoundingClientRect();
-    return this.canvasPointAdjustment([eventX - canvasX, eventY - canvasY]);
+  drawMove(canvasLine: CanvasLine) {
+    if (this.drawDisabled) {
+      return;
+    }
+    this.drawLine(canvasLine, undefined, this.contextPreview);
   }
 
-  private canvasPointAdjustment(canvasPoint: CanvasPoint): CanvasPoint {
-    if (this.drawOptions.lineWidth % 2 === 1) {
-      return [canvasPoint[0] + 0.5, canvasPoint[1] + 0.5];
+  drawEnd(dataBuffer: number[]) {
+    if (this.drawDisabled) {
+      return;
     }
-    return canvasPoint;
+    this.drawClear(undefined, this.contextPreview);
+
+    const drawEvent: DrawEvent = {
+      owner: '',
+      type: dataBuffer.length === 2 ? 'point' : dataBuffer.length === 4 ? 'line' : 'lineSerie', // TODO: move to utils
+      options: { ...this.drawOptions }, // Prevent `this.drawOptions` mutation from outside
+      data: dataBuffer as any,
+    };
+    this.handleDraw(drawEvent);
+    this.emit(drawEvent);
   }
 
-  drawStart(e: CanvasEvent) {
-    const touchesLength = this.handleTouchEvent(e); // Do this on top (NOT in the "if" statement)
-    if (touchesLength > 1) {
-      return; // Remember that only "single-touch" event is considered a draw event.
-    }
-    if (!this.drawDisabled) {
-      this.lineSerieBuffer = this.getCanvasPoint(e, touchesLength);
-    }
+  private get offset(): number {
+    return this.drawOptions.lineWidth % 2 === 1 ? 0.5 : 0;
   }
 
-  drawMove(e: CanvasEvent) {
-    const touchesLength = this.handleTouchEvent(e); // Do this on top (NOT in the "if" statement)
-    if (this.lineSerieBuffer.length) {
-      const fromX = this.lineSerieBuffer[this.lineSerieBuffer.length - 2];
-      const fromY = this.lineSerieBuffer[this.lineSerieBuffer.length - 1];
-      const [toX, toY] = this.getCanvasPoint(e, touchesLength);
-      if (toX === fromX && toY === fromY) {
-        return;
-      }
-      this.drawLine([fromX, fromY, toX, toY]);
-      this.lineSerieBuffer.push(toX, toY);
-    }
-  }
-
-  drawEnd(e: CanvasEvent) {
-    this.handleTouchEvent(e); // Do this on top (NOT in the "if" statement)
-    if (this.lineSerieBuffer.length === 2) {
-      const data = this.canvasPointAdjustment(this.lineSerieBuffer as CanvasPoint);
-      this.drawPoint(data);
-      this.emit({
-        owner: '',
-        type: 'point',
-        options: this.drawOptions,
-        data,
-      });
-    } else if (this.lineSerieBuffer.length > 2) {
-      const data = this.lineSerieBuffer as CanvasLineSerie;
-      this.emit({
-        owner: '',
-        type: 'lineSerie',
-        options: this.drawOptions,
-        data,
-      });
-    }
-    this.lineSerieBuffer = [];
+  get pointerSensitivity() {
+    return Math.max(3, this.drawOptions.lineWidth / 2);
   }
 }
