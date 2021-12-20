@@ -31,9 +31,12 @@ export class CwPointerDirective implements OnInit, OnDestroy {
   @HostListener('touchend', ['$event']) touchend(e: TouchEvent) {
     if (e.touches.length === 1) {
       e.preventDefault();
+
+      const { clientX, clientY } = e.touches[0];
+      this.pointerEnd(clientX, clientY);
+    } else {
+      this.pointerEnd();
     }
-    const { clientX, clientY } = e.touches[0];
-    this.pointerEnd(clientX, clientY);
   }
 
   @HostListener('mousedown', ['$event']) mousedown(e: MouseEvent) {
@@ -115,11 +118,13 @@ export class CwPointerDirective implements OnInit, OnDestroy {
     this.cwPointerMove.emit([fromX, fromY, toX, toY]);
   }
 
-  private pointerEnd(pointerX: number, pointerY: number) {
+  private pointerEnd(pointerX?: number, pointerY?: number) {
     if (!this.dataBuffer.length) {
       return;
     }
-    this.pointerMove(pointerX, pointerY);
+    if (pointerX && pointerY) {
+      this.pointerMove(pointerX, pointerY);
+    }
     this.cwPointerEnd.emit(this.dataBuffer);
     this.dataBuffer = [];
   }
