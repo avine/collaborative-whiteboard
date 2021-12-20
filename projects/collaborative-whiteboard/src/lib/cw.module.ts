@@ -27,7 +27,7 @@ const features = [
   CwToolGroupComponent,
   CwToolComponent,
   CwWhiteboardComponent,
-  CwPointerDirective
+  CwPointerDirective,
 ];
 
 @NgModule({
@@ -38,10 +38,10 @@ const features = [
 })
 export class CwModule {
   static forRoot(): ModuleWithProviders<CwModule> {
-    return { ngModule: CwModule, providers: [StorageService] }
+    return { ngModule: CwModule, providers: [StorageService] };
   }
 
   static forChild(): ModuleWithProviders<CwModule> {
-    return { ngModule: CwModule }
+    return { ngModule: CwModule };
   }
 }

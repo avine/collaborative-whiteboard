@@ -39,7 +39,7 @@ export class ThemeService {
 
   private restoreTheme() {
     const themeName = this.document.defaultView?.localStorage.getItem('app-theme');
-    this.setTheme(themeName as ThemeName || this.DEFAULT);
+    this.setTheme((themeName as ThemeName) || this.DEFAULT);
   }
 
   private storeTheme() {

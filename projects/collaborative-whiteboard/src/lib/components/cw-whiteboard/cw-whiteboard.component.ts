@@ -113,10 +113,10 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
   }
 
   private handleWindowResize() {
-    if (!window) {
+    if (!this.document.defaultView) {
       return of().subscribe();
     }
-    return fromEvent(window, 'resize')
+    return fromEvent(this.document.defaultView, 'resize')
       .pipe(debounceTime(250))
       .subscribe(() => {
         if (this.fitParentElement) {

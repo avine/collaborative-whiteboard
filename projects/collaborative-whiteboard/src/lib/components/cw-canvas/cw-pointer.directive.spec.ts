@@ -1,4 +1,4 @@
-import { createDirectiveFactory, SpectatorDirective } from '@ngneat/spectator';
+import { createDirectiveFactory, SpectatorDirective } from '@ngneat/spectator/jest';
 
 import { CwPointerDirective } from './cw-pointer.directive';
 
@@ -12,13 +12,12 @@ describe('CwPointerDirective ', () => {
     spectator.dispatchMouseEvent(spectator.element, 'mouseover');
 
     expect(spectator.element).toHaveStyle({
-      backgroundColor: 'rgba(0,0,0, 0.1)'
+      backgroundColor: 'rgba(0,0,0, 0.1)',
     });
 
     spectator.dispatchMouseEvent(spectator.element, 'mouseout');
     expect(spectator.element).toHaveStyle({
-      backgroundColor: '#fff'
+      backgroundColor: '#fff',
     });
   });
-
 });

@@ -52,9 +52,6 @@ export class CwService {
   constructor() {}
 
   private pushHistory(event: DrawEvent) {
-    if ('options' in event) {
-      event.options = { ...event.options }; // Make this immutable!
-    }
     const hash = getHash(event);
     this.historyMap.set(hash, event);
   }

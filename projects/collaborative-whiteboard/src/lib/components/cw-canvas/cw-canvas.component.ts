@@ -1,3 +1,4 @@
+import { DOCUMENT } from '@angular/common';
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
@@ -5,6 +6,7 @@ import {
   Component,
   ElementRef,
   EventEmitter,
+  Inject,
   Input,
   OnChanges,
   Output,
@@ -47,7 +49,9 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
 
   private broadcastBuffer: DrawEvent[] = [];
 
-  constructor(private changeDetectorRef: ChangeDetectorRef) {}
+  private isDrawStarted = false;
+
+  constructor(@Inject(DOCUMENT) private document: Document, private changeDetectorRef: ChangeDetectorRef) {}
 
   ngOnChanges({ canvasSize, broadcast }: SimpleChanges) {
     // Note: Skip the `.firstChange` because `this.context` is not yet available
@@ -112,8 +116,13 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
   }
 
   private flushBroadcastBuffer() {
+    // ######################################
+    // ! FIXME: Restore the "animate" feature
+    this.broadcast.animate = true;
+    // ######################################
+
     const id = ++this.broadcastId; // Do this on top (and NOT inside the `else` statement)
-    if (!this.broadcast.animate || !window) {
+    if (!this.broadcast.animate || !this.document.defaultView) {
       while (this.broadcastBuffer.length) {
         this.handleDraw(this.broadcastBuffer.shift() as DrawEvent);
       }
@@ -126,7 +135,7 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
             for (let i = 0; i < count; i++) {
               this.handleDraw(this.broadcastBuffer.shift() as DrawEvent);
             }
-            window.requestAnimationFrame(step);
+            this.document.defaultView?.requestAnimationFrame(step);
           } else {
             // Because we are using `ChangeDetectionStrategy.OnPush`, the end of the
             // animation (which occurs asynchronously) is NOT detected by Angular.
@@ -135,7 +144,7 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
           }
         }
       };
-      window.requestAnimationFrame(step);
+      this.document.defaultView.requestAnimationFrame(step);
     }
   }
 
@@ -222,11 +231,17 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
       return;
     }
     this.drawPoint(canvasPoint, undefined, this.contextPreview);
+    this.isDrawStarted = true;
   }
 
   drawMove(canvasLine: CanvasLine) {
     if (this.drawDisabled) {
       return;
+    }
+    if (this.isDrawStarted) {
+      // Clear the first `drawPoint` (and replace it with the following `drawLine`)
+      this.drawClear(undefined, this.contextPreview);
+      this.isDrawStarted = false;
     }
     this.drawLine(canvasLine, undefined, this.contextPreview);
   }

@@ -10,9 +10,7 @@ import { DrawEvent, DrawEventsBroadcast, mapToDrawEventsBroadcast } from '@colla
 export class CanvasMirrorComponent {
   drawEventsBroadcast!: DrawEventsBroadcast;
 
-  animate = true;
-
   broadcast(drawEvent: DrawEvent) {
-    this.drawEventsBroadcast = mapToDrawEventsBroadcast([drawEvent], this.animate);
+    this.drawEventsBroadcast = mapToDrawEventsBroadcast([drawEvent]);
   }
 }

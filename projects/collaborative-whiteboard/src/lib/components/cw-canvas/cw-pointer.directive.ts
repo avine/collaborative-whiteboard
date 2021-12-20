@@ -1,6 +1,16 @@
 import { fromEvent, Subscription, throttleTime } from 'rxjs';
 
-import { Directive, ElementRef, EventEmitter, HostListener, Input, NgZone, OnDestroy, OnInit, Output } from '@angular/core';
+import {
+  Directive,
+  ElementRef,
+  EventEmitter,
+  HostListener,
+  Input,
+  NgZone,
+  OnDestroy,
+  OnInit,
+  Output,
+} from '@angular/core';
 
 import { CanvasLine, CanvasPoint } from '../../cw.types';
 

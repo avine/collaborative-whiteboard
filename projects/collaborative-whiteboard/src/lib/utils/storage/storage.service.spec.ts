@@ -5,7 +5,7 @@ describe('StorageService', () => {
   let spectator: SpectatorService<StorageService>;
   const createService = createServiceFactory(StorageService);
 
-  beforeEach(() => spectator = createService());
+  beforeEach(() => (spectator = createService()));
 
   it('should...', () => {
     expect(spectator.service).toBeTruthy();
