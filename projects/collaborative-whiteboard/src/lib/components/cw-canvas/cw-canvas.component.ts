@@ -147,14 +147,9 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
           const event = this.broadcastEventsBuffer.shift() as DrawEventAnimated;
           if (event.type === 'line' && event.step) {
             switch (event.step) {
-              case 'start': {
-                // ! FIXME: is drawing a point here a good idea ?
-                this.drawPreviewStart([event.data[0], event.data[1]], event.options, true);
-                this.drawPreviewMove(event.data, event.options);
-                break;
-              }
+              case 'start':
               case 'started': {
-                this.drawPreviewMove(event.data, event.options);
+                this.drawPreviewMove(event.data, event.options, true);
                 break;
               }
               case 'end': {
@@ -261,8 +256,9 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
     this.hasPreview[isBroadcast ? 'broadcast' : 'owner'] = true;
   }
 
-  drawPreviewMove(canvasLine: CanvasLine, options = this.drawOptions) {
+  drawPreviewMove(canvasLine: CanvasLine, options = this.drawOptions, isBroadcast = false) {
     this.drawLine(canvasLine, options, this.contextPreview);
+    this.hasPreview[isBroadcast ? 'broadcast' : 'owner'] = true;
   }
 
   drawPreviewEnd(data: number[], options = this.drawOptions, isBroadcast = false) {
