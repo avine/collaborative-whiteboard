@@ -8,7 +8,7 @@ import {
   DrawEvent,
   DrawEventAnimated,
   DrawEventsBroadcast,
-  DrawLine,
+  DrawType,
 } from './cw.types';
 
 export const getColorsMatrix = (colors = getDefaultColors(), maxColorsPerRow = 6) => {
@@ -32,9 +32,9 @@ export const mapDrawLineSerieToLines = (events: DrawEvent[]): DrawEventAnimated[
       return;
     }
     const { owner, options, data } = event;
-    const animation: DrawEventAnimated[] = [];
+    const animated: DrawEventAnimated[] = [];
     for (let i = 0; i < data.length - 3; i = i + 2) {
-      animation.push({
+      animated.push({
         owner,
         type: 'line',
         options,
@@ -43,22 +43,20 @@ export const mapDrawLineSerieToLines = (events: DrawEvent[]): DrawEventAnimated[
       });
     }
     // Update first event
-    animation[0] = { ...animation[0], step: 'start' };
+    animated[0] = { ...animated[0], step: 'start' };
     // Update last event
-    animation[animation.length - 1] = {
-      ...animation[animation.length - 1],
+    animated[animated.length - 1] = {
+      ...animated[animated.length - 1],
       step: 'end',
-      canvasLineSerie: event.data,
+      canvasLineSerie: data,
     };
-    result.push(...animation);
+    result.push(...animated);
   });
   return result;
 };
 
-export const mapToDrawEventsBroadcast = (events: DrawEvent[], animate = false): DrawEventsBroadcast => ({
-  animate,
-  events,
-});
+export const mapToDrawEventsBroadcast = (events: DrawEvent[], animate = false): DrawEventsBroadcast =>
+  animate ? { animate, events: mapDrawLineSerieToLines(events) } : { animate, events };
 
 export const normalizeCutRange = (data: CutRangeArg): CutRange => {
   const compareNumbers = (a: number, b: number) => {
@@ -82,5 +80,8 @@ export const keepDrawEventsAfterClearEvent = (events: DrawEvent[]): DrawEvent[] 
   }
   return events;
 };
+
+export const getDrawType = (dataLength: number): DrawType =>
+  dataLength === 2 ? 'point' : dataLength === 4 ? 'line' : 'lineSerie';
 
 export const getHash = (event: DrawEvent) => MD5(event);

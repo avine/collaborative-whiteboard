@@ -49,15 +49,14 @@ export interface DrawClear extends DrawBase {
 
 export type DrawEvent = DrawPoint | DrawLine | DrawLineSerie | DrawClear;
 
-export interface DrawEventsBroadcast {
-  animate: boolean;
-  events: DrawEvent[];
-}
-
 export type DrawEventAnimated =
   | DrawPoint
   | DrawClear
   | (DrawLine & ({ step?: 'start' | 'started' } | { step: 'end'; canvasLineSerie: CanvasLineSerie }));
+
+export type DrawEventsBroadcast =
+  | { animate: false; events: DrawEvent[] }
+  | { animate: true; events: DrawEventAnimated[] };
 
 export type DrawAction = 'add' | 'remove';
 

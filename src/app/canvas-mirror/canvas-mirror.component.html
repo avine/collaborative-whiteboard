@@ -4,4 +4,10 @@
 
     <cw-canvas class="canvas canvas--target" [drawDisabled]="true" [broadcast]="drawEventsBroadcast"></cw-canvas>
   </div>
+
+  <br /><br />
+
+  <button type="button" class="app-button" (click)="animate = !animate">
+    {{ animate ? 'disable' : 'enable' }} animation
+  </button>
 </div>

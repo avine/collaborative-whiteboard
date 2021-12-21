@@ -24,7 +24,7 @@ import {
   DrawEventsBroadcast,
   DrawOptions,
 } from '../../cw.types';
-import { getClearEvent, keepDrawEventsAfterClearEvent, mapDrawLineSerieToLines } from '../../cw.utils';
+import { getClearEvent, getDrawType, keepDrawEventsAfterClearEvent, mapDrawLineSerieToLines } from '../../cw.utils';
 import { applyOn } from './cw-canvas.utils';
 
 @Component({
@@ -53,11 +53,11 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
 
   private contextPreview!: CanvasRenderingContext2D;
 
-  private drawPreviewCount = 0;
+  private hasPreview = { broadcast: false, owner: false };
 
   private broadcastId = 0;
 
-  private broadcastBuffer: DrawEvent[] = [];
+  private broadcastEventsBuffer: DrawEvent[] = [];
 
   constructor(@Inject(DOCUMENT) private document: Document, private changeDetectorRef: ChangeDetectorRef) {}
 
@@ -110,63 +110,63 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
   }
 
   private handleBroadcast() {
-    this.updateBroadcastBuffer();
-    this.flushBroadcastBuffer();
+    this.updateBroadcastEventsBuffer();
+    this.flushBroadcastEventsBuffer();
   }
 
-  private updateBroadcastBuffer() {
+  private updateBroadcastEventsBuffer() {
     const events = keepDrawEventsAfterClearEvent(this.broadcast.events);
     if (events.length < this.broadcast.events.length) {
-      this.broadcastBuffer = [getClearEvent(), ...events];
+      this.broadcastEventsBuffer = [getClearEvent(), ...events];
     } else {
-      this.broadcastBuffer.push(...this.broadcast.events);
+      this.broadcastEventsBuffer.push(...this.broadcast.events);
     }
   }
 
-  private flushBroadcastBuffer() {
+  private flushBroadcastEventsBuffer() {
     const id = ++this.broadcastId; // Do this on top (and NOT inside the `else` statement)
     if (!this.broadcast.animate || !this.document.defaultView) {
-      while (this.broadcastBuffer.length) {
-        this.handleDraw(this.broadcastBuffer.shift() as DrawEvent);
+      while (this.broadcastEventsBuffer.length) {
+        this.handleDraw(this.broadcastEventsBuffer.shift() as DrawEvent);
       }
     } else {
-      // Note: in this scope, `broadcastBuffer` is of type `DrawEventAnimated[]`.
-      this.broadcastBuffer = mapDrawLineSerieToLines(this.broadcastBuffer);
-      const steps = this.broadcastBuffer.length;
+      const steps = this.broadcastEventsBuffer.length;
       const step = () => {
-        if (id === this.broadcastId) {
-          if (this.broadcastBuffer.length) {
-            const count = this.flushCount(this.broadcastBuffer.length, steps);
-            for (let i = 0; i < count; i++) {
-              const event = this.broadcastBuffer.shift() as DrawEventAnimated;
-              if (event.type === 'line' && event.step) {
-                switch (event.step) {
-                  case 'start': {
-                    this.drawStart([event.data[0], event.data[1]], event.options);
-                    this.drawMove(event.data, event.options);
-                    break;
-                  }
-                  case 'started': {
-                    this.drawMove(event.data, event.options);
-                    break;
-                  }
-                  case 'end': {
-                    this.drawEnd(event.canvasLineSerie, event.options, true);
-                    break;
-                  }
-                }
-              } else {
-                this.handleDraw(event);
+        if (id !== this.broadcastId) {
+          return;
+        }
+        if (!this.broadcastEventsBuffer.length) {
+          // Because we are using `ChangeDetectionStrategy.OnPush`, the end of the
+          // animation (which occurs asynchronously) is NOT detected by Angular.
+          // For this reason, we have to detect this change manually.
+          this.changeDetectorRef.detectChanges();
+          return;
+        }
+        const count = this.flushCount(this.broadcastEventsBuffer.length, steps);
+        for (let i = 0; i < count; i++) {
+          const event = this.broadcastEventsBuffer.shift() as DrawEventAnimated;
+          if (event.type === 'line' && event.step) {
+            switch (event.step) {
+              case 'start': {
+                // ! FIXME: is drawing a point here a good idea ?
+                this.drawPreviewStart([event.data[0], event.data[1]], event.options, true);
+                this.drawPreviewMove(event.data, event.options);
+                break;
+              }
+              case 'started': {
+                this.drawPreviewMove(event.data, event.options);
+                break;
+              }
+              case 'end': {
+                this.drawPreviewEnd(event.canvasLineSerie, event.options, true);
+                break;
               }
             }
-            this.document.defaultView?.requestAnimationFrame(step);
           } else {
-            // Because we are using `ChangeDetectionStrategy.OnPush`, the end of the
-            // animation (which occurs asynchronously) is NOT detected by Angular.
-            // For this reason, we have to detect this change manually.
-            this.changeDetectorRef.detectChanges();
+            this.handleDraw(event);
           }
         }
+        this.document.defaultView?.requestAnimationFrame(step);
       };
       this.document.defaultView.requestAnimationFrame(step);
     }
@@ -208,7 +208,9 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
     context.beginPath();
     context.arc(x + this.offset, y + this.offset, 1, 0, Math.PI * 2, true);
     context.stroke();
-    this.applyDrawOptions();
+    if (options) {
+      this.applyDrawOptions();
+    }
   }
 
   private drawLine([fromX, fromY, toX, toY]: CanvasLine, options?: DrawOptions, context = this.contextDraw) {
@@ -217,7 +219,9 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
     context.moveTo(fromX + this.offset, fromY + this.offset);
     context.lineTo(toX + this.offset, toY + this.offset);
     context.stroke();
-    this.applyDrawOptions();
+    if (options) {
+      this.applyDrawOptions();
+    }
   }
 
   private drawLineSerie(serie: CanvasLineSerie, options?: DrawOptions, context = this.contextDraw) {
@@ -229,7 +233,9 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
       context.lineTo(serie[i] + this.offset, serie[i + 1] + this.offset);
     }
     context.stroke();
-    this.applyDrawOptions();
+    if (options) {
+      this.applyDrawOptions();
+    }
   }
 
   private drawClear(
@@ -250,39 +256,28 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
     this.draw.emit(event);
   }
 
-  drawStart(canvasPoint: CanvasPoint, options = this.drawOptions) {
-    if (this.drawDisabled) {
-      return;
-    }
+  drawPreviewStart(canvasPoint: CanvasPoint, options = this.drawOptions, isBroadcast = false) {
     this.drawPoint(canvasPoint, options, this.contextPreview);
-    this.drawPreviewCount += 1;
+    this.hasPreview[isBroadcast ? 'broadcast' : 'owner'] = true;
   }
 
-  drawMove(canvasLine: CanvasLine, options = this.drawOptions) {
-    if (this.drawDisabled) {
-      return;
-    }
+  drawPreviewMove(canvasLine: CanvasLine, options = this.drawOptions) {
     this.drawLine(canvasLine, options, this.contextPreview);
   }
 
-  drawEnd(dataBuffer: number[], options = this.drawOptions, isFromBroadcast = false) {
-    if (this.drawDisabled) {
-      return;
-    }
-    this.drawPreviewCount -= 1;
-    if (this.drawPreviewCount === 0) {
+  drawPreviewEnd(data: number[], options = this.drawOptions, isBroadcast = false) {
+    this.hasPreview[isBroadcast ? 'broadcast' : 'owner'] = false;
+    if (!this.hasPreview.broadcast && !this.hasPreview.owner) {
       this.drawClear(undefined, this.contextPreview);
     }
-
-    const drawEvent: DrawEvent = {
+    const drawEvent = {
       owner: '',
-      type: dataBuffer.length === 2 ? 'point' : dataBuffer.length === 4 ? 'line' : 'lineSerie', // TODO: move to utils
+      type: getDrawType(data.length),
+      data,
       options: { ...options }, // Prevent `this.drawOptions` mutation from outside
-      data: dataBuffer as any,
-    };
-    this.handleDraw(drawEvent);
-
-    if (!isFromBroadcast) {
+    } as DrawEvent;
+    this.handleDraw(drawEvent); // Dispatch event to `contextDraw`
+    if (!isBroadcast) {
       this.emit(drawEvent);
     }
   }

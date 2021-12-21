@@ -5,7 +5,7 @@
   class="cw-canvas__preview"
   cwPointer
   [cwPointerSensitivity]="pointerSensitivity"
-  (cwPointerStart)="drawStart($event)"
-  (cwPointerMove)="drawMove($event)"
-  (cwPointerEnd)="drawEnd($event)"
+  (cwPointerStart)="drawDisabled || drawPreviewStart($event)"
+  (cwPointerMove)="drawDisabled || drawPreviewMove($event)"
+  (cwPointerEnd)="drawDisabled || drawPreviewEnd($event)"
 ></canvas>
