@@ -15,8 +15,16 @@ import {
 } from '@angular/core';
 
 import { getDefaultCanvasSize, getDefaultDrawOptions } from '../../cw.config';
-import { CanvasLine, CanvasLineSerie, CanvasPoint, DrawEvent, DrawEventsBroadcast, DrawOptions } from '../../cw.types';
-import { getClearEvent, keepDrawEventsAfterClearEvent } from '../../cw.utils';
+import {
+  CanvasLine,
+  CanvasLineSerie,
+  CanvasPoint,
+  DrawEvent,
+  DrawEventAnimated,
+  DrawEventsBroadcast,
+  DrawOptions,
+} from '../../cw.types';
+import { getClearEvent, keepDrawEventsAfterClearEvent, mapDrawLineSerieToLines } from '../../cw.utils';
 import { applyOn } from './cw-canvas.utils';
 
 @Component({
@@ -45,11 +53,11 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
 
   private contextPreview!: CanvasRenderingContext2D;
 
+  private drawPreviewCount = 0;
+
   private broadcastId = 0;
 
   private broadcastBuffer: DrawEvent[] = [];
-
-  private isDrawStarted = false;
 
   constructor(@Inject(DOCUMENT) private document: Document, private changeDetectorRef: ChangeDetectorRef) {}
 
@@ -116,24 +124,40 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
   }
 
   private flushBroadcastBuffer() {
-    // ######################################
-    // ! FIXME: Restore the "animate" feature
-    this.broadcast.animate = true;
-    // ######################################
-
     const id = ++this.broadcastId; // Do this on top (and NOT inside the `else` statement)
     if (!this.broadcast.animate || !this.document.defaultView) {
       while (this.broadcastBuffer.length) {
         this.handleDraw(this.broadcastBuffer.shift() as DrawEvent);
       }
     } else {
+      // Note: in this scope, `broadcastBuffer` is of type `DrawEventAnimated[]`.
+      this.broadcastBuffer = mapDrawLineSerieToLines(this.broadcastBuffer);
       const steps = this.broadcastBuffer.length;
       const step = () => {
         if (id === this.broadcastId) {
           if (this.broadcastBuffer.length) {
             const count = this.flushCount(this.broadcastBuffer.length, steps);
             for (let i = 0; i < count; i++) {
-              this.handleDraw(this.broadcastBuffer.shift() as DrawEvent);
+              const event = this.broadcastBuffer.shift() as DrawEventAnimated;
+              if (event.type === 'line' && event.step) {
+                switch (event.step) {
+                  case 'start': {
+                    this.drawStart([event.data[0], event.data[1]], event.options);
+                    this.drawMove(event.data, event.options);
+                    break;
+                  }
+                  case 'started': {
+                    this.drawMove(event.data, event.options);
+                    break;
+                  }
+                  case 'end': {
+                    this.drawEnd(event.canvasLineSerie, event.options, true);
+                    break;
+                  }
+                }
+              } else {
+                this.handleDraw(event);
+              }
             }
             this.document.defaultView?.requestAnimationFrame(step);
           } else {
@@ -226,40 +250,41 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
     this.draw.emit(event);
   }
 
-  drawStart(canvasPoint: CanvasPoint) {
+  drawStart(canvasPoint: CanvasPoint, options = this.drawOptions) {
     if (this.drawDisabled) {
       return;
     }
-    this.drawPoint(canvasPoint, undefined, this.contextPreview);
-    this.isDrawStarted = true;
+    this.drawPoint(canvasPoint, options, this.contextPreview);
+    this.drawPreviewCount += 1;
   }
 
-  drawMove(canvasLine: CanvasLine) {
+  drawMove(canvasLine: CanvasLine, options = this.drawOptions) {
     if (this.drawDisabled) {
       return;
     }
-    if (this.isDrawStarted) {
-      // Clear the first `drawPoint` (and replace it with the following `drawLine`)
+    this.drawLine(canvasLine, options, this.contextPreview);
+  }
+
+  drawEnd(dataBuffer: number[], options = this.drawOptions, isFromBroadcast = false) {
+    if (this.drawDisabled) {
+      return;
+    }
+    this.drawPreviewCount -= 1;
+    if (this.drawPreviewCount === 0) {
       this.drawClear(undefined, this.contextPreview);
-      this.isDrawStarted = false;
     }
-    this.drawLine(canvasLine, undefined, this.contextPreview);
-  }
-
-  drawEnd(dataBuffer: number[]) {
-    if (this.drawDisabled) {
-      return;
-    }
-    this.drawClear(undefined, this.contextPreview);
 
     const drawEvent: DrawEvent = {
       owner: '',
       type: dataBuffer.length === 2 ? 'point' : dataBuffer.length === 4 ? 'line' : 'lineSerie', // TODO: move to utils
-      options: { ...this.drawOptions }, // Prevent `this.drawOptions` mutation from outside
+      options: { ...options }, // Prevent `this.drawOptions` mutation from outside
       data: dataBuffer as any,
     };
     this.handleDraw(drawEvent);
-    this.emit(drawEvent);
+
+    if (!isFromBroadcast) {
+      this.emit(drawEvent);
+    }
   }
 
   private get offset(): number {

@@ -54,6 +54,11 @@ export interface DrawEventsBroadcast {
   events: DrawEvent[];
 }
 
+export type DrawEventAnimated =
+  | DrawPoint
+  | DrawClear
+  | (DrawLine & ({ step?: 'start' | 'started' } | { step: 'end'; canvasLineSerie: CanvasLineSerie }));
+
 export type DrawAction = 'add' | 'remove';
 
 export interface DrawTransport {
