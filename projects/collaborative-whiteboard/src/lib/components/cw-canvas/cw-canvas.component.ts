@@ -24,7 +24,13 @@ import {
   DrawEventsBroadcast,
   DrawOptions,
 } from '../../cw.types';
-import { getClearEvent, getDrawType, keepDrawEventsAfterClearEvent, mapDrawLineSerieToLines } from '../../cw.utils';
+import {
+  getClearEvent,
+  inferDrawType,
+  keepDrawEventsAfterClearEvent,
+  mapToDrawEventsAnimated,
+  translate,
+} from '../../cw.utils';
 import { applyOn } from './cw-canvas.utils';
 
 @Component({
@@ -115,11 +121,16 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
   }
 
   private updateBroadcastEventsBuffer() {
-    const events = keepDrawEventsAfterClearEvent(this.broadcast.events);
-    if (events.length < this.broadcast.events.length) {
+    let events = keepDrawEventsAfterClearEvent(this.broadcast.events);
+    const hasClearEvent = events.length < this.broadcast.events.length;
+    events = events.map((event) => translate(event, ...this.getCanvasCenter('broadcast')));
+    if (this.broadcast.animate) {
+      events = mapToDrawEventsAnimated(events);
+    }
+    if (hasClearEvent) {
       this.broadcastEventsBuffer = [getClearEvent(), ...events];
     } else {
-      this.broadcastEventsBuffer.push(...this.broadcast.events);
+      this.broadcastEventsBuffer.push(...events);
     }
   }
 
@@ -200,8 +211,9 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
 
   private drawPoint([x, y]: CanvasPoint, options?: DrawOptions, context = this.contextDraw) {
     this.applyDrawOptions(options);
+    const offset = this.getOffset(options);
     context.beginPath();
-    context.arc(x + this.offset, y + this.offset, 1, 0, Math.PI * 2, true);
+    context.arc(x + offset, y + offset, 1, 0, Math.PI * 2, true);
     context.stroke();
     if (options) {
       this.applyDrawOptions();
@@ -210,9 +222,10 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
 
   private drawLine([fromX, fromY, toX, toY]: CanvasLine, options?: DrawOptions, context = this.contextDraw) {
     this.applyDrawOptions(options);
+    const offset = this.getOffset(options);
     context.beginPath();
-    context.moveTo(fromX + this.offset, fromY + this.offset);
-    context.lineTo(toX + this.offset, toY + this.offset);
+    context.moveTo(fromX + offset, fromY + offset);
+    context.lineTo(toX + offset, toY + offset);
     context.stroke();
     if (options) {
       this.applyDrawOptions();
@@ -221,11 +234,12 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
 
   private drawLineSerie(serie: CanvasLineSerie, options?: DrawOptions, context = this.contextDraw) {
     this.applyDrawOptions(options);
+    const offset = this.getOffset(options);
     context.beginPath();
-    context.moveTo(serie[0] + this.offset, serie[1] + this.offset);
-    context.lineTo(serie[2] + this.offset, serie[3] + this.offset);
+    context.moveTo(serie[0] + offset, serie[1] + offset);
+    context.lineTo(serie[2] + offset, serie[3] + offset);
     for (let i = 4; i < serie.length; i = i + 2) {
-      context.lineTo(serie[i] + this.offset, serie[i + 1] + this.offset);
+      context.lineTo(serie[i] + offset, serie[i + 1] + offset);
     }
     context.stroke();
     if (options) {
@@ -268,18 +282,23 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
     }
     const drawEvent = {
       owner: '',
-      type: getDrawType(data.length),
+      type: inferDrawType(data.length),
       data,
       options: { ...options }, // Prevent `this.drawOptions` mutation from outside
     } as DrawEvent;
     this.handleDraw(drawEvent); // Dispatch event to `contextDraw`
     if (!isBroadcast) {
-      this.emit(drawEvent);
+      this.emit(translate(drawEvent, ...this.getCanvasCenter('emit')));
     }
   }
 
-  private get offset(): number {
-    return this.drawOptions.lineWidth % 2 === 1 ? 0.5 : 0;
+  private getOffset(drawOptions = this.drawOptions): number {
+    return drawOptions.lineWidth % 2 === 1 ? 0.5 : 0;
+  }
+
+  private getCanvasCenter(target: 'emit' | 'broadcast'): [number, number] {
+    const factor = target === 'emit' ? -1 : 1;
+    return [factor * Math.floor(this.canvasSize.width / 2), factor * Math.floor(this.canvasSize.height / 2)];
   }
 
   get pointerSensitivity() {

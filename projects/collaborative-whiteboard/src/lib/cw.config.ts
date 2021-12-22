@@ -1,4 +1,4 @@
-import { CanvasSize, DrawClear, DrawOptions } from './cw.types';
+import { CanvasSize, DrawOptions } from './cw.types';
 
 // RGB colors
 export const getDefaultColors = () => [

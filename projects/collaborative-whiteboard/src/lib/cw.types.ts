@@ -54,9 +54,10 @@ export type DrawEventAnimated =
   | DrawClear
   | (DrawLine & ({ step?: 'start' | 'started' } | { step: 'end'; canvasLineSerie: CanvasLineSerie }));
 
-export type DrawEventsBroadcast =
-  | { animate: false; events: DrawEvent[] }
-  | { animate: true; events: DrawEventAnimated[] };
+export interface DrawEventsBroadcast {
+  animate: boolean;
+  events: DrawEvent[];
+}
 
 export type DrawAction = 'add' | 'remove';
 

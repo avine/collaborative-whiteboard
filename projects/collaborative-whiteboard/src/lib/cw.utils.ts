@@ -19,12 +19,9 @@ export const getColorsMatrix = (colors = getDefaultColors(), maxColorsPerRow = 6
   return matrix;
 };
 
-export const getClearEvent = (): DrawClear => ({
-  owner: '',
-  type: 'clear',
-});
+export const getClearEvent = (): DrawClear => ({ owner: '', type: 'clear' });
 
-export const mapDrawLineSerieToLines = (events: DrawEvent[]): DrawEventAnimated[] => {
+export const mapToDrawEventsAnimated = (events: DrawEvent[]): DrawEventAnimated[] => {
   const result: DrawEventAnimated[] = [];
   events.forEach((event) => {
     if (event.type !== 'lineSerie') {
@@ -55,8 +52,10 @@ export const mapDrawLineSerieToLines = (events: DrawEvent[]): DrawEventAnimated[
   return result;
 };
 
-export const mapToDrawEventsBroadcast = (events: DrawEvent[], animate = false): DrawEventsBroadcast =>
-  animate ? { animate, events: mapDrawLineSerieToLines(events) } : { animate, events };
+export const mapToDrawEventsBroadcast = (events: DrawEvent[], animate = false): DrawEventsBroadcast => ({
+  animate,
+  events,
+});
 
 export const normalizeCutRange = (data: CutRangeArg): CutRange => {
   const compareNumbers = (a: number, b: number) => {
@@ -81,7 +80,20 @@ export const keepDrawEventsAfterClearEvent = (events: DrawEvent[]): DrawEvent[] 
   return events;
 };
 
-export const getDrawType = (dataLength: number): DrawType =>
+export const inferDrawType = (dataLength: number): DrawType =>
   dataLength === 2 ? 'point' : dataLength === 4 ? 'line' : 'lineSerie';
+
+export const translate = (event: DrawEvent, x: number, y: number): DrawEvent => {
+  const result = { ...event };
+  if (!result.data) {
+    return result;
+  }
+  result.data = [...result.data];
+  for (let i = 0; i < result.data.length - 1; i += 2) {
+    result.data[i] = result.data[i] + x;
+    result.data[i + 1] = result.data[i + 1] + y;
+  }
+  return result;
+};
 
 export const getHash = (event: DrawEvent) => MD5(event);

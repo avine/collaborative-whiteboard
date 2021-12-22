@@ -76,7 +76,7 @@ cw-canvas {
 
 .cw-canvas__draw--guides {
   background-size: var(--cw-canvas-guides-distance) var(--cw-canvas-guides-distance);
-  background-position: -1px 0px;
+  background-position: center;
   background-image: linear-gradient(0deg, var(--cw-canvas-guides-color) 0, transparent 1px),
     linear-gradient(90deg, var(--cw-canvas-guides-color) 0, transparent 1px);
 }
