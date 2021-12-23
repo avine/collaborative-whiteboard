@@ -57,12 +57,17 @@
 
 .cw-control__button {
   outline: none;
-  padding: 0.35rem 0.7rem;
+  padding: calc(0.35rem - 1px) 0.7rem;
   border-radius: var(--cw-border-radius);
-  border: none;
+  border: 1px solid var(--cw-primary-color);
   background-color: var(--cw-primary-color);
   color: white;
   font: inherit;
+}
+
+.cw-control__button--alt {
+  background-color: transparent;
+  color: var(--cw-primary-color);
 }
 
 cw-canvas {
