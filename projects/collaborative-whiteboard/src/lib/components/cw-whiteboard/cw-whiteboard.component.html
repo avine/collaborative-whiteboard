@@ -69,13 +69,14 @@
 
 <ng-template #drawBackgroundTool>
   <cw-draw-background
-    [(drawBackground)]="drawBackground"
-    (drawBackgroundChange)="service.setDrawBackground($event)"
+    *ngIf="service.drawBackground$ | async as drawBackground"
+    [drawBackground]="drawBackground"
+    (drawBackgroundChange)="updateDrawBackground($event)"
   ></cw-draw-background>
 </ng-template>
 
 <ng-template #drawLineTool>
-  <cw-draw-line [(drawOptions)]="drawOptions"></cw-draw-line>
+  <cw-draw-line [(drawOptions)]="drawOptions" (drawOptionsChange)="storeDrawOptions($event)"></cw-draw-line>
 </ng-template>
 
 <ng-template #cutTool>

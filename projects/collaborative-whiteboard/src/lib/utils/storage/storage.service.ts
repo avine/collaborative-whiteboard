@@ -15,7 +15,8 @@ export class StorageService {
   }
 
   getSession<T = any>(key: string, defaultValue: T): T;
-  getSession<T = any>(key: string, defaultValue?: undefined): T | null {
+  getSession<T = any>(key: string, defaultValue?: undefined): T | null;
+  getSession<T = any>(key: string, defaultValue?: T): T | null {
     return this.get(this.session, key) ?? defaultValue ?? null;
   }
 
@@ -28,7 +29,8 @@ export class StorageService {
   }
 
   getLocal<T = any>(key: string, defaultValue: T): T;
-  getLocal<T = any>(key: string, defaultValue?: undefined): T | null {
+  getLocal<T = any>(key: string, defaultValue?: undefined): T | null;
+  getLocal<T = any>(key: string, defaultValue?: T): T | null {
     return this.get(this.local, key) ?? defaultValue ?? null;
   }
 

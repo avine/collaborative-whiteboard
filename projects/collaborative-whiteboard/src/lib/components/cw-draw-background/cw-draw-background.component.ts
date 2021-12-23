@@ -2,7 +2,6 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from 
 import { getDefaultDrawBackground } from '../../cw.config';
 
 import { DrawBackground } from '../../cw.types';
-import { StorageKey, StorageService } from '../../utils/storage';
 
 @Component({
   selector: 'cw-draw-background',
@@ -10,15 +9,12 @@ import { StorageKey, StorageService } from '../../utils/storage';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CwDrawBackgroundComponent {
-  @Input() drawBackground: DrawBackground = getDefaultDrawBackground();
+  @Input() drawBackground = getDefaultDrawBackground();
 
   @Output() drawBackgroundChange = new EventEmitter<DrawBackground>();
 
-  constructor(private storageService: StorageService) {}
-
   emit() {
     this.drawBackgroundChange.emit({ ...this.drawBackground });
-    this.storageService.setLocal(StorageKey.DrawBackground, this.drawBackground);
   }
 
   reset() {

@@ -16,9 +16,9 @@ import {
   ViewChild,
 } from '@angular/core';
 
-import { getDefaultCanvasSize, getDefaultDrawBackground, getDefaultDrawOptions } from '../../cw.config';
+import { getDefaultCanvasSize, getDefaultDrawOptions } from '../../cw.config';
 import { CwService } from '../../cw.service';
-import { DrawEventsBroadcast, DrawTransport, Owner } from '../../cw.types';
+import { DrawBackground, DrawEventsBroadcast, DrawOptions, DrawTransport, Owner } from '../../cw.types';
 import { addStorageKeySuffix, StorageKey, StorageService } from '../../utils/storage';
 
 @Component({
@@ -47,13 +47,13 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
 
   @ViewChild('canvasContainer', { static: true, read: ElementRef }) canvasContainer!: ElementRef<HTMLElement>;
 
-  canvasContainerOverflow!: string;
+  private canvasContainerOverflow!: string;
 
   canvasSize = getDefaultCanvasSize();
 
-  drawBackground = this.storageService.getLocal(StorageKey.DrawBackground, getDefaultDrawBackground());
-
   drawOptions = this.storageService.getLocal(StorageKey.DrawOptions, getDefaultDrawOptions());
+
+  showGuides = this.storageService.getLocal(StorageKey.ShowGuides, true);
 
   // note: if there's more than one tool-group then set a different name for each one of them
   toolGroupName = '';
@@ -69,11 +69,9 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
 
   showCutTool = false;
 
-  showGuides = this.storageService.getLocal(StorageKey.ShowGuides, true);
-
   broadcastHistoryCut!: DrawEventsBroadcast;
 
-  subscriptions: Subscription[] = [];
+  private subscriptions: Subscription[] = [];
 
   constructor(
     public service: CwService,
@@ -87,6 +85,7 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
       this.service.emit$.subscribe((transport: DrawTransport) => {
         this.emit.emit(transport);
       }),
+
       // This is tricky!
       // We can't subscribe to `broadcastHistoryCut$` in the template like this:
       //
@@ -111,7 +110,7 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
       this.fitCanvasSizeToParentElement();
     }
 
-    this.service.setDrawBackground(this.drawBackground);
+    this.initDrawBackground();
   }
 
   ngOnDestroy() {
@@ -153,6 +152,22 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
 
   storeShowGuides(showGuides: boolean) {
     this.storageService.setLocal(StorageKey.ShowGuides, showGuides);
+  }
+
+  storeDrawOptions(drawOptions: DrawOptions) {
+    this.storageService.setLocal(StorageKey.DrawOptions, drawOptions);
+  }
+
+  private initDrawBackground() {
+    const drawBackground = this.storageService.getLocal<DrawBackground>(StorageKey.DrawBackground);
+    if (drawBackground) {
+      this.service.setDrawBackground(drawBackground);
+    }
+  }
+
+  updateDrawBackground(drawBackground: DrawBackground) {
+    this.service.setDrawBackground(drawBackground);
+    this.storageService.setLocal(StorageKey.DrawBackground, drawBackground);
   }
 
   download(htmlCanvasElement: HTMLCanvasElement) {
