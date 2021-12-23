@@ -199,7 +199,7 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
         break;
       }
       case 'fillRect': {
-        this.fillRect(event.data, event.options);
+        this.drawFillRect(event.data, event.options);
         break;
       }
       case 'clear': {
@@ -251,27 +251,29 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
     }
   }
 
-  private fillRect(
-    canvasLine: CanvasLine = [0, 0, this.canvasSize.width, this.canvasSize.height],
-    options: Pick<DrawOptions, 'color' | 'opacity'>,
-    context = this.contextDraw
-  ) {
-    context.fillStyle = `rgba(${options.color}, ${options.opacity})`;
+  private drawFillRect(canvasLine = this.canvasSizeAsLine, options?: DrawOptions, context = this.contextDraw) {
+    this.applyDrawOptions(options);
     context.fillRect(...canvasLine);
+    if (options) {
+      this.applyDrawOptions();
+    }
   }
 
-  private drawClear(
-    canvasLine: CanvasLine = [0, 0, this.canvasSize.width, this.canvasSize.height],
-    context = this.contextDraw
-  ) {
+  private drawClear(canvasLine = this.canvasSizeAsLine, context = this.contextDraw) {
     context.clearRect(...canvasLine);
   }
 
   private applyDrawOptions(options = this.drawOptions) {
+    const rgba = `rgba(${options.color}, ${options.opacity})`;
     applyOn([this.contextDraw, this.contextPreview], (context) => {
       context.lineWidth = options.lineWidth;
-      context.strokeStyle = `rgba(${options.color}, ${options.opacity})`;
+      context.strokeStyle = rgba;
+      context.fillStyle = rgba;
     });
+  }
+
+  private get canvasSizeAsLine(): CanvasLine {
+    return [0, 0, this.canvasSize.width, this.canvasSize.height];
   }
 
   private emit(event: DrawEvent) {

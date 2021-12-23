@@ -1,5 +1,5 @@
 export enum StorageKey {
-  FillBackground = 'fill-background',
+  DrawBackground = 'draw-background',
   DrawOptions = 'draw-options',
   ShowGuides = 'show-guides',
   ToolGroupLayoutVertical = 'tool-group-layout-vertical',

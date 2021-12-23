@@ -1,5 +1,5 @@
 export type IconAlias =
-  | 'fillBackground'
+  | 'drawBackground'
   | 'drawLine'
   | 'undo'
   | 'redo'

@@ -16,7 +16,7 @@ import {
   ViewChild,
 } from '@angular/core';
 
-import { getDefaultCanvasSize, getDefaultDrawOptions, getDefaultFillBackground } from '../../cw.config';
+import { getDefaultCanvasSize, getDefaultDrawBackground, getDefaultDrawOptions } from '../../cw.config';
 import { CwService } from '../../cw.service';
 import { DrawEventsBroadcast, DrawTransport, Owner } from '../../cw.types';
 import { addStorageKeySuffix, StorageKey, StorageService } from '../../utils/storage';
@@ -51,7 +51,7 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
 
   canvasSize = getDefaultCanvasSize();
 
-  fillBackground = this.storageService.getLocal(StorageKey.FillBackground, getDefaultFillBackground());
+  drawBackground = this.storageService.getLocal(StorageKey.DrawBackground, getDefaultDrawBackground());
 
   drawOptions = this.storageService.getLocal(StorageKey.DrawOptions, getDefaultDrawOptions());
 
@@ -63,7 +63,7 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
     true
   );
 
-  showFillBackgroundTool = false;
+  showDrawBackgroundTool = false;
 
   showDrawLineTool = false;
 
@@ -111,7 +111,7 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
       this.fitCanvasSizeToParentElement();
     }
 
-    this.service.patchDrawConfig(this.fillBackground);
+    this.service.setDrawBackground(this.drawBackground);
   }
 
   ngOnDestroy() {

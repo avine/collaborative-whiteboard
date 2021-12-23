@@ -23,7 +23,7 @@ export const getColorsMatrix = (colors = getDefaultColors(), maxColorsPerRow = 6
 export const getFillRectEvent = (color: string, opacity = 1): DrawFillRect => ({
   owner: '',
   type: 'fillRect',
-  options: { color, opacity },
+  options: { lineWidth: 0, color, opacity },
 });
 
 export const getClearEvent = (): DrawClear => ({ owner: '', type: 'clear' });

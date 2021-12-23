@@ -1,6 +1,6 @@
-export interface DrawConfig {
-  bgColor: string;
-  bgOpacity: number;
+export interface DrawBackground {
+  color: string;
+  opacity: number;
 }
 
 export type Owner = number | string;
@@ -50,7 +50,7 @@ export interface DrawLineSerie extends DrawBase {
 export interface DrawFillRect extends DrawBase {
   type: 'fillRect';
   data?: CanvasLine;
-  options: Pick<DrawOptions, 'color' | 'opacity'>;
+  options: DrawOptions; // Note: `lineWidth` is not relevant in this case.
 }
 
 export interface DrawClear extends DrawBase {

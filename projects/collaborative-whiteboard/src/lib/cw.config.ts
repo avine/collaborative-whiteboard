@@ -1,11 +1,6 @@
-import { CanvasSize, DrawConfig, DrawOptions } from './cw.types';
+import { CanvasSize, DrawBackground, DrawOptions } from './cw.types';
 
-export const getDefaultDrawConfig = (): DrawConfig => ({ bgColor: '', bgOpacity: 1 });
-
-export const getDefaultFillBackground = (): Pick<DrawConfig, 'bgColor' | 'bgOpacity'> => ({
-  bgColor: '',
-  bgOpacity: 1,
-});
+export const getDefaultDrawBackground = (): DrawBackground => ({ color: '', opacity: 1 });
 
 // RGB colors
 export const getDefaultColors = () => [

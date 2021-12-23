@@ -3,11 +3,11 @@ import { first, map } from 'rxjs/operators';
 
 import { Injectable } from '@angular/core';
 
-import { getDefaultDrawConfig } from './cw.config';
+import { getDefaultDrawBackground } from './cw.config';
 import {
   CutRange,
   CutRangeArg,
-  DrawConfig,
+  DrawBackground,
   DrawEvent,
   DrawEventsBroadcast,
   DrawFillRect,
@@ -25,7 +25,7 @@ import {
 
 @Injectable()
 export class CwService {
-  private drawConfig$$ = new BehaviorSubject<DrawConfig>(getDefaultDrawConfig());
+  private drawBackground$$ = new BehaviorSubject<DrawBackground>(getDefaultDrawBackground());
 
   private historyMap = new Map<string, DrawEvent>();
 
@@ -45,7 +45,7 @@ export class CwService {
    */
   private emit$$ = new Subject<DrawTransport>();
 
-  drawConfig$ = this.drawConfig$$.asObservable();
+  drawBackground$ = this.drawBackground$$.asObservable();
 
   history$ = this.history$$.asObservable();
 
@@ -287,17 +287,13 @@ export class CwService {
     return cutRange;
   }
 
-  patchDrawConfig(partialDrawConfig: Partial<DrawConfig>) {
-    const patch = diff(this.drawConfig$$.value, partialDrawConfig);
-    if (!Object.keys(patch).length) {
-      return;
-    }
-    this.drawConfig$$.next({ ...this.drawConfig$$.value, ...patch });
+  setDrawBackground(drawBackground: DrawBackground) {
+    this.drawBackground$$.next(drawBackground);
     this.redraw(false);
   }
 
   get backgroundEvent(): [DrawFillRect] | never[] {
-    const { bgColor, bgOpacity } = this.drawConfig$$.value;
-    return bgColor ? [getFillRectEvent(bgColor, bgOpacity)] : [];
+    const { color, opacity } = this.drawBackground$$.value;
+    return color ? [getFillRectEvent(color, opacity)] : [];
   }
 }

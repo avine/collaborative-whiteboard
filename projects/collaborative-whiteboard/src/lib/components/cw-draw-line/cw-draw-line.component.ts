@@ -10,7 +10,7 @@ import { StorageKey, StorageService } from '../../utils/storage';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CwDrawLineComponent {
-  @Input() lineWidthMax = 50;
+  @Input() lineWidthMax = 40;
 
   @Input() drawOptions = getDefaultDrawOptions();
 

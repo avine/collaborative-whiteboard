@@ -9,8 +9,8 @@ import { CwCanvasComponent } from './components/cw-canvas/cw-canvas.component';
 import { CwPointerDirective } from './components/cw-canvas/cw-pointer.directive';
 import { CwColorPickerComponent } from './components/cw-color-picker/cw-color-picker.component';
 import { CwCutComponent } from './components/cw-cut/cw-cut.component';
+import { CwDrawBackgroundComponent } from './components/cw-draw-background/cw-draw-background.component';
 import { CwDrawLineComponent } from './components/cw-draw-line/cw-draw-line.component';
-import { CwFillBackgroundComponent } from './components/cw-fill-background/cw-fill-background.component';
 import { CwIconComponent } from './components/cw-icon/cw-icon.component';
 import { CwToolContentComponent } from './components/cw-tool-content/cw-tool-content.component';
 import { CwToolGroupComponent } from './components/cw-tool-group/cw-tool-group.component';
@@ -22,8 +22,8 @@ const features = [
   CwCanvasComponent,
   CwColorPickerComponent,
   CwCutComponent,
+  CwDrawBackgroundComponent,
   CwDrawLineComponent,
-  CwFillBackgroundComponent,
   CwIconComponent,
   CwToolContentComponent,
   CwToolGroupComponent,
