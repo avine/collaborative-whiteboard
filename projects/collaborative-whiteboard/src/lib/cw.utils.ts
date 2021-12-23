@@ -8,6 +8,7 @@ import {
   DrawEvent,
   DrawEventAnimated,
   DrawEventsBroadcast,
+  DrawFillRect,
   DrawType,
 } from './cw.types';
 
@@ -18,6 +19,12 @@ export const getColorsMatrix = (colors = getDefaultColors(), maxColorsPerRow = 6
   }
   return matrix;
 };
+
+export const getFillRectEvent = (color: string, opacity = 1): DrawFillRect => ({
+  owner: '',
+  type: 'fillRect',
+  options: { color, opacity },
+});
 
 export const getClearEvent = (): DrawClear => ({ owner: '', type: 'clear' });
 
@@ -97,3 +104,13 @@ export const translate = (event: DrawEvent, x: number, y: number): DrawEvent => 
 };
 
 export const getHash = (event: DrawEvent) => MD5(event);
+
+export const diff = <T extends {}>(source: T, patch: Partial<T>) => {
+  const target: Partial<T> = {};
+  for (const prop in patch) {
+    if (source[prop] !== patch[prop]) {
+      target[prop] = patch[prop];
+    }
+  }
+  return target;
+};

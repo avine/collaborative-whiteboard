@@ -74,11 +74,17 @@ cw-canvas {
   display: block;
 }
 
-.cw-canvas__draw--guides {
+.cw-canvas__guides {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   background-size: var(--cw-canvas-guides-distance) var(--cw-canvas-guides-distance);
   background-position: center;
   background-image: linear-gradient(0deg, var(--cw-canvas-guides-color) 0, transparent 1px),
     linear-gradient(90deg, var(--cw-canvas-guides-color) 0, transparent 1px);
+  transition: background-image ease var(--cw-anim-duration-fast);
 }
 
 .cw-canvas__preview {

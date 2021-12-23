@@ -10,7 +10,7 @@ import { StorageKey, StorageService } from '../../utils/storage';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CwDrawLineComponent {
-  @Input() lineWidthMax = 30;
+  @Input() lineWidthMax = 50;
 
   @Input() drawOptions = getDefaultDrawOptions();
 
@@ -19,7 +19,7 @@ export class CwDrawLineComponent {
   constructor(private storageService: StorageService) {}
 
   emit() {
-    this.drawOptionsChange.emit(this.drawOptions);
+    this.drawOptionsChange.emit({ ...this.drawOptions });
     this.storageService.setLocal(StorageKey.DrawOptions, this.drawOptions);
   }
 }

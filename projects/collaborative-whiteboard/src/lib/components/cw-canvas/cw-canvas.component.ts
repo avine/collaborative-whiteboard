@@ -198,6 +198,10 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
         this.drawLineSerie(event.data, event.options);
         break;
       }
+      case 'fillRect': {
+        this.fillRect(event.data, event.options);
+        break;
+      }
       case 'clear': {
         this.drawClear(event.data);
         break;
@@ -245,6 +249,15 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
     if (options) {
       this.applyDrawOptions();
     }
+  }
+
+  private fillRect(
+    canvasLine: CanvasLine = [0, 0, this.canvasSize.width, this.canvasSize.height],
+    options: Pick<DrawOptions, 'color' | 'opacity'>,
+    context = this.contextDraw
+  ) {
+    context.fillStyle = `rgba(${options.color}, ${options.opacity})`;
+    context.fillRect(...canvasLine);
   }
 
   private drawClear(

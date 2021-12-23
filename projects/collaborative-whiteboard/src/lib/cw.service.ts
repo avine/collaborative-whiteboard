@@ -3,20 +3,37 @@ import { first, map } from 'rxjs/operators';
 
 import { Injectable } from '@angular/core';
 
-import { CutRange, CutRangeArg, DrawEvent, DrawEventsBroadcast, DrawTransport, Owner } from './cw.types';
-import { getClearEvent, getHash, mapToDrawEventsBroadcast, normalizeCutRange } from './cw.utils';
+import { getDefaultDrawConfig } from './cw.config';
+import {
+  CutRange,
+  CutRangeArg,
+  DrawConfig,
+  DrawEvent,
+  DrawEventsBroadcast,
+  DrawFillRect,
+  DrawTransport,
+  Owner,
+} from './cw.types';
+import {
+  diff,
+  getClearEvent,
+  getFillRectEvent,
+  getHash,
+  mapToDrawEventsBroadcast,
+  normalizeCutRange,
+} from './cw.utils';
 
 @Injectable()
 export class CwService {
+  private drawConfig$$ = new BehaviorSubject<DrawConfig>(getDefaultDrawConfig());
+
   private historyMap = new Map<string, DrawEvent>();
 
   private historyRedo: DrawEvent[][] = [];
 
   private history$$ = new BehaviorSubject<DrawEvent[]>([]);
 
-  private cutRange: CutRange = [0, 0];
-
-  private cutRange$$ = new BehaviorSubject<CutRange>(this.cutRange);
+  private cutRange$$ = new BehaviorSubject<CutRange>([0, 0]);
 
   /**
    * Dispatch draw events from the server to the client
@@ -27,6 +44,8 @@ export class CwService {
    * Dispatch draw events from the client to the server
    */
   private emit$$ = new Subject<DrawTransport>();
+
+  drawConfig$ = this.drawConfig$$.asObservable();
 
   history$ = this.history$$.asObservable();
 
@@ -49,7 +68,7 @@ export class CwService {
 
   owner: Owner = '';
 
-  constructor() {}
+  // constructor() {}
 
   private pushHistory(event: DrawEvent) {
     const hash = getHash(event);
@@ -69,6 +88,16 @@ export class CwService {
         return removed;
       }
     }
+  }
+
+  private replaceHistory(event: DrawEvent, index = 0): boolean {
+    const historyMapEntries = Array.from(this.historyMap.entries());
+    if (index >= historyMapEntries.length - 1) {
+      return false;
+    }
+    historyMapEntries[index] = [getHash(event), event];
+    this.historyMap = new Map(historyMapEntries);
+    return true;
   }
 
   private pushHistoryRedo(events: DrawEvent[]) {
@@ -113,7 +142,7 @@ export class CwService {
   }
 
   private checkCutRange() {
-    const [from, to] = this.cutRange;
+    const [from, to] = this.cutRange$$.value;
     if (to >= this.history.length) {
       const lastIndex = this.history.length - 1;
       this.setCutRange([Math.min(from, lastIndex), lastIndex]);
@@ -157,11 +186,12 @@ export class CwService {
       if (ownerEvents.length) {
         this.pushHistoryRedo(ownerEvents);
       }
-      this.broadcast$$.next(mapToDrawEventsBroadcast([getClearEvent(), ...this.history]));
+      this.broadcast$$.next(mapToDrawEventsBroadcast([getClearEvent(), ...this.history])); // TODO: do we need this.backgroundEvent here?
       this.emitHistory();
     }
   }
 
+  // ! FIXME: this is no more usefull...
   // The clear event `data` should be: `[undefined, undefined, undefined, undefined]`.
   // But when stringified through the network it becomes: `[null, null, null, null]`.
   // Thus, we need to restore the real clear event data structure,
@@ -205,7 +235,7 @@ export class CwService {
     const event = this.popHistory();
     if (event) {
       this.pushHistoryRedo([event]);
-      this.broadcast$$.next(mapToDrawEventsBroadcast([getClearEvent(), ...this.history]));
+      this.broadcast$$.next(mapToDrawEventsBroadcast([getClearEvent(), ...this.backgroundEvent, ...this.history]));
       this.emit$$.next({ action: 'remove', events: [event] });
       this.emitHistory();
     }
@@ -225,7 +255,7 @@ export class CwService {
     const removed = events.filter((event) => this.pullHistory(event));
     if (removed.length) {
       this.pushHistoryRedo(removed);
-      this.broadcast$$.next(mapToDrawEventsBroadcast([getClearEvent(), ...this.history]));
+      this.broadcast$$.next(mapToDrawEventsBroadcast([getClearEvent(), ...this.backgroundEvent, ...this.history]));
       this.emit$$.next({ action: 'remove', events: removed });
       this.emitHistory();
     }
@@ -245,16 +275,29 @@ export class CwService {
   }
 
   redraw(animate = true) {
-    const events = [getClearEvent(), ...this.history];
+    const events = [getClearEvent(), ...this.backgroundEvent, ...this.history];
     this.broadcast$$.next(mapToDrawEventsBroadcast(events, animate));
   }
 
   setCutRange(data: CutRangeArg) {
     const cutRange = normalizeCutRange(data);
-    if (cutRange[0] !== this.cutRange[0] || cutRange[1] !== this.cutRange[1]) {
-      this.cutRange = cutRange;
+    if (cutRange[0] !== this.cutRange$$.value[0] || cutRange[1] !== this.cutRange$$.value[1]) {
       this.cutRange$$.next(cutRange);
     }
     return cutRange;
+  }
+
+  patchDrawConfig(partialDrawConfig: Partial<DrawConfig>) {
+    const patch = diff(this.drawConfig$$.value, partialDrawConfig);
+    if (!Object.keys(patch).length) {
+      return;
+    }
+    this.drawConfig$$.next({ ...this.drawConfig$$.value, ...patch });
+    this.redraw(false);
+  }
+
+  get backgroundEvent(): [DrawFillRect] | never[] {
+    const { bgColor, bgOpacity } = this.drawConfig$$.value;
+    return bgColor ? [getFillRectEvent(bgColor, bgOpacity)] : [];
   }
 }

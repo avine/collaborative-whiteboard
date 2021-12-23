@@ -1,0 +1,27 @@
+<div class="cw-control">
+  <div class="cw-control__label">
+    <span class="cw-control__label-inner">Opacity</span>
+  </div>
+
+  <div class="cw-control__block">
+    <input type="range" min="0.2" max="1" step="0.05" [(ngModel)]="options.bgOpacity" (ngModelChange)="emit()" />
+
+    <span class="cw-control__number cw-control__number--large">{{ options.bgOpacity | percent }}</span>
+  </div>
+</div>
+
+<div class="cw-control">
+  <div class="cw-control__label">
+    <span class="cw-control__label-inner">Color</span>
+  </div>
+
+  <cw-color-picker
+    [(color)]="options.bgColor"
+    [opacity]="options.bgOpacity"
+    (colorChange)="emit()"
+  ></cw-color-picker>
+</div>
+
+<div class="cw-control">
+  <button type="button" class="cw-control__button" (click)="reset()">Reset</button>
+</div>

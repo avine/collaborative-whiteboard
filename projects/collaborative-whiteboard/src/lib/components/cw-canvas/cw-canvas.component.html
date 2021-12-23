@@ -1,4 +1,6 @@
-<canvas #canvasDraw class="cw-canvas__draw" [class.cw-canvas__draw--guides]="showGuides"></canvas>
+<canvas #canvasDraw class="cw-canvas__draw"></canvas>
+
+<div *ngIf="showGuides" class="cw-canvas__guides"></div>
 
 <canvas
   #canvasPreview

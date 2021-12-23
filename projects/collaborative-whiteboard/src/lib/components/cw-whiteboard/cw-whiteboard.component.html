@@ -25,6 +25,10 @@
   [dragBoundarySelector]="dragBoundarySelector"
   class="cw-whiteboard__tools"
 >
+  <cw-tool [content]="fillBackgroundTool" title="Fill background" [(active)]="showFillBackgroundTool">
+    <cw-icon icon="fillBackground"></cw-icon>
+  </cw-tool>
+
   <cw-tool [content]="drawLineTool" title="Draw line" [(active)]="showDrawLineTool">
     <cw-icon icon="drawLine"></cw-icon>
   </cw-tool>
@@ -45,7 +49,12 @@
     <cw-icon icon="undoAll"></cw-icon>
   </cw-tool>
 
-  <cw-tool title="Guides" [noContentSwitchMode]="true" [(active)]="showGuides" (activeChange)="storeShowGuides($event)">
+  <cw-tool
+    [title]="showGuides ? 'Hide guides' : 'Show guides'"
+    [noContentSwitchMode]="true"
+    [(active)]="showGuides"
+    (activeChange)="storeShowGuides($event)"
+  >
     <cw-icon icon="guides"></cw-icon>
   </cw-tool>
 
@@ -57,6 +66,13 @@
     <cw-icon icon="download"></cw-icon>
   </cw-tool>
 </cw-tool-group>
+
+<ng-template #fillBackgroundTool>
+  <cw-fill-background
+    [(options)]="fillBackground"
+    (optionsChange)="service.patchDrawConfig($event)"
+  ></cw-fill-background>
+</ng-template>
 
 <ng-template #drawLineTool>
   <cw-draw-line [(drawOptions)]="drawOptions"></cw-draw-line>

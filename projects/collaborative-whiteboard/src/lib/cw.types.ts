@@ -1,3 +1,8 @@
+export interface DrawConfig {
+  bgColor: string;
+  bgOpacity: number;
+}
+
 export type Owner = number | string;
 
 export interface CanvasSize {
@@ -11,7 +16,7 @@ export type CanvasLine = [number, number, number, number];
 
 export type CanvasLineSerie = number[];
 
-export type DrawType = 'point' | 'line' | 'lineSerie' | 'clear';
+export type DrawType = 'point' | 'line' | 'lineSerie' | 'fillRect' | 'clear';
 
 export interface DrawOptions {
   lineWidth: number;
@@ -42,17 +47,24 @@ export interface DrawLineSerie extends DrawBase {
   options: DrawOptions;
 }
 
+export interface DrawFillRect extends DrawBase {
+  type: 'fillRect';
+  data?: CanvasLine;
+  options: Pick<DrawOptions, 'color' | 'opacity'>;
+}
+
 export interface DrawClear extends DrawBase {
   type: 'clear';
   data?: CanvasLine;
 }
 
-export type DrawEvent = DrawPoint | DrawLine | DrawLineSerie | DrawClear;
+export type DrawEvent = DrawPoint | DrawLine | DrawLineSerie | DrawFillRect | DrawClear;
 
 export type DrawEventAnimated =
   | DrawPoint
-  | DrawClear
-  | (DrawLine & ({ step?: 'start' | 'started' } | { step: 'end'; canvasLineSerie: CanvasLineSerie }));
+  | (DrawLine & ({ step?: 'start' | 'started' } | { step: 'end'; canvasLineSerie: CanvasLineSerie }))
+  | DrawFillRect
+  | DrawClear;
 
 export interface DrawEventsBroadcast {
   animate: boolean;
