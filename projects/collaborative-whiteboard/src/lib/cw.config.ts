@@ -1,8 +1,10 @@
 import { CanvasSize, FillBackground, DrawOptions } from './cw.types';
 
-export const getDefaultFillBackground = (): FillBackground => ({ color: '', opacity: 1 });
+export const getDefaultFillBackground = (): FillBackground => ({ transparent: true, color: '', opacity: 1 });
 
-// RGB colors
+// Colors palette: https://material.io/design/color/the-color-system.html#tools-for-picking-colors
+
+// RGB colors (material 400)
 export const getDefaultColors = () => [
   '239, 83, 80',
   '236, 64, 122',
@@ -10,7 +12,7 @@ export const getDefaultColors = () => [
   '126, 87, 194',
   '92, 107, 192',
   '66, 165, 245',
-  '41, 182, 246',
+  '129, 212, 250',
   '38, 198, 218',
   '38, 166, 154',
   '102, 187, 106',
@@ -24,7 +26,29 @@ export const getDefaultColors = () => [
   '189, 189, 189',
 ];
 
-export const defaultColor = '41, 182, 246';
+export const defaultColor = '66, 165, 245';
+
+// RGB colors (material 800)
+export const getDefaultFillBackgroundColor = () => [
+  '198, 40, 40',
+  '73, 20, 86',
+  '106, 27, 154',
+  '69, 39, 160',
+  '40, 53, 147',
+  '21, 101, 192',
+  '2, 119, 189',
+  '0, 131, 143',
+  '0, 105, 92',
+  '46, 125, 50',
+  '85, 139, 47',
+  '158, 157, 36',
+  '249, 168, 37',
+  '255, 143, 0',
+  '239, 108, 0',
+  '216, 67, 21',
+  '78, 52, 46',
+  '66, 66, 66',
+];
 
 export const getDefaultCanvasSize = (): CanvasSize => ({
   width: 300,

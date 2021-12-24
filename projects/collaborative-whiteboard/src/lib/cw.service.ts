@@ -15,7 +15,6 @@ import {
   Owner,
 } from './cw.types';
 import {
-  diff,
   getClearEvent,
   getFillRectEvent,
   getHash,
@@ -168,7 +167,6 @@ export class CwService {
   }
 
   private broadcastAdd(events: DrawEvent[]) {
-    events = this.normalizeEvents(events);
     events.forEach((event) => this.pushHistory(event));
     const ownerEvents = this.getOwnerDrawEvents(events);
     if (ownerEvents.length) {
@@ -179,7 +177,6 @@ export class CwService {
   }
 
   private broadcastRemove(events: DrawEvent[]) {
-    events = this.normalizeEvents(events);
     const removed = events.filter((event) => this.pullHistory(event));
     if (removed.length) {
       const ownerEvents = this.getOwnerDrawEvents(removed);
@@ -189,18 +186,6 @@ export class CwService {
       this.broadcast$$.next(mapToDrawEventsBroadcast([getClearEvent(), ...this.history])); // TODO: do we need this.backgroundEvent here?
       this.emitHistory();
     }
-  }
-
-  // ! FIXME: this is no more usefull...
-  // The clear event `data` should be: `[undefined, undefined, undefined, undefined]`.
-  // But when stringified through the network it becomes: `[null, null, null, null]`.
-  // Thus, we need to restore the real clear event data structure,
-  // otherwise the method `CwCanvasComponent.drawClear` will not work properly...
-  //
-  // Note that since the whiteboard is collaborative, the clear event should NOT
-  // be broadcast through the network, otherwise all users' events will be deleted.
-  private normalizeEvents(events: DrawEvent[]) {
-    return events.map((event) => (event.type === 'clear' ? getClearEvent() : event));
   }
 
   /**
@@ -292,8 +277,15 @@ export class CwService {
     this.redraw(false);
   }
 
-  get backgroundEvent(): [DrawFillRect] | never[] {
-    const { color, opacity } = this.fillBackground$$.value;
-    return color ? [getFillRectEvent(color, opacity)] : [];
+  get backgroundEvent(): DrawFillRect[] {
+    const events: DrawFillRect[] = [];
+    const { transparent, color, opacity } = this.fillBackground$$.value;
+    if (!transparent) {
+      events.push(getFillRectEvent('255, 255, 255', 1));
+    }
+    if (color) {
+      events.push(getFillRectEvent(color, opacity));
+    }
+    return events;
   }
 }

@@ -1,6 +1,6 @@
 <div class="cw-control">
-  <div class="cw-control__label">
-    <span class="cw-control__label-inner">Opacity</span>
+  <div class="cw-control__title">
+    <span class="cw-control__title-inner">Opacity</span>
   </div>
 
   <div class="cw-control__block">
@@ -11,15 +11,33 @@
 </div>
 
 <div class="cw-control">
-  <div class="cw-control__label">
-    <span class="cw-control__label-inner">Color</span>
+  <div class="cw-control__title">
+    <span class="cw-control__title-inner">Color</span>
   </div>
 
   <cw-color-picker
+    [colors]="colors"
     [(color)]="fillBackground.color"
     [opacity]="fillBackground.opacity"
     (colorChange)="emit()"
   ></cw-color-picker>
+</div>
+
+<div class="cw-control">
+  <div class="cw-control__title">
+    <span class="cw-control__title-inner">Transparency</span>
+  </div>
+
+  <div class="cw-control__block">
+    <input
+      [id]="checkboxId"
+      type="checkbox"
+      [(ngModel)]="fillBackground.transparent"
+      (ngModelChange)="emit()"
+    />
+
+    <label [for]="checkboxId" class="cw-control__label">Preserve</label>
+  </div>
 </div>
 
 <div class="cw-control">

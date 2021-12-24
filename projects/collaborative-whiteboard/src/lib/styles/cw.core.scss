@@ -15,7 +15,7 @@
   margin-top: 1.5rem;
 }
 
-.cw-control__label {
+.cw-control__title {
   display: block;
   position: relative;
   margin-bottom: 0.5em;
@@ -33,7 +33,7 @@
   }
 }
 
-.cw-control__label-inner {
+.cw-control__title-inner {
   display: inline-block;
   padding: 0 0.75em 0 0.5em;
   background-color: var(--cw-surface-color);
@@ -43,6 +43,7 @@
 .cw-control__block {
   display: flex;
   justify-content: space-between;
+  align-items: center;
 }
 
 .cw-control__number {
@@ -53,6 +54,12 @@
 
 .cw-control__number--large {
   min-width: 2.5rem;
+}
+
+.cw-control__label {
+  flex-grow: 1;
+  margin-left: 0.5rem;
+  text-align: left;
 }
 
 .cw-control__button {

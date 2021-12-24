@@ -1,4 +1,5 @@
 export interface FillBackground {
+  transparent: boolean;
   color: string;
   opacity: number;
 }

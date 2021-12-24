@@ -105,12 +105,4 @@ export const translate = (event: DrawEvent, x: number, y: number): DrawEvent => 
 
 export const getHash = (event: DrawEvent) => MD5(event);
 
-export const diff = <T extends {}>(source: T, patch: Partial<T>) => {
-  const target: Partial<T> = {};
-  for (const prop in patch) {
-    if (source[prop] !== patch[prop]) {
-      target[prop] = patch[prop];
-    }
-  }
-  return target;
-};
+export const getUID = (prefix = '') => (prefix ? `${prefix}-` : '') + Math.random().toString().substring(2);
