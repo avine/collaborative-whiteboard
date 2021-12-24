@@ -18,7 +18,7 @@ import {
 
 import { getDefaultCanvasSize, getDefaultDrawOptions } from '../../cw.config';
 import { CwService } from '../../cw.service';
-import { DrawBackground, DrawEventsBroadcast, DrawOptions, DrawTransport, Owner } from '../../cw.types';
+import { DrawEventsBroadcast, DrawOptions, DrawTransport, FillBackground, Owner } from '../../cw.types';
 import { addStorageKeySuffix, StorageKey, StorageService } from '../../utils/storage';
 
 @Component({
@@ -63,7 +63,7 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
     true
   );
 
-  showDrawBackgroundTool = false;
+  showFillBackgroundTool = false;
 
   showDrawLineTool = false;
 
@@ -110,7 +110,7 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
       this.fitCanvasSizeToParentElement();
     }
 
-    this.initDrawBackground();
+    this.initFillBackground();
   }
 
   ngOnDestroy() {
@@ -158,16 +158,16 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
     this.storageService.setLocal(StorageKey.DrawOptions, drawOptions);
   }
 
-  private initDrawBackground() {
-    const drawBackground = this.storageService.getLocal<DrawBackground>(StorageKey.DrawBackground);
-    if (drawBackground) {
-      this.service.setDrawBackground(drawBackground);
+  private initFillBackground() {
+    const fillBackground = this.storageService.getLocal<FillBackground>(StorageKey.FillBackground);
+    if (fillBackground) {
+      this.service.setFillBackground(fillBackground);
     }
   }
 
-  updateDrawBackground(drawBackground: DrawBackground) {
-    this.service.setDrawBackground(drawBackground);
-    this.storageService.setLocal(StorageKey.DrawBackground, drawBackground);
+  updateFillBackground(fillBackground: FillBackground) {
+    this.service.setFillBackground(fillBackground);
+    this.storageService.setLocal(StorageKey.FillBackground, fillBackground);
   }
 
   download(htmlCanvasElement: HTMLCanvasElement) {

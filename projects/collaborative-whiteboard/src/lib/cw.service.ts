@@ -3,15 +3,15 @@ import { first, map } from 'rxjs/operators';
 
 import { Injectable } from '@angular/core';
 
-import { getDefaultDrawBackground } from './cw.config';
+import { getDefaultFillBackground } from './cw.config';
 import {
   CutRange,
   CutRangeArg,
-  DrawBackground,
   DrawEvent,
   DrawEventsBroadcast,
   DrawFillRect,
   DrawTransport,
+  FillBackground,
   Owner,
 } from './cw.types';
 import {
@@ -25,7 +25,7 @@ import {
 
 @Injectable()
 export class CwService {
-  private drawBackground$$ = new BehaviorSubject<DrawBackground>(getDefaultDrawBackground());
+  private fillBackground$$ = new BehaviorSubject<FillBackground>(getDefaultFillBackground());
 
   private historyMap = new Map<string, DrawEvent>();
 
@@ -45,7 +45,7 @@ export class CwService {
    */
   private emit$$ = new Subject<DrawTransport>();
 
-  drawBackground$ = this.drawBackground$$.asObservable();
+  fillBackground$ = this.fillBackground$$.asObservable();
 
   history$ = this.history$$.asObservable();
 
@@ -287,13 +287,13 @@ export class CwService {
     return cutRange;
   }
 
-  setDrawBackground(drawBackground: DrawBackground) {
-    this.drawBackground$$.next(drawBackground);
+  setFillBackground(fillBackground: FillBackground) {
+    this.fillBackground$$.next(fillBackground);
     this.redraw(false);
   }
 
   get backgroundEvent(): [DrawFillRect] | never[] {
-    const { color, opacity } = this.drawBackground$$.value;
+    const { color, opacity } = this.fillBackground$$.value;
     return color ? [getFillRectEvent(color, opacity)] : [];
   }
 }

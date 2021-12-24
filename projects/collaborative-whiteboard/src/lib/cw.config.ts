@@ -1,6 +1,6 @@
-import { CanvasSize, DrawBackground, DrawOptions } from './cw.types';
+import { CanvasSize, FillBackground, DrawOptions } from './cw.types';
 
-export const getDefaultDrawBackground = (): DrawBackground => ({ color: '', opacity: 1 });
+export const getDefaultFillBackground = (): FillBackground => ({ color: '', opacity: 1 });
 
 // RGB colors
 export const getDefaultColors = () => [

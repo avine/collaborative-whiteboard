@@ -25,8 +25,8 @@
   [dragBoundarySelector]="dragBoundarySelector"
   class="cw-whiteboard__tools"
 >
-  <cw-tool [content]="drawBackgroundTool" title="Fill background" [(active)]="showDrawBackgroundTool">
-    <cw-icon icon="drawBackground"></cw-icon>
+  <cw-tool [content]="fillBackgroundTool" title="Fill background" [(active)]="showFillBackgroundTool">
+    <cw-icon icon="fillBackground"></cw-icon>
   </cw-tool>
 
   <cw-tool [content]="drawLineTool" title="Draw line" [(active)]="showDrawLineTool">
@@ -67,12 +67,12 @@
   </cw-tool>
 </cw-tool-group>
 
-<ng-template #drawBackgroundTool>
-  <cw-draw-background
-    *ngIf="service.drawBackground$ | async as drawBackground"
-    [drawBackground]="drawBackground"
-    (drawBackgroundChange)="updateDrawBackground($event)"
-  ></cw-draw-background>
+<ng-template #fillBackgroundTool>
+  <cw-fill-background
+    *ngIf="service.fillBackground$ | async as fillBackground"
+    [fillBackground]="fillBackground"
+    (fillBackgroundChange)="updateFillBackground($event)"
+  ></cw-fill-background>
 </ng-template>
 
 <ng-template #drawLineTool>

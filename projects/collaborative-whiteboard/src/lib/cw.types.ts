@@ -1,4 +1,4 @@
-export interface DrawBackground {
+export interface FillBackground {
   color: string;
   opacity: number;
 }
