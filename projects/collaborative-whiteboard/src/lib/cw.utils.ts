@@ -1,5 +1,3 @@
-import { MD5 } from 'object-hash';
-
 import { getDefaultColors } from './cw.config';
 import {
   CutRange,
@@ -21,12 +19,13 @@ export const getColorsMatrix = (colors = getDefaultColors(), maxColorsPerRow = 6
 };
 
 export const getFillRectEvent = (color: string, opacity = 1): DrawFillRect => ({
+  id: getEventUID(),
   owner: '',
   type: 'fillRect',
   options: { lineWidth: 0, color, opacity },
 });
 
-export const getClearEvent = (): DrawClear => ({ owner: '', type: 'clear' });
+export const getClearEvent = (): DrawClear => ({ id: getEventUID(), owner: '', type: 'clear' });
 
 export const mapToDrawEventsAnimated = (events: DrawEvent[]): DrawEventAnimated[] => {
   const result: DrawEventAnimated[] = [];
@@ -39,6 +38,7 @@ export const mapToDrawEventsAnimated = (events: DrawEvent[]): DrawEventAnimated[
     const animated: DrawEventAnimated[] = [];
     for (let i = 0; i < data.length - 3; i = i + 2) {
       animated.push({
+        id: getEventUID(),
         owner,
         type: 'line',
         options,
@@ -103,6 +103,6 @@ export const translate = (event: DrawEvent, x: number, y: number): DrawEvent => 
   return result;
 };
 
-export const getHash = (event: DrawEvent) => MD5(event);
+export const getEventUID = () => `${Date.now()}-${Math.round(Math.random() * 1e16).toString(16).substring(0, 8)}`;
 
 export const getUID = (prefix = '') => (prefix ? `${prefix}-` : '') + Math.random().toString().substring(2);

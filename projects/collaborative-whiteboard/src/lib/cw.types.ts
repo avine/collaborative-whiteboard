@@ -26,6 +26,7 @@ export interface DrawOptions {
 }
 
 export interface DrawBase {
+  id: string;
   owner: Owner;
   type: DrawType;
 }

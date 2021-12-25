@@ -1,6 +1,7 @@
 <div class="cw-whiteboard__canvas" #canvasContainer>
   <cw-canvas
     #canvas
+    [owner]="(service.owner$ | async) || throwOwnerMissing()"
     [canvasSize]="canvasSize"
     [drawOptions]="drawOptions"
     class="cw-whiteboard__canvas-draw"

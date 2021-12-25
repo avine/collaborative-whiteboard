@@ -14,7 +14,7 @@ import {
   ViewChild,
 } from '@angular/core';
 
-import { getDefaultCanvasSize, getDefaultDrawOptions } from '../../cw.config';
+import { defaultOwner, getDefaultCanvasSize, getDefaultDrawOptions } from '../../cw.config';
 import {
   CanvasLine,
   CanvasLineSerie,
@@ -23,9 +23,11 @@ import {
   DrawEventAnimated,
   DrawEventsBroadcast,
   DrawOptions,
+  Owner,
 } from '../../cw.types';
 import {
   getClearEvent,
+  getEventUID,
   inferDrawType,
   keepDrawEventsAfterClearEvent,
   mapToDrawEventsAnimated,
@@ -39,6 +41,8 @@ import { applyOn } from './cw-canvas.utils';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CwCanvasComponent implements OnChanges, AfterViewInit {
+  @Input() owner: Owner = defaultOwner;
+
   @Input() canvasSize = getDefaultCanvasSize();
 
   @Input() showGuides = true;
@@ -296,7 +300,8 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
       this.drawClear(undefined, this.contextPreview);
     }
     const drawEvent = {
-      owner: '',
+      id: getEventUID(),
+      owner: this.owner,
       type: inferDrawType(data.length),
       data,
       options: { ...options }, // Prevent `this.drawOptions` mutation from outside

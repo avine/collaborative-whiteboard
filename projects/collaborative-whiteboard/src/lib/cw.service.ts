@@ -3,7 +3,7 @@ import { first, map } from 'rxjs/operators';
 
 import { Injectable } from '@angular/core';
 
-import { getDefaultFillBackground } from './cw.config';
+import { defaultOwner, getDefaultFillBackground } from './cw.config';
 import {
   CutRange,
   CutRangeArg,
@@ -14,16 +14,12 @@ import {
   FillBackground,
   Owner,
 } from './cw.types';
-import {
-  getClearEvent,
-  getFillRectEvent,
-  getHash,
-  mapToDrawEventsBroadcast,
-  normalizeCutRange,
-} from './cw.utils';
+import { getClearEvent, getFillRectEvent, mapToDrawEventsBroadcast, normalizeCutRange } from './cw.utils';
 
 @Injectable()
 export class CwService {
+  private owner$$ = new BehaviorSubject<Owner>(defaultOwner);
+
   private fillBackground$$ = new BehaviorSubject<FillBackground>(getDefaultFillBackground());
 
   private historyMap = new Map<string, DrawEvent>();
@@ -43,6 +39,8 @@ export class CwService {
    * Dispatch draw events from the client to the server
    */
   private emit$$ = new Subject<DrawTransport>();
+
+  owner$ = this.owner$$.asObservable();
 
   fillBackground$ = this.fillBackground$$.asObservable();
 
@@ -65,18 +63,16 @@ export class CwService {
 
   emit$ = this.emit$$.asObservable();
 
-  owner: Owner = '';
-
-  // constructor() {}
+  set owner(owner: Owner) {
+    this.owner$$.next(owner);
+  }
 
   private pushHistory(event: DrawEvent) {
-    const hash = getHash(event);
-    this.historyMap.set(hash, event);
+    this.historyMap.set(event.id, event);
   }
 
   private pullHistory(event: DrawEvent): boolean {
-    const hash = getHash(event);
-    return this.historyMap.delete(hash);
+    return this.historyMap.delete(event.id);
   }
 
   private popHistory(hash = this.getOwnerLastHash()): DrawEvent | void {
@@ -94,7 +90,7 @@ export class CwService {
     if (index >= historyMapEntries.length - 1) {
       return false;
     }
-    historyMapEntries[index] = [getHash(event), event];
+    historyMapEntries[index] = [event.id, event];
     this.historyMap = new Map(historyMapEntries);
     return true;
   }
@@ -110,14 +106,13 @@ export class CwService {
   private dropHistoryRedoAgainst(events: DrawEvent[]) {
     let redos: DrawEvent[] = [];
     events.forEach((event) => {
-      const hash = getHash(event);
       while (redos.length || this.historyRedo.length) {
         if (!redos.length) {
           redos = this.historyRedo.shift() || []; // redos = this.popHistoryRedo(); // FIXME...
         }
         while (redos.length) {
           const redo = redos.shift();
-          if (redo && getHash(redo) === hash) {
+          if (redo?.id === event.id) {
             // FIXME: Is there a bug ?
             // At this point we should do something like this, no?
             // But is this case really exists ?
@@ -148,19 +143,15 @@ export class CwService {
     }
   }
 
-  private setDrawEventOwner(event: DrawEvent): DrawEvent {
-    return { ...event, owner: this.owner };
-  }
-
   private getOwnerDrawEvents(events: DrawEvent[]) {
-    return events.filter((event) => event.owner === this.owner);
+    return events.filter((event) => event.owner === this.owner$$.value);
   }
 
   private getOwnerLastHash(): string | void {
     const historyMapEntries = Array.from(this.historyMap.entries());
     for (let i = historyMapEntries.length - 1; i >= 0; i--) {
       const [hash, event] = historyMapEntries[i];
-      if (event.owner === this.owner) {
+      if (event.owner === this.owner$$.value) {
         return hash;
       }
     }
@@ -209,7 +200,6 @@ export class CwService {
    * Dispatch draw events from the client to the server
    */
   emit(event: DrawEvent) {
-    event = this.setDrawEventOwner(event);
     this.pushHistory(event);
     this.dropHistoryRedoAgainst([event]);
     this.emit$$.next({ action: 'add', events: [event] });
