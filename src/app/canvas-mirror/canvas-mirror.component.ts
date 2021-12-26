@@ -12,7 +12,7 @@ export class CanvasMirrorComponent {
 
   animate = true;
 
-  broadcast(drawEvent: DrawEvent) {
-    this.drawEventsBroadcast = mapToDrawEventsBroadcast([drawEvent], this.animate);
+  broadcast(event: DrawEvent) {
+    this.drawEventsBroadcast = mapToDrawEventsBroadcast([event], this.animate);
   }
 }

@@ -1,6 +1,6 @@
-import { CanvasSize, FillBackground, DrawOptions } from './cw.types';
+import { CanvasSize, DrawOptions, FillBackground, Owner } from './cw.types';
 
-export const defaultOwner = 'guest';
+export const defaultOwner: Owner = 'guest';
 
 export const getDefaultFillBackground = (): FillBackground => ({ transparent: true, color: '', opacity: 1 });
 

@@ -54,7 +54,7 @@ export class CwService {
 
   broadcastHistoryCut$ = combineLatest([this.historyCut$, this.cutRange$$]).pipe(
     map(([historyCut, [from, to]]) => {
-      const slice = [getClearEvent(), ...historyCut.slice(from, to + 1)];
+      const slice = [getClearEvent(this.owner), ...historyCut.slice(from, to + 1)];
       return mapToDrawEventsBroadcast(slice);
     })
   );
@@ -174,7 +174,7 @@ export class CwService {
       if (ownerEvents.length) {
         this.pushHistoryRedo(ownerEvents);
       }
-      this.broadcast$$.next(mapToDrawEventsBroadcast([getClearEvent(), ...this.history])); // TODO: do we need this.backgroundEvent here?
+      this.broadcast$$.next(mapToDrawEventsBroadcast([getClearEvent(this.owner), ...this.history])); // TODO: do we need this.backgroundEvent here?
       this.emitHistory();
     }
   }
@@ -210,7 +210,7 @@ export class CwService {
     const event = this.popHistory();
     if (event) {
       this.pushHistoryRedo([event]);
-      this.broadcast$$.next(mapToDrawEventsBroadcast([getClearEvent(), ...this.backgroundEvent, ...this.history]));
+      this.broadcast$$.next(mapToDrawEventsBroadcast([getClearEvent(this.owner), ...this.backgroundEvent, ...this.history]));
       this.emit$$.next({ action: 'remove', events: [event] });
       this.emitHistory();
     }
@@ -230,7 +230,7 @@ export class CwService {
     const removed = events.filter((event) => this.pullHistory(event));
     if (removed.length) {
       this.pushHistoryRedo(removed);
-      this.broadcast$$.next(mapToDrawEventsBroadcast([getClearEvent(), ...this.backgroundEvent, ...this.history]));
+      this.broadcast$$.next(mapToDrawEventsBroadcast([getClearEvent(this.owner), ...this.backgroundEvent, ...this.history]));
       this.emit$$.next({ action: 'remove', events: removed });
       this.emitHistory();
     }
@@ -250,7 +250,7 @@ export class CwService {
   }
 
   redraw(animate = true) {
-    const events = [getClearEvent(), ...this.backgroundEvent, ...this.history];
+    const events = [getClearEvent(this.owner), ...this.backgroundEvent, ...this.history];
     this.broadcast$$.next(mapToDrawEventsBroadcast(events, animate));
   }
 
@@ -271,10 +271,10 @@ export class CwService {
     const events: DrawFillRect[] = [];
     const { transparent, color, opacity } = this.fillBackground$$.value;
     if (!transparent) {
-      events.push(getFillRectEvent('255, 255, 255', 1));
+      events.push(getFillRectEvent('255, 255, 255', 1, this.owner));
     }
     if (color) {
-      events.push(getFillRectEvent(color, opacity));
+      events.push(getFillRectEvent(color, opacity, this.owner));
     }
     return events;
   }

@@ -102,6 +102,7 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
         this.broadcastHistoryCut = broadcastHistoryCut;
         this.changeDetectorRef.detectChanges();
       }),
+
       this.handleWindowResize()
     );
 

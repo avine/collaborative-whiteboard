@@ -1,4 +1,4 @@
-import { getDefaultColors } from './cw.config';
+import { defaultOwner, getDefaultColors } from './cw.config';
 import {
   CutRange,
   CutRangeArg,
@@ -18,14 +18,18 @@ export const getColorsMatrix = (colors = getDefaultColors(), maxColorsPerRow = 6
   return matrix;
 };
 
-export const getFillRectEvent = (color: string, opacity = 1): DrawFillRect => ({
+export const getFillRectEvent = (color: string, opacity = 1, owner = defaultOwner): DrawFillRect => ({
   id: getEventUID(),
-  owner: '',
+  owner,
   type: 'fillRect',
   options: { lineWidth: 0, color, opacity },
 });
 
-export const getClearEvent = (): DrawClear => ({ id: getEventUID(), owner: '', type: 'clear' });
+export const getClearEvent = (owner = defaultOwner): DrawClear => ({
+  id: getEventUID(),
+  owner,
+  type: 'clear',
+});
 
 export const mapToDrawEventsAnimated = (events: DrawEvent[]): DrawEventAnimated[] => {
   const result: DrawEventAnimated[] = [];
@@ -103,6 +107,9 @@ export const translate = (event: DrawEvent, x: number, y: number): DrawEvent => 
   return result;
 };
 
-export const getEventUID = () => `${Date.now()}-${Math.round(Math.random() * 1e16).toString(16).substring(0, 8)}`;
+export const getEventUID = () =>
+  `${Date.now()}-${Math.round(Math.random() * 1e16)
+    .toString(16)
+    .substring(0, 8)}`;
 
 export const getUID = (prefix = '') => (prefix ? `${prefix}-` : '') + Math.random().toString().substring(2);

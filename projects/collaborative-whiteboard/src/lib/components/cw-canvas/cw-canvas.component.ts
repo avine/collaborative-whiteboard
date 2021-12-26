@@ -23,7 +23,6 @@ import {
   DrawEventAnimated,
   DrawEventsBroadcast,
   DrawOptions,
-  Owner,
 } from '../../cw.types';
 import {
   getClearEvent,
@@ -41,7 +40,7 @@ import { applyOn } from './cw-canvas.utils';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CwCanvasComponent implements OnChanges, AfterViewInit {
-  @Input() owner: Owner = defaultOwner;
+  @Input() owner = defaultOwner;
 
   @Input() canvasSize = getDefaultCanvasSize();
 
@@ -132,7 +131,7 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
       events = mapToDrawEventsAnimated(events);
     }
     if (hasClearEvent) {
-      this.broadcastEventsBuffer = [getClearEvent(), ...events];
+      this.broadcastEventsBuffer = [getClearEvent(this.owner), ...events];
     } else {
       this.broadcastEventsBuffer.push(...events);
     }
@@ -299,16 +298,16 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
     if (!this.hasPreview.broadcast && !this.hasPreview.owner) {
       this.drawClear(undefined, this.contextPreview);
     }
-    const drawEvent = {
+    const event = {
       id: getEventUID(),
       owner: this.owner,
       type: inferDrawType(data.length),
       data,
       options: { ...options }, // Prevent `this.drawOptions` mutation from outside
     } as DrawEvent;
-    this.handleDraw(drawEvent); // Dispatch event to `contextDraw`
+    this.handleDraw(event); // Dispatch event to `contextDraw`
     if (!isBroadcast) {
-      this.emit(translate(drawEvent, ...this.getCanvasCenter('emit')));
+      this.emit(translate(event, ...this.getCanvasCenter('emit')));
     }
   }
 

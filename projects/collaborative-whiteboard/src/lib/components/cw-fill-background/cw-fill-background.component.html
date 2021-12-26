@@ -29,12 +29,7 @@
   </div>
 
   <div class="cw-control__block">
-    <input
-      [id]="checkboxId"
-      type="checkbox"
-      [(ngModel)]="fillBackground.transparent"
-      (ngModelChange)="emit()"
-    />
+    <input [id]="checkboxId" type="checkbox" [(ngModel)]="fillBackground.transparent" (ngModelChange)="emit()" />
 
     <label [for]="checkboxId" class="cw-control__label">Preserve</label>
   </div>
