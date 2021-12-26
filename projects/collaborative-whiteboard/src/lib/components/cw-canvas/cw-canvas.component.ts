@@ -17,12 +17,10 @@ import {
 import { defaultOwner, getDefaultCanvasSize, getDefaultDrawOptions } from '../../cw.config';
 import {
   CanvasLine,
-  CanvasLineSerie,
   CanvasPoint,
   DrawEvent,
   DrawEventAnimated,
   DrawEventsBroadcast,
-  DrawOptions,
 } from '../../cw.types';
 import {
   getClearEvent,
@@ -32,7 +30,7 @@ import {
   mapToDrawEventsAnimated,
   translate,
 } from '../../cw.utils';
-import { applyOn } from './cw-canvas.utils';
+import { CanvasContext } from '../../utils/canvas/context';
 
 @Component({
   selector: 'cw-canvas',
@@ -58,9 +56,9 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
 
   @ViewChild('canvasPreview') canvasPreviewRef!: ElementRef<HTMLCanvasElement>;
 
-  private contextDraw!: CanvasRenderingContext2D;
+  private contextDraw!: CanvasContext;
 
-  private contextPreview!: CanvasRenderingContext2D;
+  private contextPreview!: CanvasContext;
 
   private hasPreview = { broadcast: false, owner: false };
 
@@ -81,41 +79,27 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    this.applyCanvasSize();
     this.initContext();
-
+    this.applyCanvasSize();
     if (this.broadcast) {
       this.handleBroadcast();
     }
   }
 
-  private applyCanvasSize() {
-    applyOn([this.canvasDrawRef.nativeElement, this.canvasPreviewRef.nativeElement], (canvas) => {
-      canvas.width = this.canvasSize.width;
-      canvas.height = this.canvasSize.height;
-    });
-
-    if (this.contextDraw) {
-      // Changing the canvas size will reset its context...
-      this.setDefaultContext();
-    }
-  }
-
   private initContext() {
-    if (this.canvasDrawRef.nativeElement.getContext) {
-      this.contextDraw = this.canvasDrawRef.nativeElement.getContext('2d') as CanvasRenderingContext2D;
-      this.contextPreview = this.canvasPreviewRef.nativeElement.getContext('2d') as CanvasRenderingContext2D;
-      this.setDefaultContext();
-    } else {
+    const contextDraw = this.canvasDrawRef.nativeElement?.getContext('2d');
+    const contextPreview = this.canvasPreviewRef.nativeElement?.getContext('2d');
+    if (!contextDraw || !contextPreview) {
       console.error('Canvas NOT supported!');
+      return;
     }
+    this.contextDraw = new CanvasContext(contextDraw);
+    this.contextPreview = new CanvasContext(contextPreview);
   }
 
-  private setDefaultContext() {
-    applyOn([this.contextDraw, this.contextPreview], (context) => {
-      context.lineCap = 'round';
-      context.lineJoin = 'round';
-    });
+  private applyCanvasSize() {
+    this.contextDraw.applyCanvasSize(this.canvasSize);
+    this.contextPreview.applyCanvasSize(this.canvasSize);
   }
 
   private handleBroadcast() {
@@ -190,23 +174,23 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
   private handleDraw(event: DrawEvent) {
     switch (event.type) {
       case 'point': {
-        this.drawPoint(event.data, event.options);
+        this.contextDraw.drawPoint(event.data, event.options);
         break;
       }
       case 'line': {
-        this.drawLine(event.data, event.options);
+        this.contextDraw.drawLine(event.data, event.options);
         break;
       }
       case 'lineSerie': {
-        this.drawLineSerie(event.data, event.options);
+        this.contextDraw.drawLineSerie(event.data, event.options);
         break;
       }
       case 'fillRect': {
-        this.drawFillRect(event.data, event.options);
+        this.contextDraw.drawFillRect(event.data ?? this.canvasSizeAsLine, event.options);
         break;
       }
       case 'clear': {
-        this.drawClear(event.data);
+        this.contextDraw.drawClear(event.data ?? this.canvasSizeAsLine);
         break;
       }
       default: {
@@ -216,87 +200,20 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
     }
   }
 
-  private drawPoint([x, y]: CanvasPoint, options?: DrawOptions, context = this.contextDraw) {
-    this.applyDrawOptions(options);
-    const offset = this.getOffset(options);
-    context.beginPath();
-    context.arc(x + offset, y + offset, 1, 0, Math.PI * 2, true);
-    context.stroke();
-    if (options) {
-      this.applyDrawOptions();
-    }
-  }
-
-  private drawLine([fromX, fromY, toX, toY]: CanvasLine, options?: DrawOptions, context = this.contextDraw) {
-    this.applyDrawOptions(options);
-    const offset = this.getOffset(options);
-    context.beginPath();
-    context.moveTo(fromX + offset, fromY + offset);
-    context.lineTo(toX + offset, toY + offset);
-    context.stroke();
-    if (options) {
-      this.applyDrawOptions();
-    }
-  }
-
-  private drawLineSerie(serie: CanvasLineSerie, options?: DrawOptions, context = this.contextDraw) {
-    this.applyDrawOptions(options);
-    const offset = this.getOffset(options);
-    context.beginPath();
-    context.moveTo(serie[0] + offset, serie[1] + offset);
-    context.lineTo(serie[2] + offset, serie[3] + offset);
-    for (let i = 4; i < serie.length; i = i + 2) {
-      context.lineTo(serie[i] + offset, serie[i + 1] + offset);
-    }
-    context.stroke();
-    if (options) {
-      this.applyDrawOptions();
-    }
-  }
-
-  private drawFillRect(canvasLine = this.canvasSizeAsLine, options?: DrawOptions, context = this.contextDraw) {
-    this.applyDrawOptions(options);
-    context.fillRect(...canvasLine);
-    if (options) {
-      this.applyDrawOptions();
-    }
-  }
-
-  private drawClear(canvasLine = this.canvasSizeAsLine, context = this.contextDraw) {
-    context.clearRect(...canvasLine);
-  }
-
-  private applyDrawOptions(options = this.drawOptions) {
-    const rgba = `rgba(${options.color}, ${options.opacity})`;
-    applyOn([this.contextDraw, this.contextPreview], (context) => {
-      context.lineWidth = options.lineWidth;
-      context.strokeStyle = rgba;
-      context.fillStyle = rgba;
-    });
-  }
-
-  private get canvasSizeAsLine(): CanvasLine {
-    return [0, 0, this.canvasSize.width, this.canvasSize.height];
-  }
-
-  private emit(event: DrawEvent) {
-    this.draw.emit(event);
-  }
-
   drawPreviewStart(canvasPoint: CanvasPoint, options = this.drawOptions, isBroadcast = false) {
-    this.drawPoint(canvasPoint, options, this.contextPreview);
+    this.contextPreview.drawPoint(canvasPoint, options);
     this.hasPreview[isBroadcast ? 'broadcast' : 'owner'] = true;
   }
 
   drawPreviewMove(canvasLine: CanvasLine, options = this.drawOptions, isBroadcast = false) {
-    this.drawLine(canvasLine, options, this.contextPreview);
+    this.contextPreview.drawLine(canvasLine, options);
     this.hasPreview[isBroadcast ? 'broadcast' : 'owner'] = true;
   }
 
   drawPreviewEnd(data: number[], options = this.drawOptions, isBroadcast = false) {
     this.hasPreview[isBroadcast ? 'broadcast' : 'owner'] = false;
     if (!this.hasPreview.broadcast && !this.hasPreview.owner) {
-      this.drawClear(undefined, this.contextPreview);
+      this.contextPreview.drawClear(this.canvasSizeAsLine);
     }
     const event = {
       id: getEventUID(),
@@ -307,12 +224,12 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
     } as DrawEvent;
     this.handleDraw(event); // Dispatch event to `contextDraw`
     if (!isBroadcast) {
-      this.emit(translate(event, ...this.getCanvasCenter('emit')));
+      this.draw.emit(translate(event, ...this.getCanvasCenter('emit')));
     }
   }
 
-  private getOffset(drawOptions = this.drawOptions): number {
-    return drawOptions.lineWidth % 2 === 1 ? 0.5 : 0;
+  private get canvasSizeAsLine(): CanvasLine {
+    return [0, 0, this.canvasSize.width, this.canvasSize.height];
   }
 
   private getCanvasCenter(target: 'emit' | 'broadcast'): [number, number] {
