@@ -2,7 +2,12 @@ import { CanvasSize, DrawOptions, FillBackground, Owner } from './cw.types';
 
 export const defaultOwner: Owner = 'guest';
 
-export const getDefaultFillBackground = (): FillBackground => ({ transparent: true, color: '', opacity: 1 });
+export const getDefaultFillBackground = (owner: Owner = defaultOwner): FillBackground => ({
+  owner,
+  transparent: true,
+  color: '',
+  opacity: 1,
+});
 
 // Colors palette: https://material.io/design/color/the-color-system.html#tools-for-picking-colors
 

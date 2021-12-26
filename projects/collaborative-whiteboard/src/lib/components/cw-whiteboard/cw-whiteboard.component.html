@@ -70,6 +70,7 @@
 
 <ng-template #fillBackgroundTool>
   <cw-fill-background
+    [owner]="(service.owner$ | async) || throwOwnerMissing()"
     *ngIf="service.fillBackground$ | async as fillBackground"
     [fillBackground]="fillBackground"
     (fillBackgroundChange)="updateFillBackground($event)"
