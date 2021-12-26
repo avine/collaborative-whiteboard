@@ -56,7 +56,7 @@ export const mapToDrawEventsAnimated = (events: DrawEvent[]): DrawEventAnimated[
     animated[animated.length - 1] = {
       ...animated[animated.length - 1],
       step: 'end',
-      canvasLineSerie: data,
+      originalEvent: event,
     };
     result.push(...animated);
   });

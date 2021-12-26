@@ -65,7 +65,7 @@ export type DrawEvent = DrawPoint | DrawLine | DrawLineSerie | DrawFillRect | Dr
 
 export type DrawEventAnimated =
   | DrawPoint
-  | (DrawLine & ({ step?: 'start' | 'started' } | { step: 'end'; canvasLineSerie: CanvasLineSerie }))
+  | (DrawLine & ({ step?: 'start' | 'started' } | { step: 'end'; originalEvent: DrawLineSerie }))
   | DrawFillRect
   | DrawClear;
 

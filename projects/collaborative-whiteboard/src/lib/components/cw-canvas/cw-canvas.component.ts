@@ -21,6 +21,7 @@ import {
   DrawEvent,
   DrawEventAnimated,
   DrawEventsBroadcast,
+  DrawOptions,
 } from '../../cw.types';
 import {
   getClearEvent,
@@ -52,15 +53,13 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
 
   @Output() draw = new EventEmitter<DrawEvent>();
 
-  @ViewChild('canvasDraw') canvasDrawRef!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('canvasResult') canvasResultRef!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('canvasBroadcast') canvasBroadcastRef!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('canvasEmit') canvasEmitRef!: ElementRef<HTMLCanvasElement>;
 
-  @ViewChild('canvasPreview') canvasPreviewRef!: ElementRef<HTMLCanvasElement>;
-
-  private contextDraw!: CanvasContext;
-
-  private contextPreview!: CanvasContext;
-
-  private hasPreview = { broadcast: false, owner: false };
+  private contextResult!: CanvasContext;
+  private contextBroadcast!: CanvasContext;
+  private contextEmit!: CanvasContext;
 
   private broadcastId = 0;
 
@@ -87,19 +86,22 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
   }
 
   private initContext() {
-    const contextDraw = this.canvasDrawRef.nativeElement?.getContext('2d');
-    const contextPreview = this.canvasPreviewRef.nativeElement?.getContext('2d');
-    if (!contextDraw || !contextPreview) {
+    const contextResult = this.canvasResultRef.nativeElement?.getContext('2d');
+    const contextBroadcast = this.canvasBroadcastRef.nativeElement?.getContext('2d');
+    const contextEmit = this.canvasEmitRef.nativeElement?.getContext('2d');
+    if (!contextResult || !contextBroadcast || !contextEmit) {
       console.error('Canvas NOT supported!');
       return;
     }
-    this.contextDraw = new CanvasContext(contextDraw);
-    this.contextPreview = new CanvasContext(contextPreview);
+    this.contextResult = new CanvasContext(contextResult);
+    this.contextBroadcast = new CanvasContext(contextBroadcast);
+    this.contextEmit = new CanvasContext(contextEmit);
   }
 
   private applyCanvasSize() {
-    this.contextDraw.applyCanvasSize(this.canvasSize);
-    this.contextPreview.applyCanvasSize(this.canvasSize);
+    this.contextResult.applyCanvasSize(this.canvasSize);
+    this.contextBroadcast.applyCanvasSize(this.canvasSize);
+    this.contextEmit.applyCanvasSize(this.canvasSize);
   }
 
   private handleBroadcast() {
@@ -125,7 +127,7 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
     const id = ++this.broadcastId; // Do this on top (and NOT inside the `else` statement)
     if (!this.broadcast.animate || !this.document.defaultView) {
       while (this.broadcastEventsBuffer.length) {
-        this.handleDraw(this.broadcastEventsBuffer.shift() as DrawEvent);
+        this.handleResult(this.broadcastEventsBuffer.shift() as DrawEvent);
       }
     } else {
       const steps = this.broadcastEventsBuffer.length;
@@ -147,16 +149,17 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
             switch (event.step) {
               case 'start':
               case 'started': {
-                this.drawPreviewMove(event.data, event.options, true);
+                this.contextBroadcast.drawLine(event.data, event.options);
                 break;
               }
               case 'end': {
-                this.drawPreviewEnd(event.canvasLineSerie, event.options, true);
+                this.contextBroadcast.drawClear(this.canvasSizeAsLine);
+                this.handleResult(event.originalEvent);
                 break;
               }
             }
           } else {
-            this.handleDraw(event);
+            this.handleResult(event);
           }
         }
         this.document.defaultView?.requestAnimationFrame(step);
@@ -171,26 +174,26 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
     return Math.min(count, remain);
   }
 
-  private handleDraw(event: DrawEvent) {
+  private handleResult(event: DrawEvent) {
     switch (event.type) {
       case 'point': {
-        this.contextDraw.drawPoint(event.data, event.options);
+        this.contextResult.drawPoint(event.data, event.options);
         break;
       }
       case 'line': {
-        this.contextDraw.drawLine(event.data, event.options);
+        this.contextResult.drawLine(event.data, event.options);
         break;
       }
       case 'lineSerie': {
-        this.contextDraw.drawLineSerie(event.data, event.options);
+        this.contextResult.drawLineSerie(event.data, event.options);
         break;
       }
       case 'fillRect': {
-        this.contextDraw.drawFillRect(event.data ?? this.canvasSizeAsLine, event.options);
+        this.contextResult.drawFillRect(event.data ?? this.canvasSizeAsLine, event.options);
         break;
       }
       case 'clear': {
-        this.contextDraw.drawClear(event.data ?? this.canvasSizeAsLine);
+        this.contextResult.drawClear(event.data ?? this.canvasSizeAsLine);
         break;
       }
       default: {
@@ -200,36 +203,33 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
     }
   }
 
-  drawPreviewStart(canvasPoint: CanvasPoint, options = this.drawOptions, isBroadcast = false) {
-    this.contextPreview.drawPoint(canvasPoint, options);
-    this.hasPreview[isBroadcast ? 'broadcast' : 'owner'] = true;
+  get pointerSensitivity() {
+    return Math.max(3, this.drawOptions.lineWidth / 2);
   }
 
-  drawPreviewMove(canvasLine: CanvasLine, options = this.drawOptions, isBroadcast = false) {
-    this.contextPreview.drawLine(canvasLine, options);
-    this.hasPreview[isBroadcast ? 'broadcast' : 'owner'] = true;
+  emitStart(canvasPoint: CanvasPoint, options = this.drawOptions) {
+    this.contextEmit.drawPoint(canvasPoint, options);
   }
 
-  drawPreviewEnd(data: number[], options = this.drawOptions, isBroadcast = false) {
-    this.hasPreview[isBroadcast ? 'broadcast' : 'owner'] = false;
-    if (!this.hasPreview.broadcast && !this.hasPreview.owner) {
-      this.contextPreview.drawClear(this.canvasSizeAsLine);
-    }
-    const event = {
+  emitMove(canvasLine: CanvasLine, options = this.drawOptions) {
+    this.contextEmit.drawLine(canvasLine, options);
+  }
+
+  emitEnd(data: number[], options = this.drawOptions) {
+    this.contextEmit.drawClear(this.canvasSizeAsLine);
+    const event = this.getCompleteEvent(data, options);
+    this.handleResult(event);
+    this.draw.emit(translate(event, ...this.getCanvasCenter('emit')));
+  }
+
+  private getCompleteEvent(data: number[], options: DrawOptions): DrawEvent {
+    return {
       id: getEventUID(),
       owner: this.owner,
       type: inferDrawType(data.length),
       data,
-      options: { ...options }, // Prevent `this.drawOptions` mutation from outside
+      options: { ...options }, // Prevent `drawOptions` mutation from outside
     } as DrawEvent;
-    this.handleDraw(event); // Dispatch event to `contextDraw`
-    if (!isBroadcast) {
-      this.draw.emit(translate(event, ...this.getCanvasCenter('emit')));
-    }
-  }
-
-  private get canvasSizeAsLine(): CanvasLine {
-    return [0, 0, this.canvasSize.width, this.canvasSize.height];
   }
 
   private getCanvasCenter(target: 'emit' | 'broadcast'): [number, number] {
@@ -237,7 +237,7 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
     return [factor * Math.floor(this.canvasSize.width / 2), factor * Math.floor(this.canvasSize.height / 2)];
   }
 
-  get pointerSensitivity() {
-    return Math.max(3, this.drawOptions.lineWidth / 2);
+  private get canvasSizeAsLine(): CanvasLine {
+    return [0, 0, this.canvasSize.width, this.canvasSize.height];
   }
 }

@@ -1,13 +1,15 @@
-<canvas #canvasDraw class="cw-canvas__draw"></canvas>
+<canvas #canvasResult class="cw-canvas__result"></canvas>
 
 <div *ngIf="showGuides" class="cw-canvas__guides"></div>
 
+<canvas #canvasBroadcast class="cw-canvas__preview"></canvas>
+
 <canvas
-  #canvasPreview
+  #canvasEmit
   class="cw-canvas__preview"
   cwPointer
   [cwPointerSensitivity]="pointerSensitivity"
-  (cwPointerStart)="drawDisabled || drawPreviewStart($event)"
-  (cwPointerMove)="drawDisabled || drawPreviewMove($event)"
-  (cwPointerEnd)="drawDisabled || drawPreviewEnd($event)"
+  (cwPointerStart)="drawDisabled || emitStart($event)"
+  (cwPointerMove)="drawDisabled || emitMove($event)"
+  (cwPointerEnd)="drawDisabled || emitEnd($event)"
 ></canvas>

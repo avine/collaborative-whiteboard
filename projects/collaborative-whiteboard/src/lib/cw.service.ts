@@ -210,7 +210,9 @@ export class CwService {
     const event = this.popHistory();
     if (event) {
       this.pushHistoryRedo([event]);
-      this.broadcast$$.next(mapToDrawEventsBroadcast([getClearEvent(this.owner), ...this.backgroundEvent, ...this.history]));
+      this.broadcast$$.next(
+        mapToDrawEventsBroadcast([getClearEvent(this.owner), ...this.backgroundEvent, ...this.history])
+      );
       this.emit$$.next({ action: 'remove', events: [event] });
       this.emitHistory();
     }
@@ -230,7 +232,9 @@ export class CwService {
     const removed = events.filter((event) => this.pullHistory(event));
     if (removed.length) {
       this.pushHistoryRedo(removed);
-      this.broadcast$$.next(mapToDrawEventsBroadcast([getClearEvent(this.owner), ...this.backgroundEvent, ...this.history]));
+      this.broadcast$$.next(
+        mapToDrawEventsBroadcast([getClearEvent(this.owner), ...this.backgroundEvent, ...this.history])
+      );
       this.emit$$.next({ action: 'remove', events: removed });
       this.emitHistory();
     }
