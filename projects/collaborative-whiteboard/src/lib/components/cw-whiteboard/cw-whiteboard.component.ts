@@ -18,7 +18,7 @@ import {
 
 import { getDefaultCanvasSize, getDefaultDrawOptions } from '../../cw.config';
 import { CwService } from '../../cw.service';
-import { DrawEventsBroadcast, DrawOptions, DrawTransport, FillBackground, Owner } from '../../cw.types';
+import { DrawEventsBroadcast, DrawMode, DrawOptions, DrawTransport, FillBackground, Owner } from '../../cw.types';
 import { addStorageKeySuffix, StorageKey, StorageService } from '../../utils/storage';
 
 @Component({
@@ -65,7 +65,7 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
 
   showFillBackgroundTool = false;
 
-  showDrawLineTool = false;
+  showDrawSettingsTool = false;
 
   showCutTool = false;
 
@@ -112,6 +112,7 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
     }
 
     this.initFillBackground();
+    this.initDrawMode();
   }
 
   ngOnDestroy() {
@@ -169,6 +170,18 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
   updateFillBackground(fillBackground: FillBackground) {
     this.service.setFillBackground(fillBackground);
     this.storageService.setLocal(StorageKey.FillBackground, fillBackground);
+  }
+
+  private initDrawMode() {
+    const drawMode = this.storageService.getLocal<DrawMode>(StorageKey.DrawMode);
+    if (drawMode) {
+      this.service.drawMode = drawMode;
+    }
+  }
+
+  switchDrawMode() {
+    this.service.switchDrawMode();
+    this.storageService.setLocal(StorageKey.DrawMode, this.service.drawMode);
   }
 
   download(htmlCanvasElement: HTMLCanvasElement) {

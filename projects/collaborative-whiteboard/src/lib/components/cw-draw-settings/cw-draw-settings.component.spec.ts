@@ -1,19 +1,19 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CwDrawLineComponent } from './cw-draw-line.component';
+import { CwDrawSettingsComponent } from './cw-draw-settings.component';
 
-describe('CwDrawLineComponent', () => {
-  let component: CwDrawLineComponent;
-  let fixture: ComponentFixture<CwDrawLineComponent>;
+describe('CwDrawSettingsComponent', () => {
+  let component: CwDrawSettingsComponent;
+  let fixture: ComponentFixture<CwDrawSettingsComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [CwDrawLineComponent],
+      declarations: [CwDrawSettingsComponent],
     }).compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(CwDrawLineComponent);
+    fixture = TestBed.createComponent(CwDrawSettingsComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

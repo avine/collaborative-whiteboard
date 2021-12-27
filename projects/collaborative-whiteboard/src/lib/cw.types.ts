@@ -7,9 +7,7 @@ export interface FillBackground {
   opacity: number;
 }
 
-export interface DrawMode {
-  mode: 'free' | 'line';
-}
+export type DrawMode = 'brush' | 'line';
 
 export interface CanvasSize {
   width: number;

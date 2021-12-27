@@ -1,6 +1,8 @@
 export type IconAlias =
   | 'fillBackground'
-  | 'drawLine'
+  | 'brush'
+  | 'line'
+  | 'palette'
   | 'undo'
   | 'redo'
   | 'cut'

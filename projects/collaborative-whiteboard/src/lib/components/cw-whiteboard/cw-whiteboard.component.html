@@ -27,16 +27,20 @@
   [dragBoundarySelector]="dragBoundarySelector"
   class="cw-whiteboard__tools"
 >
-  <cw-tool title="Draw mode" [noContentSwitchMode]="true" (activeChange)="service.TMPSwitchDrawMode()">
-    {{ (service.drawMode$ | async)?.mode }}
-  </cw-tool>
-
   <cw-tool [content]="fillBackgroundTool" title="Fill background" [(active)]="showFillBackgroundTool">
     <cw-icon icon="fillBackground"></cw-icon>
   </cw-tool>
 
-  <cw-tool [content]="drawLineTool" title="Draw line" [(active)]="showDrawLineTool">
-    <cw-icon icon="drawLine"></cw-icon>
+  <cw-tool
+    *ngIf="service.drawMode$ | async as drawMode"
+    [title]="drawMode | titlecase"
+    (activeChange)="switchDrawMode()"
+  >
+    <cw-icon [icon]="drawMode"></cw-icon>
+  </cw-tool>
+
+  <cw-tool [content]="drawSettingsTool" title="Draw settings" [(active)]="showDrawSettingsTool">
+    <cw-icon icon="palette"></cw-icon>
   </cw-tool>
 
   <cw-tool title="Undo" (activeChange)="service.undo()">
@@ -82,8 +86,8 @@
   ></cw-fill-background>
 </ng-template>
 
-<ng-template #drawLineTool>
-  <cw-draw-line [(drawOptions)]="drawOptions" (drawOptionsChange)="storeDrawOptions($event)"></cw-draw-line>
+<ng-template #drawSettingsTool>
+  <cw-draw-settings [(drawOptions)]="drawOptions" (drawOptionsChange)="storeDrawOptions($event)"></cw-draw-settings>
 </ng-template>
 
 <ng-template #cutTool>

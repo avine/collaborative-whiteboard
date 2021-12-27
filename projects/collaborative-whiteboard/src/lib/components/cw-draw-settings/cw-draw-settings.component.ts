@@ -4,11 +4,11 @@ import { getDefaultDrawOptions } from '../../cw.config';
 import { DrawOptions } from '../../cw.types';
 
 @Component({
-  selector: 'cw-draw-line',
-  templateUrl: './cw-draw-line.component.html',
+  selector: 'cw-draw-settings',
+  templateUrl: './cw-draw-settings.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CwDrawLineComponent {
+export class CwDrawSettingsComponent {
   @Input() lineWidthMax = 40;
 
   @Input() drawOptions = getDefaultDrawOptions();

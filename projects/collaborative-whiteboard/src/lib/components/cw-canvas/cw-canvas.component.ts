@@ -14,7 +14,7 @@ import {
   ViewChild,
 } from '@angular/core';
 
-import { defaultOwner, getDefaultCanvasSize, getDefaultDrawMode, getDefaultDrawOptions } from '../../cw.config';
+import { defaultDrawMode, defaultOwner, getDefaultCanvasSize, getDefaultDrawOptions } from '../../cw.config';
 import {
   CanvasLine,
   CanvasPoint,
@@ -42,7 +42,7 @@ import { CanvasContext } from '../../utils/canvas/context';
 export class CwCanvasComponent implements OnChanges, AfterViewInit {
   @Input() owner = defaultOwner;
 
-  @Input() drawMode: DrawMode = getDefaultDrawMode();
+  @Input() drawMode = defaultDrawMode;
 
   @Input() canvasSize = getDefaultCanvasSize();
 
@@ -215,8 +215,8 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
   }
 
   emitMove(data: number[], options = this.drawOptions) {
-    switch (this.drawMode.mode) {
-      case 'free': {
+    switch (this.drawMode) {
+      case 'brush': {
         this.contextEmit.drawLine(data.slice(-4) as CanvasLine, options);
         break;
       }
@@ -230,7 +230,17 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
 
   emitEnd(data: number[], options = this.drawOptions) {
     this.contextEmit.drawClear(this.canvasSizeAsLine);
-    const event = this.getCompleteEvent(data, options);
+    let event: DrawEvent;
+    switch (this.drawMode) {
+      case 'brush': {
+        event = this.getCompleteEvent(data, options);
+        break;
+      }
+      case 'line': {
+        event = this.getCompleteEvent([...data.slice(0, 2), ...data.slice(-2)], options);
+        break;
+      }
+    }
     this.handleResult(event);
     this.draw.emit(translate(event, ...this.getCanvasCenter('emit')));
   }

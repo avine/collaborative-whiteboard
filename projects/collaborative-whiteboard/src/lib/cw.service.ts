@@ -3,7 +3,7 @@ import { first, map } from 'rxjs/operators';
 
 import { Injectable } from '@angular/core';
 
-import { defaultOwner, getDefaultDrawMode, getDefaultFillBackground } from './cw.config';
+import { defaultDrawMode, defaultOwner, getDefaultFillBackground } from './cw.config';
 import {
   CutRange,
   CutRangeArg,
@@ -21,7 +21,7 @@ import { getClearEvent, getFillRectEvent, mapToDrawEventsBroadcast, normalizeCut
 export class CwService {
   private owner$$ = new BehaviorSubject<Owner>(defaultOwner);
 
-  private drawMode$$ = new BehaviorSubject<DrawMode>(getDefaultDrawMode());
+  private drawMode$$ = new BehaviorSubject<DrawMode>(defaultDrawMode);
 
   private fillBackground$$ = new BehaviorSubject<FillBackground>(getDefaultFillBackground());
 
@@ -75,13 +75,12 @@ export class CwService {
   set drawMode(drawMode: DrawMode) {
     this.drawMode$$.next(drawMode);
   }
+  get drawMode(): DrawMode {
+    return this.drawMode$$.value;
+  }
 
-  TMPSwitchDrawMode() {
-    if (this.drawMode$$.value.mode === 'free') {
-      this.drawMode = { mode: 'line' };
-    } else {
-      this.drawMode = { mode: 'free' };
-    }
+  switchDrawMode() {
+    this.drawMode = this.drawMode$$.value === 'brush' ? 'line' : 'brush';
   }
 
   private pushHistory(event: DrawEvent) {
