@@ -1,6 +1,8 @@
-import { CanvasSize, DrawOptions, FillBackground, Owner } from './cw.types';
+import { CanvasSize, DrawMode, DrawOptions, FillBackground, Owner } from './cw.types';
 
 export const defaultOwner: Owner = 'guest';
+
+export const getDefaultDrawMode = (): DrawMode => ({ mode: 'free' });
 
 export const getDefaultFillBackground = (owner: Owner = defaultOwner): FillBackground => ({
   owner,

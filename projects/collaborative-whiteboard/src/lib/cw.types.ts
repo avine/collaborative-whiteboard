@@ -1,3 +1,5 @@
+export type Owner = number | string;
+
 export interface FillBackground {
   owner: Owner;
   transparent: boolean;
@@ -5,7 +7,9 @@ export interface FillBackground {
   opacity: number;
 }
 
-export type Owner = number | string;
+export interface DrawMode {
+  mode: 'free' | 'line';
+}
 
 export interface CanvasSize {
   width: number;

@@ -1,7 +1,8 @@
 <div class="cw-whiteboard__canvas" #canvasContainer>
   <cw-canvas
     #canvas
-    [owner]="(service.owner$ | async) || throwOwnerMissing()"
+    [drawMode]="(service.drawMode$ | async) || throwMissing()"
+    [owner]="(service.owner$ | async) || throwMissing()"
     [canvasSize]="canvasSize"
     [drawOptions]="drawOptions"
     class="cw-whiteboard__canvas-draw"
@@ -26,6 +27,10 @@
   [dragBoundarySelector]="dragBoundarySelector"
   class="cw-whiteboard__tools"
 >
+  <cw-tool title="Draw mode" [noContentSwitchMode]="true" (activeChange)="service.TMPSwitchDrawMode()">
+    {{ (service.drawMode$ | async)?.mode }}
+  </cw-tool>
+
   <cw-tool [content]="fillBackgroundTool" title="Fill background" [(active)]="showFillBackgroundTool">
     <cw-icon icon="fillBackground"></cw-icon>
   </cw-tool>
@@ -70,7 +75,7 @@
 
 <ng-template #fillBackgroundTool>
   <cw-fill-background
-    [owner]="(service.owner$ | async) || throwOwnerMissing()"
+    [owner]="(service.owner$ | async) || throwMissing()"
     *ngIf="service.fillBackground$ | async as fillBackground"
     [fillBackground]="fillBackground"
     (fillBackgroundChange)="updateFillBackground($event)"

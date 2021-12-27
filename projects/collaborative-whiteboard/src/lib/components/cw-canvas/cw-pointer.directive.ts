@@ -55,7 +55,7 @@ export class CwPointerDirective implements OnInit, OnDestroy {
 
   @Output() cwPointerStart = new EventEmitter<CanvasPoint>();
 
-  @Output() cwPointerMove = new EventEmitter<CanvasLine>();
+  @Output() cwPointerMove = new EventEmitter<number[]>();
 
   @Output() cwPointerEnd = new EventEmitter<number[]>();
 
@@ -115,7 +115,7 @@ export class CwPointerDirective implements OnInit, OnDestroy {
       return;
     }
     this.dataBuffer.push(toX, toY);
-    this.cwPointerMove.emit([fromX, fromY, toX, toY]);
+    this.cwPointerMove.emit(this.dataBuffer);
   }
 
   private pointerEnd(pointerX?: number, pointerY?: number) {

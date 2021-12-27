@@ -14,13 +14,14 @@ import {
   ViewChild,
 } from '@angular/core';
 
-import { defaultOwner, getDefaultCanvasSize, getDefaultDrawOptions } from '../../cw.config';
+import { defaultOwner, getDefaultCanvasSize, getDefaultDrawMode, getDefaultDrawOptions } from '../../cw.config';
 import {
   CanvasLine,
   CanvasPoint,
   DrawEvent,
   DrawEventAnimated,
   DrawEventsBroadcast,
+  DrawMode,
   DrawOptions,
 } from '../../cw.types';
 import {
@@ -40,6 +41,8 @@ import { CanvasContext } from '../../utils/canvas/context';
 })
 export class CwCanvasComponent implements OnChanges, AfterViewInit {
   @Input() owner = defaultOwner;
+
+  @Input() drawMode: DrawMode = getDefaultDrawMode();
 
   @Input() canvasSize = getDefaultCanvasSize();
 
@@ -211,8 +214,18 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
     this.contextEmit.drawPoint(canvasPoint, options);
   }
 
-  emitMove(canvasLine: CanvasLine, options = this.drawOptions) {
-    this.contextEmit.drawLine(canvasLine, options);
+  emitMove(data: number[], options = this.drawOptions) {
+    switch (this.drawMode.mode) {
+      case 'free': {
+        this.contextEmit.drawLine(data.slice(-4) as CanvasLine, options);
+        break;
+      }
+      case 'line': {
+        this.contextEmit.drawClear(this.canvasSizeAsLine);
+        this.contextEmit.drawLine([...data.slice(0, 2), ...data.slice(-2)] as CanvasLine, options);
+        break;
+      }
+    }
   }
 
   emitEnd(data: number[], options = this.drawOptions) {

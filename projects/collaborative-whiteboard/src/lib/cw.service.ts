@@ -3,13 +3,14 @@ import { first, map } from 'rxjs/operators';
 
 import { Injectable } from '@angular/core';
 
-import { defaultOwner, getDefaultFillBackground } from './cw.config';
+import { defaultOwner, getDefaultDrawMode, getDefaultFillBackground } from './cw.config';
 import {
   CutRange,
   CutRangeArg,
   DrawEvent,
   DrawEventsBroadcast,
   DrawFillRect,
+  DrawMode,
   DrawTransport,
   FillBackground,
   Owner,
@@ -19,6 +20,8 @@ import { getClearEvent, getFillRectEvent, mapToDrawEventsBroadcast, normalizeCut
 @Injectable()
 export class CwService {
   private owner$$ = new BehaviorSubject<Owner>(defaultOwner);
+
+  private drawMode$$ = new BehaviorSubject<DrawMode>(getDefaultDrawMode());
 
   private fillBackground$$ = new BehaviorSubject<FillBackground>(getDefaultFillBackground());
 
@@ -41,6 +44,8 @@ export class CwService {
   private emit$$ = new Subject<DrawTransport>();
 
   owner$ = this.owner$$.asObservable();
+
+  drawMode$ = this.drawMode$$.asObservable();
 
   fillBackground$ = this.fillBackground$$.asObservable();
 
@@ -65,6 +70,18 @@ export class CwService {
 
   set owner(owner: Owner) {
     this.owner$$.next(owner);
+  }
+
+  set drawMode(drawMode: DrawMode) {
+    this.drawMode$$.next(drawMode);
+  }
+
+  TMPSwitchDrawMode() {
+    if (this.drawMode$$.value.mode === 'free') {
+      this.drawMode = { mode: 'line' };
+    } else {
+      this.drawMode = { mode: 'free' };
+    }
   }
 
   private pushHistory(event: DrawEvent) {

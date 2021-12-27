@@ -184,7 +184,7 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
   // This function is used in the template as a fallback value when `service.owner$ | async` is null.
   // But actually, `service.owner$` can't be null because it's a `BehaviorSubject` which always have a value.
   // Anyway, we need this hack, because Angular complains...
-  throwOwnerMissing(): Owner {
+  throwMissing(): any {
     throw new Error('This code should never be executed!');
   }
 }
