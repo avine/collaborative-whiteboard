@@ -31,36 +31,39 @@ export const getClearEvent = (owner = defaultOwner): DrawClear => ({
   type: 'clear',
 });
 
-export const mapToDrawEventsAnimated = (events: DrawEvent[]): DrawEventAnimated[] => {
-  const result: DrawEventAnimated[] = [];
+export const mapToDrawEventsAnimated = (events: DrawEvent[]): (DrawEvent | DrawEventAnimated)[] => {
+  const result: (DrawEvent | DrawEventAnimated)[] = [];
   events.forEach((event) => {
-    if (event.type !== 'lineSerie') {
-      result.push(event);
-      return;
+    switch (event.type) {
+      case 'lineSerie': {
+        const animatedLength = event.data.length / 2;
+        const animated: DrawEventAnimated[] = Array(animatedLength)
+          .fill(undefined)
+          .map((_, index) => {
+            // Note: for strong typing, we need to define the variable to return.
+            const animatedStep: DrawEventAnimated = { ...event, step: 'progress', index: 2 * index + 2 };
+            return animatedStep;
+          });
+        // Update first event
+        animated[0] = { ...animated[0], step: 'start' };
+        // Update last event
+        animated[animatedLength - 1] = { ...animated[animatedLength - 1], step: 'end' };
+        result.push(...animated);
+        break;
+      }
+      default: {
+        result.push(event);
+        break;
+      }
     }
-    const { owner, options, data } = event;
-    const animated: DrawEventAnimated[] = [];
-    for (let i = 0; i < data.length - 3; i = i + 2) {
-      animated.push({
-        id: getEventUID(),
-        owner,
-        type: 'line',
-        options,
-        data: [data[i], data[i + 1], data[i + 2], data[i + 3]],
-        step: 'started',
-      });
-    }
-    // Update first event
-    animated[0] = { ...animated[0], step: 'start' };
-    // Update last event
-    animated[animated.length - 1] = {
-      ...animated[animated.length - 1],
-      step: 'end',
-      originalEvent: event,
-    };
-    result.push(...animated);
   });
   return result;
+};
+
+export const isDrawEventAnimated = (event: DrawEvent | DrawEventAnimated): event is DrawEventAnimated => {
+  const step: keyof DrawEventAnimated = 'step';
+  const index: keyof DrawEventAnimated = 'index';
+  return step in event && index in event;
 };
 
 export const mapToDrawEventsBroadcast = (events: DrawEvent[], animate = false): DrawEventsBroadcast => ({

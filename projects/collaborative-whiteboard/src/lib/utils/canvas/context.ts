@@ -1,5 +1,5 @@
 import { getDefaultCanvasSize } from '../../cw.config';
-import { CanvasLine, CanvasLineSerie, CanvasPoint, CanvasSize, DrawOptions } from '../../cw.types';
+import { CanvasLine, CanvasLineSerie, CanvasPoint, CanvasSize, DrawEvent, DrawOptions } from '../../cw.types';
 
 export class CanvasContext {
   private canvasSize = getDefaultCanvasSize();
@@ -20,6 +20,27 @@ export class CanvasContext {
   private setContextDefault() {
     this.context.lineCap = 'round';
     this.context.lineJoin = 'round';
+  }
+
+  handleEvent(event: DrawEvent) {
+    switch (event.type) {
+      case 'point': {
+        this.drawPoint(event.data, event.options);
+        break;
+      }
+      case 'line': {
+        this.drawLine(event.data, event.options);
+        break;
+      }
+      case 'lineSerie': {
+        this.drawLineSerie(event.data, event.options);
+        break;
+      }
+      default: {
+        console.error('Unhandled event', event);
+        break;
+      }
+    }
   }
 
   drawPoint([x, y]: CanvasPoint, options: DrawOptions) {

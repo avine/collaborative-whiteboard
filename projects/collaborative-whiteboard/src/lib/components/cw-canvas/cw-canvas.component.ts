@@ -21,13 +21,13 @@ import {
   DrawEvent,
   DrawEventAnimated,
   DrawEventsBroadcast,
-  DrawMode,
   DrawOptions,
 } from '../../cw.types';
 import {
   getClearEvent,
   getEventUID,
   inferDrawType,
+  isDrawEventAnimated,
   keepDrawEventsAfterClearEvent,
   mapToDrawEventsAnimated,
   translate,
@@ -66,7 +66,7 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
 
   private broadcastId = 0;
 
-  private broadcastEventsBuffer: DrawEvent[] = [];
+  private broadcastEventsBuffer: (DrawEvent | DrawEventAnimated)[] = [];
 
   constructor(@Inject(DOCUMENT) private document: Document, private changeDetectorRef: ChangeDetectorRef) {}
 
@@ -147,22 +147,23 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
         }
         const count = this.flushCount(this.broadcastEventsBuffer.length, steps);
         for (let i = 0; i < count; i++) {
-          const event = this.broadcastEventsBuffer.shift() as DrawEventAnimated;
-          if (event.type === 'line' && event.step) {
-            switch (event.step) {
-              case 'start':
-              case 'started': {
-                this.contextBroadcast.drawLine(event.data, event.options);
-                break;
-              }
-              case 'end': {
-                this.contextBroadcast.drawClear(this.canvasSizeAsLine);
-                this.handleResult(event.originalEvent);
-                break;
-              }
-            }
-          } else {
+          const event = this.broadcastEventsBuffer.shift() as DrawEvent | DrawEventAnimated;
+          if (!isDrawEventAnimated(event)) {
             this.handleResult(event);
+            continue;
+          }
+          switch (event.step) {
+            case 'start':
+            case 'progress': {
+              this.contextBroadcast.drawClear(this.canvasSizeAsLine);
+              this.contextBroadcast.handleEvent({ ...event, data: event.data.slice(0, event.index) });
+              break;
+            }
+            case 'end': {
+              this.contextBroadcast.drawClear(this.canvasSizeAsLine);
+              this.handleResult(event);
+              break;
+            }
           }
         }
         this.document.defaultView?.requestAnimationFrame(step);
@@ -215,13 +216,13 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
   }
 
   emitMove(data: number[], options = this.drawOptions) {
+    this.contextEmit.drawClear(this.canvasSizeAsLine);
     switch (this.drawMode) {
       case 'brush': {
-        this.contextEmit.drawLine(data.slice(-4) as CanvasLine, options);
+        this.contextEmit.drawLineSerie(data, options);
         break;
       }
       case 'line': {
-        this.contextEmit.drawClear(this.canvasSizeAsLine);
         this.contextEmit.drawLine([...data.slice(0, 2), ...data.slice(-2)] as CanvasLine, options);
         break;
       }
