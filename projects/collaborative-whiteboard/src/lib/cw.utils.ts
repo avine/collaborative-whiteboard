@@ -1,5 +1,6 @@
 import { defaultOwner, getDefaultColors } from './cw.config';
 import {
+  CanvasLineSerie,
   CutRange,
   CutRangeArg,
   DrawClear,
@@ -7,6 +8,8 @@ import {
   DrawEventAnimated,
   DrawEventsBroadcast,
   DrawFillRect,
+  DrawLine,
+  DrawLineSerie,
   DrawType,
 } from './cw.types';
 
@@ -35,20 +38,12 @@ export const mapToDrawEventsAnimated = (events: DrawEvent[]): (DrawEvent | DrawE
   const result: (DrawEvent | DrawEventAnimated)[] = [];
   events.forEach((event) => {
     switch (event.type) {
+      case 'line': {
+        result.push(...animateDrawLine(event));
+        break;
+      }
       case 'lineSerie': {
-        const animatedLength = event.data.length / 2;
-        const animated: DrawEventAnimated[] = Array(animatedLength)
-          .fill(undefined)
-          .map((_, index) => {
-            // Note: for strong typing, we need to define the variable to return.
-            const animatedStep: DrawEventAnimated = { ...event, step: 'progress', index: 2 * index + 2 };
-            return animatedStep;
-          });
-        // Update first event
-        animated[0] = { ...animated[0], step: 'start' };
-        // Update last event
-        animated[animatedLength - 1] = { ...animated[animatedLength - 1], step: 'end' };
-        result.push(...animated);
+        result.push(...animateDrawLineSerie(event));
         break;
       }
       default: {
@@ -60,10 +55,48 @@ export const mapToDrawEventsAnimated = (events: DrawEvent[]): (DrawEvent | DrawE
   return result;
 };
 
+export const animateDrawLine = (event: DrawLine): (DrawLine | DrawEventAnimated)[] => {
+  const DISTANCE_MIN = 50; // px
+  const STEP = 10; // px
+
+  const [fromX, fromY, toX, toY] = event.data;
+  const distance = Math.sqrt(Math.pow(Math.abs(toX - fromX), 2) + Math.pow(Math.abs(toY - fromY), 2)); // Pythagore
+  if (distance < DISTANCE_MIN) {
+    return [event];
+  }
+
+  const stepsCount = Math.floor(distance / STEP);
+  const stepX = (toX - fromX) / stepsCount;
+  const stepY = (toY - fromY) / stepsCount;
+
+  const events: (DrawLine | DrawEventAnimated)[] = [];
+  const data: CanvasLineSerie = [];
+  for (let i = 0; i < stepsCount; i++) {
+    data.push(Math.round(fromX + i * stepX), Math.round(fromY + i * stepY));
+    events.push({ ...event, type: 'lineSerie', data: [...data], animate: true });
+  }
+  events.push({ ...event, animate: false });
+  return events;
+};
+
+const animateDrawLineSerie = (event: DrawLineSerie): DrawEventAnimated[] => {
+  const animatedLength = event.data.length / 2;
+  return Array(animatedLength)
+    .fill(undefined)
+    .map((_, index) => {
+      // Note: for strong typing, we need to define the variable to return.
+      const animatedStep: DrawEventAnimated = {
+        ...event,
+        data: event.data.slice(0, 2 * index + 2),
+        animate: index !== animatedLength - 1,
+      };
+      return animatedStep;
+    });
+};
+
 export const isDrawEventAnimated = (event: DrawEvent | DrawEventAnimated): event is DrawEventAnimated => {
-  const step: keyof DrawEventAnimated = 'step';
-  const index: keyof DrawEventAnimated = 'index';
-  return step in event && index in event;
+  const animate: keyof DrawEventAnimated = 'animate';
+  return animate in event && [true, false].includes(event[animate]);
 };
 
 export const mapToDrawEventsBroadcast = (events: DrawEvent[], animate = false): DrawEventsBroadcast => ({

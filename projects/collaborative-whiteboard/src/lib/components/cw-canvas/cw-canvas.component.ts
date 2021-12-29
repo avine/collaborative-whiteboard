@@ -152,18 +152,11 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
             this.handleResult(event);
             continue;
           }
-          switch (event.step) {
-            case 'start':
-            case 'progress': {
-              this.contextBroadcast.drawClear(this.canvasSizeAsLine);
-              this.contextBroadcast.handleEvent({ ...event, data: event.data.slice(0, event.index) });
-              break;
-            }
-            case 'end': {
-              this.contextBroadcast.drawClear(this.canvasSizeAsLine);
-              this.handleResult(event);
-              break;
-            }
+          this.contextBroadcast.drawClear(this.canvasSizeAsLine);
+          if (event.animate) {
+            this.contextBroadcast.handleEvent(event);
+          } else {
+            this.handleResult(event);
           }
         }
         this.document.defaultView?.requestAnimationFrame(step);

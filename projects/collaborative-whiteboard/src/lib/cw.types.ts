@@ -65,7 +65,7 @@ export interface DrawClear extends DrawBase {
 
 export type DrawEvent = DrawPoint | DrawLine | DrawLineSerie | DrawFillRect | DrawClear;
 
-export type DrawEventAnimated = DrawLineSerie & { step: 'start' | 'progress' | 'end'; index: number };
+export type DrawEventAnimated = (DrawLine | DrawLineSerie) & ({ animate: boolean });
 
 export interface DrawEventsBroadcast {
   animate: boolean;
