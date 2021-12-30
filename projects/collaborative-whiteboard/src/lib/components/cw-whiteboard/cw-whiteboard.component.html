@@ -31,16 +31,16 @@
     <cw-icon icon="fillBackground"></cw-icon>
   </cw-tool>
 
+  <cw-tool [content]="drawSettingsTool" title="Draw settings" [(active)]="showDrawSettingsTool">
+    <cw-icon icon="palette"></cw-icon>
+  </cw-tool>
+
   <cw-tool
     *ngIf="service.drawMode$ | async as drawMode"
     [title]="drawMode | titlecase"
     (activeChange)="switchDrawMode()"
   >
     <cw-icon [icon]="drawMode"></cw-icon>
-  </cw-tool>
-
-  <cw-tool [content]="drawSettingsTool" title="Draw settings" [(active)]="showDrawSettingsTool">
-    <cw-icon icon="palette"></cw-icon>
   </cw-tool>
 
   <cw-tool title="Undo" (activeChange)="service.undo()">
