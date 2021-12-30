@@ -7,7 +7,7 @@ export interface FillBackground {
   opacity: number;
 }
 
-export type DrawMode = 'brush' | 'line';
+export type DrawMode = 'brush' | 'line' | 'rect' /* | 'arc' */;
 
 export interface CanvasSize {
   width: number;
@@ -20,7 +20,7 @@ export type CanvasLine = [number, number, number, number];
 
 export type CanvasLineSerie = number[];
 
-export type DrawType = 'point' | 'line' | 'lineSerie' | 'fillRect' | 'clear';
+export type DrawType = 'point' | 'line' | 'lineSerie' | 'rect' | 'fillRect' | 'clear';
 
 export interface DrawOptions {
   lineWidth: number;
@@ -52,6 +52,12 @@ export interface DrawLineSerie extends DrawBase {
   options: DrawOptions;
 }
 
+export interface DrawRect extends DrawBase {
+  type: 'rect';
+  data: CanvasLine;
+  options: DrawOptions;
+}
+
 export interface DrawFillRect extends DrawBase {
   type: 'fillRect';
   data?: CanvasLine;
@@ -63,9 +69,9 @@ export interface DrawClear extends DrawBase {
   data?: CanvasLine;
 }
 
-export type DrawEvent = DrawPoint | DrawLine | DrawLineSerie | DrawFillRect | DrawClear;
+export type DrawEvent = DrawPoint | DrawLine | DrawLineSerie | DrawRect | DrawFillRect | DrawClear;
 
-export type DrawEventAnimated = (DrawLine | DrawLineSerie) & ({ animate: boolean });
+export type DrawEventAnimated = (DrawLine | DrawLineSerie | DrawRect) & ({ animate: boolean });
 
 export interface DrawEventsBroadcast {
   animate: boolean;

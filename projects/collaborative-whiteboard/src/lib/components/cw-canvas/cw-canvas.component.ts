@@ -22,16 +22,10 @@ import {
   DrawEventAnimated,
   DrawEventsBroadcast,
   DrawOptions,
+  DrawType,
 } from '../../cw.types';
-import {
-  getClearEvent,
-  getEventUID,
-  inferDrawType,
-  isDrawEventAnimated,
-  keepDrawEventsAfterClearEvent,
-  mapToDrawEventsAnimated,
-  translate,
-} from '../../cw.utils';
+import { getClearEvent, getEventUID, inferDrawType, keepDrawEventsAfterClearEvent, translate } from '../../cw.utils';
+import { isDrawEventAnimated, mapToDrawEventsAnimated } from '../../utils/animation';
 import { CanvasContext } from '../../utils/canvas/context';
 
 @Component({
@@ -160,6 +154,7 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
           }
         }
         this.document.defaultView?.requestAnimationFrame(step);
+        // setTimeout(() => this.document.defaultView?.requestAnimationFrame(step), 50);
       };
       this.document.defaultView.requestAnimationFrame(step);
     }
@@ -183,6 +178,10 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
       }
       case 'lineSerie': {
         this.contextResult.drawLineSerie(event.data, event.options);
+        break;
+      }
+      case 'rect': {
+        this.contextResult.drawRect(event.data, event.options);
         break;
       }
       case 'fillRect': {
@@ -219,6 +218,10 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
         this.contextEmit.drawLine([...data.slice(0, 2), ...data.slice(-2)] as CanvasLine, options);
         break;
       }
+      case 'rect': {
+        this.contextEmit.drawRect([...data.slice(0, 2), ...data.slice(-2)] as CanvasLine, options);
+        break;
+      }
     }
   }
 
@@ -234,16 +237,20 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
         event = this.getCompleteEvent([...data.slice(0, 2), ...data.slice(-2)], options);
         break;
       }
+      case 'rect': {
+        event = this.getCompleteEvent([...data.slice(0, 2), ...data.slice(-2)], options, 'rect'); // FIXME: `forceType` parameter is a code smell!
+        break;
+      }
     }
     this.handleResult(event);
     this.draw.emit(translate(event, ...this.getCanvasCenter('emit')));
   }
 
-  private getCompleteEvent(data: number[], options: DrawOptions): DrawEvent {
+  private getCompleteEvent(data: number[], options: DrawOptions, forceDrawType?: DrawType): DrawEvent {
     return {
       id: getEventUID(),
       owner: this.owner,
-      type: inferDrawType(data.length),
+      type: forceDrawType ?? inferDrawType(data.length),
       data,
       options: { ...options }, // Prevent `drawOptions` mutation from outside
     } as DrawEvent;

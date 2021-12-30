@@ -36,6 +36,18 @@ export class CanvasContext {
         this.drawLineSerie(event.data, event.options);
         break;
       }
+      case 'rect': {
+        this.drawRect(event.data, event.options);
+        break;
+      }
+      /*case 'fillRect': {
+        this.drawFillRect(event.data, event.options);
+        break;
+      }
+      case 'clear': {
+        this.drawClear(event.data);
+        break;
+      }*/
       default: {
         console.error('Unhandled event', event);
         break;
@@ -69,6 +81,14 @@ export class CanvasContext {
     for (let i = 4; i < serie.length; i = i + 2) {
       this.context.lineTo(serie[i] + offset, serie[i + 1] + offset);
     }
+    this.context.stroke();
+  }
+
+  drawRect([fromX, fromY, toX, toY]: CanvasLine, options: DrawOptions) {
+    this.applyDrawOptions(options);
+    const offset = this.getOffset(options);
+    this.context.beginPath();
+    this.context.rect(fromX + offset, fromY + offset, toX - fromX + offset, toY - fromY + offset);
     this.context.stroke();
   }
 

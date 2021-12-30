@@ -12,7 +12,7 @@ import {
   Output,
 } from '@angular/core';
 
-import { CanvasLine, CanvasPoint } from '../../cw.types';
+import { CanvasPoint } from '../../cw.types';
 
 @Directive({
   selector: '[cwPointer]',

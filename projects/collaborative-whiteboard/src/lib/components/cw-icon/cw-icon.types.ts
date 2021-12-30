@@ -2,6 +2,8 @@ export type IconAlias =
   | 'fillBackground'
   | 'brush'
   | 'line'
+  | 'rect'
+  | 'arc'
   | 'palette'
   | 'undo'
   | 'redo'

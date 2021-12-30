@@ -1,17 +1,5 @@
 import { defaultOwner, getDefaultColors } from './cw.config';
-import {
-  CanvasLineSerie,
-  CutRange,
-  CutRangeArg,
-  DrawClear,
-  DrawEvent,
-  DrawEventAnimated,
-  DrawEventsBroadcast,
-  DrawFillRect,
-  DrawLine,
-  DrawLineSerie,
-  DrawType,
-} from './cw.types';
+import { CutRange, CutRangeArg, DrawClear, DrawEvent, DrawEventsBroadcast, DrawFillRect, DrawType } from './cw.types';
 
 export const getColorsMatrix = (colors = getDefaultColors(), maxColorsPerRow = 6) => {
   const matrix: string[][] = [];
@@ -33,71 +21,6 @@ export const getClearEvent = (owner = defaultOwner): DrawClear => ({
   owner,
   type: 'clear',
 });
-
-export const mapToDrawEventsAnimated = (events: DrawEvent[]): (DrawEvent | DrawEventAnimated)[] => {
-  const result: (DrawEvent | DrawEventAnimated)[] = [];
-  events.forEach((event) => {
-    switch (event.type) {
-      case 'line': {
-        result.push(...animateDrawLine(event));
-        break;
-      }
-      case 'lineSerie': {
-        result.push(...animateDrawLineSerie(event));
-        break;
-      }
-      default: {
-        result.push(event);
-        break;
-      }
-    }
-  });
-  return result;
-};
-
-export const animateDrawLine = (event: DrawLine): (DrawLine | DrawEventAnimated)[] => {
-  const DISTANCE_MIN = 50; // px
-  const STEP = 10; // px
-
-  const [fromX, fromY, toX, toY] = event.data;
-  const distance = Math.sqrt(Math.pow(Math.abs(toX - fromX), 2) + Math.pow(Math.abs(toY - fromY), 2)); // Pythagore
-  if (distance < DISTANCE_MIN) {
-    return [event];
-  }
-
-  const stepsCount = Math.floor(distance / STEP);
-  const stepX = (toX - fromX) / stepsCount;
-  const stepY = (toY - fromY) / stepsCount;
-
-  const events: (DrawLine | DrawEventAnimated)[] = [];
-  const data: CanvasLineSerie = [];
-  for (let i = 0; i < stepsCount; i++) {
-    data.push(Math.round(fromX + i * stepX), Math.round(fromY + i * stepY));
-    events.push({ ...event, type: 'lineSerie', data: [...data], animate: true });
-  }
-  events.push({ ...event, animate: false });
-  return events;
-};
-
-const animateDrawLineSerie = (event: DrawLineSerie): DrawEventAnimated[] => {
-  const animatedLength = event.data.length / 2;
-  return Array(animatedLength)
-    .fill(undefined)
-    .map((_, index) => {
-      // Note: for strong typing, we need to define the variable to return.
-      const animatedStep: DrawEventAnimated = {
-        ...event,
-        data: event.data.slice(0, 2 * index + 2),
-        animate: index !== animatedLength - 1,
-      };
-      return animatedStep;
-    });
-};
-
-export const isDrawEventAnimated = (event: DrawEvent | DrawEventAnimated): event is DrawEventAnimated => {
-  const animate: keyof DrawEventAnimated = 'animate';
-  return animate in event && [true, false].includes(event[animate]);
-};
 
 export const mapToDrawEventsBroadcast = (events: DrawEvent[], animate = false): DrawEventsBroadcast => ({
   animate,
