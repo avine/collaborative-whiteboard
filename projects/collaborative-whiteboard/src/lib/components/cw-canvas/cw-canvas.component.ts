@@ -32,8 +32,8 @@ import {
   keepDrawEventsAfterClearEvent,
   translate,
 } from '../../cw.utils';
-import { isDrawEventAnimated, mapToDrawEventsAnimated } from '../../utils/animation';
-import { CanvasContext } from '../../utils/canvas/context';
+import { CanvasContext } from '../../utils/canvas-context';
+import { isDrawEventAnimated, mapToDrawEventsAnimated } from '../../utils/events-animation';
 
 @Component({
   selector: 'cw-canvas',

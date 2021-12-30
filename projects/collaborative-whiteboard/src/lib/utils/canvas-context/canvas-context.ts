@@ -1,25 +1,7 @@
 import { getDefaultCanvasSize } from '../../cw.config';
 import { CanvasLine, CanvasLineSerie, CanvasPoint, CanvasSize, DrawEvent, DrawOptions } from '../../cw.types';
-
-interface ICanvasContext {
-  drawPoint: (data: CanvasPoint, options: DrawOptions) => void;
-  drawLine: (data: CanvasLine, options: DrawOptions) => void;
-  drawLineSerie: (data: CanvasLineSerie, options: DrawOptions) => void;
-  drawRectangle: (data: CanvasLine, options: DrawOptions) => void;
-  drawEllipse: (data: CanvasLine, options: DrawOptions) => void;
-  drawFillRect: (data: CanvasLine, options: DrawOptions) => void;
-  drawClear: (data: CanvasLine, options: DrawOptions) => void;
-}
-
-const getCanvasContextMethod: Record<DrawEvent['type'], keyof ICanvasContext> = {
-  point: 'drawPoint',
-  line: 'drawLine',
-  lineSerie: 'drawLineSerie',
-  rectangle: 'drawRectangle',
-  ellipse: 'drawEllipse',
-  fillRect: 'drawFillRect',
-  clear: 'drawClear',
-};
+import { ICanvasContext } from './canvas.context.types';
+import { getCanvasContextMethod } from './canvas.context.utils';
 
 export class CanvasContext implements ICanvasContext {
   private canvasSize = getDefaultCanvasSize();
