@@ -1,5 +1,14 @@
 import { defaultOwner, getDefaultColors } from './cw.config';
-import { CutRange, CutRangeArg, DrawClear, DrawEvent, DrawEventsBroadcast, DrawFillRect, DrawType } from './cw.types';
+import {
+  CanvasLine,
+  CutRange,
+  CutRangeArg,
+  DrawClear,
+  DrawEvent,
+  DrawEventsBroadcast,
+  DrawFillRect,
+  DrawType,
+} from './cw.types';
 
 export const getColorsMatrix = (colors = getDefaultColors(), maxColorsPerRow = 6) => {
   const matrix: string[][] = [];
@@ -9,17 +18,24 @@ export const getColorsMatrix = (colors = getDefaultColors(), maxColorsPerRow = 6
   return matrix;
 };
 
+export const getEmptyCanvasLine = (): CanvasLine => [0, 0, 0, 0];
+
+export const isEmptyCanvasLine = ([fromX, fromY, toX, toY]: CanvasLine) => toX === fromX && toY === fromY;
+
 export const getFillRectEvent = (color: string, opacity = 1, owner = defaultOwner): DrawFillRect => ({
   id: getEventUID(),
   owner,
   type: 'fillRect',
-  options: { lineWidth: 0, color, opacity },
+  data: getEmptyCanvasLine(),
+  options: { lineWidth: 0, color, opacity }, // Note: `lineWidth` is not relevant in this case
 });
 
 export const getClearEvent = (owner = defaultOwner): DrawClear => ({
   id: getEventUID(),
   owner,
   type: 'clear',
+  data: getEmptyCanvasLine(),
+  options: { lineWidth: 0, color: '', opacity: 0 }, // Note: `options` is not relevant in this case
 });
 
 export const mapToDrawEventsBroadcast = (events: DrawEvent[], animate = false): DrawEventsBroadcast => ({

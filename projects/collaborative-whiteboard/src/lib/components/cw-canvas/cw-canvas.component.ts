@@ -24,7 +24,14 @@ import {
   DrawOptions,
   DrawType,
 } from '../../cw.types';
-import { getClearEvent, getEventUID, inferDrawType, keepDrawEventsAfterClearEvent, translate } from '../../cw.utils';
+import {
+  getClearEvent,
+  getEventUID,
+  inferDrawType,
+  isEmptyCanvasLine,
+  keepDrawEventsAfterClearEvent,
+  translate,
+} from '../../cw.utils';
 import { isDrawEventAnimated, mapToDrawEventsAnimated } from '../../utils/animation';
 import { CanvasContext } from '../../utils/canvas/context';
 
@@ -183,35 +190,10 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
   }
 
   private handleResult(event: DrawEvent) {
-    switch (event.type) {
-      case 'point': {
-        this.contextResult.drawPoint(event.data, event.options);
-        break;
-      }
-      case 'line': {
-        this.contextResult.drawLine(event.data, event.options);
-        break;
-      }
-      case 'lineSerie': {
-        this.contextResult.drawLineSerie(event.data, event.options);
-        break;
-      }
-      case 'rect': {
-        this.contextResult.drawRect(event.data, event.options);
-        break;
-      }
-      case 'fillRect': {
-        this.contextResult.drawFillRect(event.data ?? this.canvasSizeAsLine, event.options);
-        break;
-      }
-      case 'clear': {
-        this.contextResult.drawClear(event.data ?? this.canvasSizeAsLine);
-        break;
-      }
-      default: {
-        console.error('Unhandled event', event);
-        break;
-      }
+    if ((event.type === 'fillRect' || event.type === 'clear') && isEmptyCanvasLine(event.data)) {
+      this.contextResult.handleEvent({ ...event, data: this.canvasSizeAsLine });
+    } else {
+      this.contextResult.handleEvent(event);
     }
   }
 

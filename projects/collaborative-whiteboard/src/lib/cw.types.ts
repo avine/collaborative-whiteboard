@@ -32,41 +32,37 @@ export interface DrawBase {
   id: string;
   owner: Owner;
   type: DrawType;
+  options: DrawOptions;
 }
 
 export interface DrawPoint extends DrawBase {
   type: 'point';
   data: CanvasPoint;
-  options: DrawOptions;
 }
 
 export interface DrawLine extends DrawBase {
   type: 'line';
   data: CanvasLine;
-  options: DrawOptions;
 }
 
 export interface DrawLineSerie extends DrawBase {
   type: 'lineSerie';
   data: CanvasLineSerie;
-  options: DrawOptions;
 }
 
 export interface DrawRect extends DrawBase {
   type: 'rect';
   data: CanvasLine;
-  options: DrawOptions;
 }
 
 export interface DrawFillRect extends DrawBase {
   type: 'fillRect';
-  data?: CanvasLine;
-  options: DrawOptions; // Note: `lineWidth` is not relevant in this case.
+  data: CanvasLine;
 }
 
 export interface DrawClear extends DrawBase {
   type: 'clear';
-  data?: CanvasLine;
+  data: CanvasLine;
 }
 
 export type DrawEvent = DrawPoint | DrawLine | DrawLineSerie | DrawRect | DrawFillRect | DrawClear;

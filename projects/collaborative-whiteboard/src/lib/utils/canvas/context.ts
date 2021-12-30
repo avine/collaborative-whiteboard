@@ -1,7 +1,25 @@
 import { getDefaultCanvasSize } from '../../cw.config';
 import { CanvasLine, CanvasLineSerie, CanvasPoint, CanvasSize, DrawEvent, DrawOptions } from '../../cw.types';
 
-export class CanvasContext {
+interface ICanvasContext {
+  drawPoint: (data: CanvasPoint, options: DrawOptions) => void;
+  drawLine: (data: CanvasLine, options: DrawOptions) => void;
+  drawLineSerie: (data: CanvasLineSerie, options: DrawOptions) => void;
+  drawRect: (data: CanvasLine, options: DrawOptions) => void;
+  drawFillRect: (data: CanvasLine, options: DrawOptions) => void;
+  drawClear: (data: CanvasLine, options: DrawOptions) => void;
+}
+
+const getCanvasContextMethod: Record<DrawEvent['type'], keyof ICanvasContext> = {
+  point: 'drawPoint',
+  line: 'drawLine',
+  lineSerie: 'drawLineSerie',
+  rect: 'drawRect',
+  fillRect: 'drawFillRect',
+  clear: 'drawClear',
+};
+
+export class CanvasContext implements ICanvasContext {
   private canvasSize = getDefaultCanvasSize();
 
   constructor(private context: CanvasRenderingContext2D) {}
@@ -23,36 +41,7 @@ export class CanvasContext {
   }
 
   handleEvent(event: DrawEvent) {
-    switch (event.type) {
-      case 'point': {
-        this.drawPoint(event.data, event.options);
-        break;
-      }
-      case 'line': {
-        this.drawLine(event.data, event.options);
-        break;
-      }
-      case 'lineSerie': {
-        this.drawLineSerie(event.data, event.options);
-        break;
-      }
-      case 'rect': {
-        this.drawRect(event.data, event.options);
-        break;
-      }
-      /*case 'fillRect': {
-        this.drawFillRect(event.data, event.options);
-        break;
-      }
-      case 'clear': {
-        this.drawClear(event.data);
-        break;
-      }*/
-      default: {
-        console.error('Unhandled event', event);
-        break;
-      }
-    }
+    this[getCanvasContextMethod[event.type]](event.data as any, event.options);
   }
 
   drawPoint([x, y]: CanvasPoint, options: DrawOptions) {
@@ -97,7 +86,7 @@ export class CanvasContext {
     this.context.fillRect(...canvasLine);
   }
 
-  drawClear(canvasLine: CanvasLine) {
+  drawClear(canvasLine: CanvasLine, _?: DrawOptions) { // Note: keep the second parameter for signature consistency
     this.context.clearRect(...canvasLine);
   }
 
