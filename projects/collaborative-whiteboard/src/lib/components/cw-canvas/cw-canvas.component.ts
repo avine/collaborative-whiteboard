@@ -128,6 +128,7 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
       }
     } else {
       const steps = this.broadcastEventsBuffer.length;
+      const frameRate = this.getAnimFrameRate();
       const step = () => {
         if (id !== this.broadcastId) {
           return;
@@ -139,8 +140,8 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
           this.changeDetectorRef.detectChanges();
           return;
         }
-        const count = this.flushCount(this.broadcastEventsBuffer.length, steps);
-        for (let i = 0; i < count; i++) {
+        const flushCount = this.getAnimFlushCount(this.broadcastEventsBuffer.length, steps);
+        for (let i = 0; i < flushCount; i++) {
           const event = this.broadcastEventsBuffer.shift() as DrawEvent | DrawEventAnimated;
           if (!isDrawEventAnimated(event)) {
             this.handleResult(event);
@@ -153,14 +154,29 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
             this.handleResult(event);
           }
         }
-        this.document.defaultView?.requestAnimationFrame(step);
-        // setTimeout(() => this.document.defaultView?.requestAnimationFrame(step), 50);
+        if (frameRate) {
+          setTimeout(() => this.document.defaultView?.requestAnimationFrame(step), frameRate);
+        } else {
+          this.document.defaultView?.requestAnimationFrame(step);
+        }
       };
       this.document.defaultView.requestAnimationFrame(step);
     }
   }
 
-  private flushCount(remain: number, total: number) {
+  private getAnimFrameRate(): number {
+    // According to `getAnimFlushCount` implementation, when `broadcastEventsBuffer`
+    // is of length 475, then `expectedAnimDuration` is about 100.
+    const expectedFrameCount = this.broadcastEventsBuffer.length / 4.75;
+    // Note that in reality, the animation will take more time to complete...
+    const expectedAnimDuration = 1500; // ms
+    const frameRate = expectedAnimDuration / expectedFrameCount;
+    const isTooSlow = frameRate > 60;
+    const isTooFast = frameRate < 12; // around 90Hz
+    return isTooSlow || isTooFast ? 0 : frameRate;
+  }
+
+  private getAnimFlushCount(remain: number, total: number) {
     // Let's do some easing!
     const count = Math.round(Math.sin((remain / total) * Math.PI) * 9) + 1;
     return Math.min(count, remain);

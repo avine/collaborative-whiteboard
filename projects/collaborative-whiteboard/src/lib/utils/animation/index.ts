@@ -1,8 +1,17 @@
-import { CanvasLine, CanvasLineSerie, DrawEvent, DrawEventAnimated, DrawLine, DrawLineSerie, DrawRect } from '../../cw.types';
+import {
+  CanvasLine,
+  CanvasLineSerie,
+  CanvasPoint,
+  DrawEvent,
+  DrawEventAnimated,
+  DrawLine,
+  DrawLineSerie,
+  DrawRect,
+} from '../../cw.types';
 
 const mapCanvasLineToLineSerie = (canvasLine: CanvasLine): CanvasLineSerie => {
   const DISTANCE_MIN = 30; // px
-  const STEP = 10; // px
+  const STEP = 5; // px
 
   const [fromX, fromY, toX, toY] = canvasLine;
   const distance = Math.sqrt(Math.pow(Math.abs(toX - fromX), 2) + Math.pow(Math.abs(toY - fromY), 2)); // Pythagore
@@ -14,20 +23,14 @@ const mapCanvasLineToLineSerie = (canvasLine: CanvasLine): CanvasLineSerie => {
   const stepX = (toX - fromX) / stepsCount;
   const stepY = (toY - fromY) / stepsCount;
 
+  const round = (n: number) => Math.round(n * 10) / 10;
+
   const canvasLineSerie: CanvasLineSerie = [];
   for (let i = 0; i < stepsCount; i++) {
-    canvasLineSerie.push(Math.round(fromX + i * stepX), Math.round(fromY + i * stepY));
+    canvasLineSerie.push(round(fromX + i * stepX), round(fromY + i * stepY));
   }
   canvasLineSerie.push(...canvasLine.slice(-2));
   return canvasLineSerie;
-};
-
-const animateCanvasLineSerie = (canvasLineSerie: CanvasLineSerie): CanvasLineSerie[] => {
-  const result: CanvasLineSerie[] = [];
-  for (let i = 4; i <= canvasLineSerie.length; i += 2) {
-    result.push(canvasLineSerie.slice(0, i));
-  }
-  return result;
 };
 
 const smartConcatCanvasLineSeries = (...canvasLineSeries: CanvasLineSerie[]): CanvasLineSerie => {
@@ -44,14 +47,36 @@ const smartConcatCanvasLineSeries = (...canvasLineSeries: CanvasLineSerie[]): Ca
   return result;
 };
 
+const buildBrushAnimation = (canvasLineSerie: CanvasLineSerie): CanvasLineSerie[] => {
+  const result: CanvasLineSerie[] = [];
+  for (let i = 4; i <= canvasLineSerie.length; i += 2) {
+    result.push(canvasLineSerie.slice(0, i));
+  }
+  return result;
+};
+
+const buildLineAnimation = (canvasLineSerie: CanvasLineSerie): CanvasLine[] => {
+  const result: CanvasLine[] = [];
+  for (let i = 4; i <= canvasLineSerie.length; i += 2) {
+    result.push([...(canvasLineSerie.slice(0, 2) as CanvasPoint), ...(canvasLineSerie.slice(i - 2, i) as CanvasPoint)]);
+  }
+  return result;
+};
+
 const animateDrawLineSerie = (event: DrawLineSerie): DrawEventAnimated[] => {
-  const result = animateCanvasLineSerie(event.data).map((data) => ({ ...event, data, animate: true }));
+  const result = buildBrushAnimation(event.data).map((data) => ({ ...event, data, animate: true }));
   result.push({ ...event, animate: false });
   return result;
 };
 
 const animateDrawLine = (event: DrawLine): DrawEventAnimated[] => {
-  return animateDrawLineSerie({ ...event, type: 'lineSerie', data: mapCanvasLineToLineSerie(event.data) });
+  const result: DrawEventAnimated[] = buildLineAnimation(mapCanvasLineToLineSerie(event.data)).map((data) => ({
+    ...event,
+    data,
+    animate: true,
+  }));
+  result.push({ ...event, animate: false });
+  return result;
 };
 
 const animateDrawRect = (event: DrawRect): DrawEventAnimated[] => {
@@ -62,12 +87,15 @@ const animateDrawRect = (event: DrawRect): DrawEventAnimated[] => {
     mapCanvasLineToLineSerie([toX, toY, fromX, toY]),
     mapCanvasLineToLineSerie([fromX, toY, fromX, fromY])
   );
-  const result = animateCanvasLineSerie(canvasLineSerie).map((data) => ({
-    ...event,
-    type: 'lineSerie',
-    data,
-    animate: true,
-  } as DrawEventAnimated));
+  const result = buildBrushAnimation(canvasLineSerie).map(
+    (data) =>
+      ({
+        ...event,
+        type: 'lineSerie',
+        data,
+        animate: true,
+      } as DrawEventAnimated)
+  );
   result.push({ ...event, animate: false });
   return result;
 };
