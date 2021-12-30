@@ -27,7 +27,7 @@ import {
 import {
   getClearEvent,
   getEventUID,
-  inferDrawType,
+  inferBasicDrawType,
   isEmptyCanvasLine,
   keepDrawEventsAfterClearEvent,
   translate,
@@ -131,6 +131,7 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
     const id = ++this.broadcastId; // Do this on top (and NOT inside the `else` statement)
     if (!this.broadcast.animate || !this.document.defaultView) {
       while (this.broadcastEventsBuffer.length) {
+        this.contextBroadcast.drawClear(this.canvasSizeAsLine);
         this.handleResult(this.broadcastEventsBuffer.shift() as DrawEvent);
       }
     } else {
@@ -240,11 +241,11 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
         break;
       }
       case 'rectangle': {
-        event = this.getCompleteEvent([...data.slice(0, 2), ...data.slice(-2)], options, 'rectangle'); // FIXME: `forceType` parameter is a code smell!
+        event = this.getCompleteEvent([...data.slice(0, 2), ...data.slice(-2)], options, 'rectangle');
         break;
       }
       case 'ellipse': {
-        event = this.getCompleteEvent([...data.slice(0, 2), ...data.slice(-2)], options, 'ellipse'); // FIXME: `forceType` parameter is a code smell!
+        event = this.getCompleteEvent([...data.slice(0, 2), ...data.slice(-2)], options, 'ellipse');
         break;
       }
     }
@@ -256,7 +257,7 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
     return {
       id: getEventUID(),
       owner: this.owner,
-      type: forceDrawType ?? inferDrawType(data.length),
+      type: forceDrawType ?? inferBasicDrawType(data.length),
       data,
       options: { ...options }, // Prevent `drawOptions` mutation from outside
     } as DrawEvent;
