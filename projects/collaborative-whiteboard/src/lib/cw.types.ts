@@ -7,7 +7,7 @@ export interface FillBackground {
   opacity: number;
 }
 
-export type DrawMode = 'brush' | 'line' | 'rect' /* | 'arc' */;
+export type DrawMode = 'brush' | 'line' | 'rectangle' | 'ellipse';
 
 export interface CanvasSize {
   width: number;
@@ -20,12 +20,13 @@ export type CanvasLine = [number, number, number, number];
 
 export type CanvasLineSerie = number[];
 
-export type DrawType = 'point' | 'line' | 'lineSerie' | 'rect' | 'fillRect' | 'clear';
+export type DrawType = 'point' | 'line' | 'lineSerie' | 'rectangle' | 'ellipse' | 'fillRect' | 'clear';
 
 export interface DrawOptions {
   lineWidth: number;
   color: string;
   opacity: number;
+  angle?: number;
 }
 
 export interface DrawBase {
@@ -50,8 +51,14 @@ export interface DrawLineSerie extends DrawBase {
   data: CanvasLineSerie;
 }
 
-export interface DrawRect extends DrawBase {
-  type: 'rect';
+export interface DrawRectangle extends DrawBase {
+  type: 'rectangle';
+  data: CanvasLine;
+}
+
+export interface DrawEllipse extends DrawBase {
+  type: 'ellipse';
+  options: DrawOptions;
   data: CanvasLine;
 }
 
@@ -65,9 +72,9 @@ export interface DrawClear extends DrawBase {
   data: CanvasLine;
 }
 
-export type DrawEvent = DrawPoint | DrawLine | DrawLineSerie | DrawRect | DrawFillRect | DrawClear;
+export type DrawEvent = DrawPoint | DrawLine | DrawLineSerie | DrawRectangle | DrawEllipse | DrawFillRect | DrawClear;
 
-export type DrawEventAnimated = (DrawLine | DrawLineSerie | DrawRect) & ({ animate: boolean });
+export type DrawEventAnimated = (DrawLine | DrawLineSerie | DrawRectangle | DrawEllipse) & ({ animate: boolean });
 
 export interface DrawEventsBroadcast {
   animate: boolean;

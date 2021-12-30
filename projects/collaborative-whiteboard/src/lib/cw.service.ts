@@ -80,7 +80,7 @@ export class CwService {
   }
 
   switchDrawMode() {
-    const modes: DrawMode[] = ['brush', 'line', 'rect'];
+    const modes: DrawMode[] = ['brush', 'line', 'rectangle', 'ellipse'];
     this.drawMode = modes[(modes.indexOf(this.drawMode$$.value) + 1) % modes.length];
   }
 

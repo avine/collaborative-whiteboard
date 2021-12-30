@@ -2,24 +2,28 @@ import {
   CanvasLine,
   CanvasLineSerie,
   CanvasPoint,
+  DrawEllipse,
   DrawEvent,
   DrawEventAnimated,
   DrawLine,
   DrawLineSerie,
-  DrawRect,
+  DrawRectangle,
 } from '../../cw.types';
+
+export const getDiagonal = ([fromX, fromY, toX, toY]: CanvasLine): number =>
+  Math.sqrt(Math.pow(Math.abs(toX - fromX), 2) + Math.pow(Math.abs(toY - fromY), 2)); // Pythagore
 
 const mapCanvasLineToLineSerie = (canvasLine: CanvasLine): CanvasLineSerie => {
   const DISTANCE_MIN = 30; // px
   const STEP = 5; // px
 
-  const [fromX, fromY, toX, toY] = canvasLine;
-  const distance = Math.sqrt(Math.pow(Math.abs(toX - fromX), 2) + Math.pow(Math.abs(toY - fromY), 2)); // Pythagore
+  const distance = getDiagonal(canvasLine);
   if (distance < DISTANCE_MIN) {
     return canvasLine;
   }
 
   const stepsCount = Math.floor(distance / STEP);
+  const [fromX, fromY, toX, toY] = canvasLine;
   const stepX = (toX - fromX) / stepsCount;
   const stepY = (toY - fromY) / stepsCount;
 
@@ -79,7 +83,7 @@ const animateDrawLine = (event: DrawLine): DrawEventAnimated[] => {
   return result;
 };
 
-const animateDrawRect = (event: DrawRect): DrawEventAnimated[] => {
+const animateDrawRectangle = (event: DrawRectangle): DrawEventAnimated[] => {
   const [fromX, fromY, toX, toY] = event.data;
   const canvasLineSerie = smartConcatCanvasLineSeries(
     mapCanvasLineToLineSerie([fromX, fromY, toX, fromY]),
@@ -100,6 +104,23 @@ const animateDrawRect = (event: DrawRect): DrawEventAnimated[] => {
   return result;
 };
 
+const animateDrawEllipse = (event: DrawEllipse): DrawEventAnimated[] => {
+  const STEP = 5; // px
+
+  const [fromX, fromY, toX, toY] = event.data;
+  // Ellipse perimeter approximation
+  const perimeter =
+    2 * Math.PI * Math.sqrt((Math.pow(Math.abs(toX - fromX), 2) + Math.pow(Math.abs(toY - fromY), 2)) / 2);
+  const stepsCount = perimeter / STEP;
+
+  const result: DrawEventAnimated[] = [];
+  for (let i = 0; i < stepsCount; i += 1) {
+    result.push({ ...event, options: { ...event.options, angle: ((2 * Math.PI) / stepsCount) * i }, animate: true });
+  }
+  result.push({ ...event, animate: false });
+  return result;
+};
+
 export const mapToDrawEventsAnimated = (events: DrawEvent[]): (DrawEvent | DrawEventAnimated)[] => {
   const result: (DrawEvent | DrawEventAnimated)[] = [];
   events.forEach((event) => {
@@ -112,8 +133,12 @@ export const mapToDrawEventsAnimated = (events: DrawEvent[]): (DrawEvent | DrawE
         result.push(...animateDrawLineSerie(event));
         break;
       }
-      case 'rect': {
-        result.push(...animateDrawRect(event));
+      case 'rectangle': {
+        result.push(...animateDrawRectangle(event));
+        break;
+      }
+      case 'ellipse': {
+        result.push(...animateDrawEllipse(event));
         break;
       }
       default: {

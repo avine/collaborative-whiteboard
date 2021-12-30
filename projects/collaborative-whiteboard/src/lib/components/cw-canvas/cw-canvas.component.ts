@@ -216,8 +216,12 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
         this.contextEmit.drawLine([...data.slice(0, 2), ...data.slice(-2)] as CanvasLine, options);
         break;
       }
-      case 'rect': {
-        this.contextEmit.drawRect([...data.slice(0, 2), ...data.slice(-2)] as CanvasLine, options);
+      case 'rectangle': {
+        this.contextEmit.drawRectangle([...data.slice(0, 2), ...data.slice(-2)] as CanvasLine, options);
+        break;
+      }
+      case 'ellipse': {
+        this.contextEmit.drawEllipse([...data.slice(0, 2), ...data.slice(-2)] as CanvasLine, options);
         break;
       }
     }
@@ -235,8 +239,12 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
         event = this.getCompleteEvent([...data.slice(0, 2), ...data.slice(-2)], options);
         break;
       }
-      case 'rect': {
-        event = this.getCompleteEvent([...data.slice(0, 2), ...data.slice(-2)], options, 'rect'); // FIXME: `forceType` parameter is a code smell!
+      case 'rectangle': {
+        event = this.getCompleteEvent([...data.slice(0, 2), ...data.slice(-2)], options, 'rectangle'); // FIXME: `forceType` parameter is a code smell!
+        break;
+      }
+      case 'ellipse': {
+        event = this.getCompleteEvent([...data.slice(0, 2), ...data.slice(-2)], options, 'ellipse'); // FIXME: `forceType` parameter is a code smell!
         break;
       }
     }

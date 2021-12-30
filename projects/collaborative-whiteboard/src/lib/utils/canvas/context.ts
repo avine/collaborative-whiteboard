@@ -5,7 +5,8 @@ interface ICanvasContext {
   drawPoint: (data: CanvasPoint, options: DrawOptions) => void;
   drawLine: (data: CanvasLine, options: DrawOptions) => void;
   drawLineSerie: (data: CanvasLineSerie, options: DrawOptions) => void;
-  drawRect: (data: CanvasLine, options: DrawOptions) => void;
+  drawRectangle: (data: CanvasLine, options: DrawOptions) => void;
+  drawEllipse: (data: CanvasLine, options: DrawOptions) => void;
   drawFillRect: (data: CanvasLine, options: DrawOptions) => void;
   drawClear: (data: CanvasLine, options: DrawOptions) => void;
 }
@@ -14,7 +15,8 @@ const getCanvasContextMethod: Record<DrawEvent['type'], keyof ICanvasContext> = 
   point: 'drawPoint',
   line: 'drawLine',
   lineSerie: 'drawLineSerie',
-  rect: 'drawRect',
+  rectangle: 'drawRectangle',
+  ellipse: 'drawEllipse',
   fillRect: 'drawFillRect',
   clear: 'drawClear',
 };
@@ -41,7 +43,7 @@ export class CanvasContext implements ICanvasContext {
   }
 
   handleEvent(event: DrawEvent) {
-    this[getCanvasContextMethod[event.type]](event.data as any, event.options);
+    this[getCanvasContextMethod[event.type]](event.data as any, event.options as any);
   }
 
   drawPoint([x, y]: CanvasPoint, options: DrawOptions) {
@@ -73,11 +75,21 @@ export class CanvasContext implements ICanvasContext {
     this.context.stroke();
   }
 
-  drawRect([fromX, fromY, toX, toY]: CanvasLine, options: DrawOptions) {
+  drawRectangle([fromX, fromY, toX, toY]: CanvasLine, options: DrawOptions) {
     this.applyDrawOptions(options);
     const offset = this.getOffset(options);
     this.context.beginPath();
     this.context.rect(fromX + offset, fromY + offset, toX - fromX + offset, toY - fromY + offset);
+    this.context.stroke();
+  }
+
+  drawEllipse([fromX, fromY, toX, toY]: CanvasLine, options: DrawOptions) {
+    this.applyDrawOptions(options);
+    this.context.beginPath();
+    const radiusX = (toX - fromX) / 2;
+    const radiusY = (toY - fromY) / 2;
+    const angle = options.angle ?? 2 * Math.PI;
+    this.context.ellipse(fromX + radiusX, fromY + radiusY, Math.abs(radiusX), Math.abs(radiusY), 0, 0, angle);
     this.context.stroke();
   }
 
@@ -86,7 +98,8 @@ export class CanvasContext implements ICanvasContext {
     this.context.fillRect(...canvasLine);
   }
 
-  drawClear(canvasLine: CanvasLine, _?: DrawOptions) { // Note: keep the second parameter for signature consistency
+  drawClear(canvasLine: CanvasLine, _?: DrawOptions) {
+    // Note: keep the second parameter for signature consistency
     this.context.clearRect(...canvasLine);
   }
 
