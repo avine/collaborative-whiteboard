@@ -58,7 +58,6 @@ export interface DrawRectangle extends DrawBase {
 
 export interface DrawEllipse extends DrawBase {
   type: 'ellipse';
-  options: DrawOptions;
   data: CanvasLine;
 }
 

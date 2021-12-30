@@ -1,4 +1,4 @@
-import { defaultOwner, getDefaultColors } from './cw.config';
+import { DEFAULT_OWNER, getDefaultColors } from './cw.config';
 import {
   CanvasLine,
   CutRange,
@@ -22,7 +22,7 @@ export const getEmptyCanvasLine = (): CanvasLine => [0, 0, 0, 0];
 
 export const isEmptyCanvasLine = ([fromX, fromY, toX, toY]: CanvasLine) => toX === fromX && toY === fromY;
 
-export const getFillRectEvent = (color: string, opacity = 1, owner = defaultOwner): DrawFillRect => ({
+export const getFillRectEvent = (color: string, opacity = 1, owner = DEFAULT_OWNER): DrawFillRect => ({
   id: getEventUID(),
   owner,
   type: 'fillRect',
@@ -30,7 +30,7 @@ export const getFillRectEvent = (color: string, opacity = 1, owner = defaultOwne
   options: { lineWidth: 0, color, opacity }, // Note: `lineWidth` is not relevant in this case
 });
 
-export const getClearEvent = (owner = defaultOwner): DrawClear => ({
+export const getClearEvent = (owner = DEFAULT_OWNER): DrawClear => ({
   id: getEventUID(),
   owner,
   type: 'clear',

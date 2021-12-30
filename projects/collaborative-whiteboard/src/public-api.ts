@@ -14,7 +14,6 @@ export * from './lib/components/cw-color-picker/cw-color-picker.component';
 export * from './lib/components/cw-cut/cw-cut.component';
 export * from './lib/components/cw-draw-settings/cw-draw-settings.component';
 export * from './lib/components/cw-fill-background/cw-fill-background.component';
-
 export * from './lib/components/cw-icon/cw-icon.component';
 export * from './lib/components/cw-tool/cw-tool.component';
 export * from './lib/components/cw-tool-content/cw-tool-content.component';

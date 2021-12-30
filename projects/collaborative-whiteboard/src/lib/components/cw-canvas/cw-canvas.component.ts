@@ -14,7 +14,7 @@ import {
   ViewChild,
 } from '@angular/core';
 
-import { defaultDrawMode, defaultOwner, getDefaultCanvasSize, getDefaultDrawOptions } from '../../cw.config';
+import { DEFAULT_DRAW_MODE, DEFAULT_OWNER, getDefaultCanvasSize, getDefaultDrawOptions } from '../../cw.config';
 import {
   CanvasLine,
   CanvasPoint,
@@ -41,9 +41,9 @@ import { CanvasContext } from '../../utils/canvas/context';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CwCanvasComponent implements OnChanges, AfterViewInit {
-  @Input() owner = defaultOwner;
+  @Input() owner = DEFAULT_OWNER;
 
-  @Input() drawMode = defaultDrawMode;
+  @Input() drawMode = DEFAULT_DRAW_MODE;
 
   @Input() canvasSize = getDefaultCanvasSize();
 

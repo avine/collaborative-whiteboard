@@ -1,10 +1,10 @@
 import { CanvasSize, DrawMode, DrawOptions, FillBackground, Owner } from './cw.types';
 
-export const defaultOwner: Owner = 'guest';
+export const DEFAULT_OWNER: Owner = 'guest';
 
-export const defaultDrawMode: DrawMode = 'brush';
+export const DEFAULT_DRAW_MODE: DrawMode = 'brush';
 
-export const getDefaultFillBackground = (owner: Owner = defaultOwner): FillBackground => ({
+export const getDefaultFillBackground = (owner: Owner = DEFAULT_OWNER): FillBackground => ({
   owner,
   transparent: true,
   color: '',
@@ -35,7 +35,7 @@ export const getDefaultColors = () => [
   '189, 189, 189',
 ];
 
-export const defaultColor = '66, 165, 245';
+export const DEFAULT_COLOR = '66, 165, 245';
 
 // RGB colors (material 800)
 export const getDefaultFillBackgroundColor = () => [
@@ -66,6 +66,6 @@ export const getDefaultCanvasSize = (): CanvasSize => ({
 
 export const getDefaultDrawOptions = (): DrawOptions => ({
   lineWidth: 4,
-  color: defaultColor,
+  color: DEFAULT_COLOR,
   opacity: 1,
 });

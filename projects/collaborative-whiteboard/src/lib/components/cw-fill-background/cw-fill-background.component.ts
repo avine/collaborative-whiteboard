@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 
-import { defaultOwner, getDefaultFillBackground, getDefaultFillBackgroundColor } from '../../cw.config';
+import { DEFAULT_OWNER, getDefaultFillBackground, getDefaultFillBackgroundColor } from '../../cw.config';
 import { FillBackground, Owner } from '../../cw.types';
 import { getUID } from '../../cw.utils';
 
@@ -18,7 +18,7 @@ export class CwFillBackgroundComponent {
 
   @Output() fillBackgroundChange = new EventEmitter<FillBackground>();
 
-  private ownerSnapshot = defaultOwner;
+  private ownerSnapshot = DEFAULT_OWNER;
 
   colors = getDefaultFillBackgroundColor();
 

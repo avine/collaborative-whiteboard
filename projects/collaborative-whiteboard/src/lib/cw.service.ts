@@ -3,7 +3,7 @@ import { first, map } from 'rxjs/operators';
 
 import { Injectable } from '@angular/core';
 
-import { defaultDrawMode, defaultOwner, getDefaultFillBackground } from './cw.config';
+import { DEFAULT_DRAW_MODE, DEFAULT_OWNER, getDefaultFillBackground } from './cw.config';
 import {
   CutRange,
   CutRangeArg,
@@ -19,9 +19,9 @@ import { getClearEvent, getFillRectEvent, mapToDrawEventsBroadcast, normalizeCut
 
 @Injectable()
 export class CwService {
-  private owner$$ = new BehaviorSubject<Owner>(defaultOwner);
+  private owner$$ = new BehaviorSubject<Owner>(DEFAULT_OWNER);
 
-  private drawMode$$ = new BehaviorSubject<DrawMode>(defaultDrawMode);
+  private drawMode$$ = new BehaviorSubject<DrawMode>(DEFAULT_DRAW_MODE);
 
   private fillBackground$$ = new BehaviorSubject<FillBackground>(getDefaultFillBackground());
 
@@ -70,6 +70,9 @@ export class CwService {
 
   set owner(owner: Owner) {
     this.owner$$.next(owner);
+  }
+  get owner() {
+    return this.owner$$.value;
   }
 
   set drawMode(drawMode: DrawMode) {
