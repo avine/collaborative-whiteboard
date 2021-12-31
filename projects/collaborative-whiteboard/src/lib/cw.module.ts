@@ -16,10 +16,11 @@ import { CwToolContentComponent } from './components/tool-content/tool-content.c
 import { CwToolGroupComponent } from './components/tool-group/tool-group.component';
 import { CwToolComponent } from './components/tool/tool.component';
 import { CwWhiteboardComponent } from './components/whiteboard/whiteboard.component';
-import { StorageService } from './utils/storage';
+import { CwStorageService } from './services/storage';
 
 const features = [
   CwCanvasComponent,
+  CwPointerDirective,
   CwColorPickerComponent,
   CwCutComponent,
   CwDrawSettingsComponent,
@@ -29,7 +30,6 @@ const features = [
   CwToolGroupComponent,
   CwToolComponent,
   CwWhiteboardComponent,
-  CwPointerDirective,
 ];
 
 @NgModule({
@@ -40,7 +40,7 @@ const features = [
 })
 export class CwModule {
   static forRoot(): ModuleWithProviders<CwModule> {
-    return { ngModule: CwModule, providers: [StorageService] };
+    return { ngModule: CwModule, providers: [CwStorageService] };
   }
 
   static forChild(): ModuleWithProviders<CwModule> {

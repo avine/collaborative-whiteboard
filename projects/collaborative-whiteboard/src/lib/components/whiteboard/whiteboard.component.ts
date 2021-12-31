@@ -19,7 +19,7 @@ import {
 import { getDefaultCanvasSize, getDefaultDrawOptions } from '../../cw.config';
 import { CwService } from '../../cw.service';
 import { DrawEventsBroadcast, DrawMode, DrawOptions, DrawTransport, FillBackground, Owner } from '../../cw.types';
-import { addStorageKeySuffix, StorageKey, StorageService } from '../../utils/storage';
+import { addStorageKeySuffix, CwStorageService, StorageKey } from '../../services/storage';
 
 @Component({
   selector: 'cw-whiteboard',
@@ -75,7 +75,7 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
 
   constructor(
     public service: CwService,
-    private storageService: StorageService,
+    private storageService: CwStorageService,
     private changeDetectorRef: ChangeDetectorRef,
     @Inject(DOCUMENT) private document: Document
   ) {}

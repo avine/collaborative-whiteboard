@@ -16,7 +16,7 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 
-import { addStorageKeySuffix, StorageKey, StorageService } from '../../utils/storage';
+import { addStorageKeySuffix, CwStorageService, StorageKey } from '../../services/storage';
 import { CwToolContentComponent } from '../tool-content/tool-content.component';
 import { ToolContentPosition } from '../tool-content/tool-content.types';
 import { CwToolComponent } from '../tool/tool.component';
@@ -50,7 +50,7 @@ export class CwToolGroupComponent implements AfterViewInit, OnDestroy {
   private overlayZIndex = 1000;
 
   constructor(
-    private storageService: StorageService,
+    private storageService: CwStorageService,
     private overlay: Overlay,
     private changeDetectorRef: ChangeDetectorRef
   ) {}

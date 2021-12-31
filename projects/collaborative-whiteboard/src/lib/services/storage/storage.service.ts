@@ -4,7 +4,7 @@ import { Inject, Injectable } from '@angular/core';
 import { STORAGE_PREFIX } from './storage.types';
 
 @Injectable()
-export class StorageService {
+export class CwStorageService {
   private readonly local = this.document.defaultView?.localStorage;
   private readonly session = this.document.defaultView?.sessionStorage;
 
