@@ -185,6 +185,14 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
   }
 
   private getAnimFlushCount(remain: number, total: number) {
+    // This is tricky!
+    // When starting the animation, always flush at least 3 events.
+    // By doing this, we prevent the flickering effect in the following situation:
+    //   - the animation starts with one `clear` event and 2 background events.
+    // For details see: `CwService.prototype.backgroundEvent`.
+    if (remain === total) {
+      return 3;
+    }
     // Let's do some easing!
     const count = Math.round(Math.sin((remain / total) * Math.PI) * 9) + 1;
     return Math.min(count, remain);

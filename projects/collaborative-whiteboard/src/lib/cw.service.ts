@@ -291,7 +291,7 @@ export class CwService {
     this.redraw(false);
   }
 
-  get backgroundEvent(): DrawFillRect[] {
+  private get backgroundEvent(): DrawFillRect[] {
     const events: DrawFillRect[] = [];
     const { transparent, color, opacity } = this.fillBackground$$.value;
     if (!transparent) {
