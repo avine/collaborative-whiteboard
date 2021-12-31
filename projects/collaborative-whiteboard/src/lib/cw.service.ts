@@ -194,7 +194,9 @@ export class CwService {
       if (ownerEvents.length) {
         this.pushHistoryRedo(ownerEvents);
       }
-      this.broadcast$$.next(mapToDrawEventsBroadcast([getClearEvent(this.owner), ...this.history])); // TODO: do we need this.backgroundEvent here?
+      this.broadcast$$.next(
+        mapToDrawEventsBroadcast([getClearEvent(this.owner), ...this.backgroundEvent, ...this.history])
+      );
       this.emitHistory();
     }
   }

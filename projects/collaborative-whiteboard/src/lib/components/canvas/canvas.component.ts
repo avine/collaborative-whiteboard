@@ -25,14 +25,7 @@ import {
   DrawType,
 } from '../../cw.types';
 import { CanvasContext } from '../../utils/canvas-context';
-import {
-  getClearEvent,
-  getEventUID,
-  inferBasicDrawType,
-  isEmptyCanvasLine,
-  keepDrawEventsAfterClearEvent,
-  translate,
-} from '../../utils/common';
+import { getEventUID, inferBasicDrawType, isEmptyCanvasLine, moveDrawEvent } from '../../utils/common';
 import { isDrawEventAnimated, mapToDrawEventsAnimated } from '../../utils/events-animation';
 
 @Component({
@@ -109,29 +102,44 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
   }
 
   private handleBroadcast() {
+    this.handleBroadcastBackground();
     this.updateBroadcastEventsBuffer();
     this.flushBroadcastEventsBuffer();
   }
 
+  private handleBroadcastBackground() {
+    const events: DrawEvent[] = [];
+    const drawTypesInOrder: DrawType[] = ['clear', 'fillRect', 'fillRect'];
+    for (let i = 0; i < drawTypesInOrder.length; i++) {
+      const currFirstEvent = this.broadcast.events[0];
+      if (currFirstEvent?.type !== drawTypesInOrder[i] || !isEmptyCanvasLine(currFirstEvent?.data as CanvasLine)) {
+        break;
+      }
+      events.push(this.broadcast.events.shift() as DrawEvent);
+    }
+    if (!events.length) {
+      return;
+    }
+    while (events.length) {
+      this.handleResult(events.shift() as DrawEvent);
+    }
+    this.contextBroadcast.drawClear(this.canvasSizeAsLine);
+    this.broadcastEventsBuffer = [];
+  }
+
   private updateBroadcastEventsBuffer() {
-    let events = keepDrawEventsAfterClearEvent(this.broadcast.events);
-    const hasClearEvent = events.length < this.broadcast.events.length;
-    events = events.map((event) => translate(event, ...this.getCanvasCenter('broadcast')));
+    let events = this.broadcast.events.map((event) => moveDrawEvent(event, ...this.getCanvasCenter('broadcast')));
     if (this.broadcast.animate) {
       events = mapToDrawEventsAnimated(events);
     }
-    if (hasClearEvent) {
-      this.broadcastEventsBuffer = [getClearEvent(this.owner), ...events];
-    } else {
-      this.broadcastEventsBuffer.push(...events);
-    }
+    this.broadcastEventsBuffer.push(...events);
   }
 
   private flushBroadcastEventsBuffer() {
     const id = ++this.broadcastId; // Do this on top (and NOT inside the `else` statement)
     if (!this.broadcast.animate || !this.document.defaultView) {
+      this.contextBroadcast.drawClear(this.canvasSizeAsLine);
       while (this.broadcastEventsBuffer.length) {
-        this.contextBroadcast.drawClear(this.canvasSizeAsLine);
         this.handleResult(this.broadcastEventsBuffer.shift() as DrawEvent);
       }
     } else {
@@ -185,14 +193,6 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
   }
 
   private getAnimFlushCount(remain: number, total: number) {
-    // This is tricky!
-    // When starting the animation, always flush at least 3 events.
-    // By doing this, we prevent the flickering effect in the following situation:
-    //   - the animation starts with one `clear` event and 2 background events.
-    // For details see: `CwService.prototype.backgroundEvent`.
-    if (remain === total) {
-      return 3;
-    }
     // Let's do some easing!
     const count = Math.round(Math.sin((remain / total) * Math.PI) * 9) + 1;
     return Math.min(count, remain);
@@ -258,7 +258,7 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
       }
     }
     this.handleResult(event);
-    this.draw.emit(translate(event, ...this.getCanvasCenter('emit')));
+    this.draw.emit(moveDrawEvent(event, ...this.getCanvasCenter('emit')));
   }
 
   private getCompleteEvent(data: number[], options: DrawOptions, forceDrawType?: DrawType): DrawEvent {

@@ -57,19 +57,10 @@ export const normalizeCutRange = (data: CutRangeArg): CutRange => {
   return [Math.max(0, from), Math.max(0, to)];
 };
 
-export const keepDrawEventsAfterClearEvent = (events: DrawEvent[]): DrawEvent[] => {
-  for (let i = events.length - 1; i >= 0; i--) {
-    if (events[i].type === 'clear') {
-      return events.slice(i + 1);
-    }
-  }
-  return events;
-};
-
 export const inferBasicDrawType = (dataLength: number): DrawType =>
   dataLength === 2 ? 'point' : dataLength === 4 ? 'line' : 'lineSerie';
 
-export const translate = (event: DrawEvent, x: number, y: number): DrawEvent => {
+export const moveDrawEvent = (event: DrawEvent, x: number, y: number): DrawEvent => {
   const result = { ...event };
   if (!result.data) {
     return result;
