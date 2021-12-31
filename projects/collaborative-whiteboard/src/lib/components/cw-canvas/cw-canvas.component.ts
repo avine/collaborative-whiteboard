@@ -24,6 +24,7 @@ import {
   DrawOptions,
   DrawType,
 } from '../../cw.types';
+import { CanvasContext } from '../../utils/canvas-context';
 import {
   getClearEvent,
   getEventUID,
@@ -31,8 +32,7 @@ import {
   isEmptyCanvasLine,
   keepDrawEventsAfterClearEvent,
   translate,
-} from '../../cw.utils';
-import { CanvasContext } from '../../utils/canvas-context';
+} from '../../utils/common';
 import { isDrawEventAnimated, mapToDrawEventsAnimated } from '../../utils/events-animation';
 
 @Component({

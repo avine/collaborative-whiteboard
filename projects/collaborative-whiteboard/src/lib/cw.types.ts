@@ -73,7 +73,7 @@ export interface DrawClear extends DrawBase {
 
 export type DrawEvent = DrawPoint | DrawLine | DrawLineSerie | DrawRectangle | DrawEllipse | DrawFillRect | DrawClear;
 
-export type DrawEventAnimated = (DrawLine | DrawLineSerie | DrawRectangle | DrawEllipse) & ({ animate: boolean });
+export type DrawEventAnimated = (DrawLine | DrawLineSerie | DrawRectangle | DrawEllipse) & { animate: boolean };
 
 export interface DrawEventsBroadcast {
   animate: boolean;

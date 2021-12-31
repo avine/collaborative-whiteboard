@@ -15,7 +15,7 @@ import {
   FillBackground,
   Owner,
 } from './cw.types';
-import { getClearEvent, getFillRectEvent, mapToDrawEventsBroadcast, normalizeCutRange } from './cw.utils';
+import { getClearEvent, getFillRectEvent, mapToDrawEventsBroadcast, normalizeCutRange } from './utils/common';
 
 @Injectable()
 export class CwService {

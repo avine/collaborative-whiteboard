@@ -1,4 +1,4 @@
-import { CanvasLine, CanvasLineSerie, CanvasPoint, DrawOptions } from "../../cw.types";
+import { CanvasLine, CanvasLineSerie, CanvasPoint, DrawOptions } from '../../cw.types';
 
 export interface ICanvasContext {
   drawPoint: (data: CanvasPoint, options: DrawOptions) => void;

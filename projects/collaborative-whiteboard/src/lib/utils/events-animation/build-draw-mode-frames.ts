@@ -1,4 +1,4 @@
-import { CanvasLineSerie, CanvasLine, CanvasPoint } from "../../cw.types";
+import { CanvasLineSerie, CanvasLine, CanvasPoint } from '../../cw.types';
 
 export const buildBrushFrames = (canvasLineSerie: CanvasLineSerie): CanvasLineSerie[] => {
   const result: CanvasLineSerie[] = [];

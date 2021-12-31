@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from 
 
 import { DEFAULT_OWNER, getDefaultFillBackground, getDefaultFillBackgroundColor } from '../../cw.config';
 import { FillBackground, Owner } from '../../cw.types';
-import { getUID } from '../../cw.utils';
+import { getUID } from '../../utils/common';
 
 @Component({
   selector: 'cw-fill-background',
