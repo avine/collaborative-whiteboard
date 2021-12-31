@@ -5,7 +5,7 @@ import { DrawOptions } from '../../cw.types';
 
 @Component({
   selector: 'cw-draw-settings',
-  templateUrl: './cw-draw-settings.component.html',
+  templateUrl: './draw-settings.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CwDrawSettingsComponent {

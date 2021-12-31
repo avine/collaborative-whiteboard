@@ -12,15 +12,15 @@ export * from './lib/utils/events-animation';
 export * from './lib/utils/storage';
 export * from './lib/utils/common';
 
-export * from './lib/components/cw-canvas/cw-canvas.component';
-export * from './lib/components/cw-color-picker/cw-color-picker.component';
-export * from './lib/components/cw-cut/cw-cut.component';
-export * from './lib/components/cw-draw-settings/cw-draw-settings.component';
-export * from './lib/components/cw-fill-background/cw-fill-background.component';
-export * from './lib/components/cw-icon/cw-icon.component';
-export * from './lib/components/cw-tool/cw-tool.component';
-export * from './lib/components/cw-tool-content/cw-tool-content.component';
-export * from './lib/components/cw-tool-group/cw-tool-group.component';
-export * from './lib/components/cw-whiteboard/cw-whiteboard.component';
+export * from './lib/components/canvas/canvas.component';
+export * from './lib/components/color-picker/color-picker.component';
+export * from './lib/components/cut/cut.component';
+export * from './lib/components/draw-settings/draw-settings.component';
+export * from './lib/components/fill-background/fill-background.component';
+export * from './lib/components/icon/icon.component';
+export * from './lib/components/tool/tool.component';
+export * from './lib/components/tool-content/tool-content.component';
+export * from './lib/components/tool-group/tool-group.component';
+export * from './lib/components/whiteboard/whiteboard.component';
 
-export * from './lib/components/cw-canvas/cw-pointer.directive';
+export * from './lib/components/canvas/pointer.directive';

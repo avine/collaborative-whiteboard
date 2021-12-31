@@ -4,7 +4,7 @@ import { getColorsMatrix } from '../../utils/common';
 
 @Component({
   selector: 'cw-color-picker',
-  templateUrl: './cw-color-picker.component.html',
+  templateUrl: './color-picker.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CwColorPickerComponent {

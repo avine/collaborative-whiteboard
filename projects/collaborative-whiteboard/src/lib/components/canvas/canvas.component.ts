@@ -37,7 +37,7 @@ import { isDrawEventAnimated, mapToDrawEventsAnimated } from '../../utils/events
 
 @Component({
   selector: 'cw-canvas',
-  templateUrl: './cw-canvas.component.html',
+  templateUrl: './canvas.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CwCanvasComponent implements OnChanges, AfterViewInit {

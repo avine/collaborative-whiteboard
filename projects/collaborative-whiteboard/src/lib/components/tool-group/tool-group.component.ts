@@ -17,13 +17,13 @@ import {
 } from '@angular/core';
 
 import { addStorageKeySuffix, StorageKey, StorageService } from '../../utils/storage';
-import { CwToolContentComponent } from '../cw-tool-content/cw-tool-content.component';
-import { ToolContentPosition } from '../cw-tool-content/cw-tool-content.types';
-import { CwToolComponent } from '../cw-tool/cw-tool.component';
+import { CwToolContentComponent } from '../tool-content/tool-content.component';
+import { ToolContentPosition } from '../tool-content/tool-content.types';
+import { CwToolComponent } from '../tool/tool.component';
 
 @Component({
   selector: 'cw-tool-group',
-  templateUrl: './cw-tool-group.component.html',
+  templateUrl: './tool-group.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CwToolGroupComponent implements AfterViewInit, OnDestroy {

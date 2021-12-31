@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, TemplateRef } from '@angular/core';
 
-import { ToolContentPosition } from './cw-tool-content.types';
+import { ToolContentPosition } from './tool-content.types';
 
 @Component({
   selector: 'cw-tool-content',
-  templateUrl: './cw-tool-content.component.html',
+  templateUrl: './tool-content.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CwToolContentComponent {

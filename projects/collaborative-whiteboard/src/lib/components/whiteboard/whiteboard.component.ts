@@ -23,7 +23,7 @@ import { addStorageKeySuffix, StorageKey, StorageService } from '../../utils/sto
 
 @Component({
   selector: 'cw-whiteboard',
-  templateUrl: './cw-whiteboard.component.html',
+  templateUrl: './whiteboard.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [CwService],
 })

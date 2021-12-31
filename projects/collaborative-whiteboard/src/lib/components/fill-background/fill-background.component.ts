@@ -6,7 +6,7 @@ import { getUID } from '../../utils/common';
 
 @Component({
   selector: 'cw-fill-background',
-  templateUrl: './cw-fill-background.component.html',
+  templateUrl: './fill-background.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CwFillBackgroundComponent {

@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 
-import { IconAlias, IconsMap } from './cw-icon.types';
+import { IconAlias, IconsMap } from './icon.types';
 
 @Component({
   selector: 'cw-icon',
-  templateUrl: './cw-icon.component.html',
+  templateUrl: './icon.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CwIconComponent {

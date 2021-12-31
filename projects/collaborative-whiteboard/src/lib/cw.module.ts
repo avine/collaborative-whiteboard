@@ -5,17 +5,17 @@ import { CommonModule } from '@angular/common';
 import { ModuleWithProviders, NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
-import { CwCanvasComponent } from './components/cw-canvas/cw-canvas.component';
-import { CwPointerDirective } from './components/cw-canvas/cw-pointer.directive';
-import { CwColorPickerComponent } from './components/cw-color-picker/cw-color-picker.component';
-import { CwCutComponent } from './components/cw-cut/cw-cut.component';
-import { CwDrawSettingsComponent } from './components/cw-draw-settings/cw-draw-settings.component';
-import { CwFillBackgroundComponent } from './components/cw-fill-background/cw-fill-background.component';
-import { CwIconComponent } from './components/cw-icon/cw-icon.component';
-import { CwToolContentComponent } from './components/cw-tool-content/cw-tool-content.component';
-import { CwToolGroupComponent } from './components/cw-tool-group/cw-tool-group.component';
-import { CwToolComponent } from './components/cw-tool/cw-tool.component';
-import { CwWhiteboardComponent } from './components/cw-whiteboard/cw-whiteboard.component';
+import { CwCanvasComponent } from './components/canvas/canvas.component';
+import { CwPointerDirective } from './components/canvas/pointer.directive';
+import { CwColorPickerComponent } from './components/color-picker/color-picker.component';
+import { CwCutComponent } from './components/cut/cut.component';
+import { CwDrawSettingsComponent } from './components/draw-settings/draw-settings.component';
+import { CwFillBackgroundComponent } from './components/fill-background/fill-background.component';
+import { CwIconComponent } from './components/icon/icon.component';
+import { CwToolContentComponent } from './components/tool-content/tool-content.component';
+import { CwToolGroupComponent } from './components/tool-group/tool-group.component';
+import { CwToolComponent } from './components/tool/tool.component';
+import { CwWhiteboardComponent } from './components/whiteboard/whiteboard.component';
 import { StorageService } from './utils/storage';
 
 const features = [
