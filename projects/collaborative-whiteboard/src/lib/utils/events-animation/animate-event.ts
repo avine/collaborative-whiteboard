@@ -1,6 +1,6 @@
 import { DrawEllipse, DrawEventAnimated, DrawLine, DrawLineSerie, DrawRectangle } from '../../cw.types';
-import { buildBrushFrames, buildLineFrames } from './build-draw-mode-frames';
-import { mapCanvasLineToLineSerie, smartConcatCanvasLineSeries } from './map-line-and-line-serie';
+import { buildBrushFrames, buildLineFrames } from './build-frames';
+import { splitCanvasLine, smartConcatCanvasLineSeries } from './split-or-concat-lines';
 
 export const animateDrawLineSerie = (event: DrawLineSerie): DrawEventAnimated[] => {
   const result = buildBrushFrames(event.data).map((data) => ({ ...event, data, animate: true }));
@@ -9,7 +9,7 @@ export const animateDrawLineSerie = (event: DrawLineSerie): DrawEventAnimated[] 
 };
 
 export const animateDrawLine = (event: DrawLine): DrawEventAnimated[] => {
-  const result: DrawEventAnimated[] = buildLineFrames(mapCanvasLineToLineSerie(event.data)).map((data) => ({
+  const result: DrawEventAnimated[] = buildLineFrames(splitCanvasLine(event.data)).map((data) => ({
     ...event,
     data,
     animate: true,
@@ -21,10 +21,10 @@ export const animateDrawLine = (event: DrawLine): DrawEventAnimated[] => {
 export const animateDrawRectangle = (event: DrawRectangle): DrawEventAnimated[] => {
   const [fromX, fromY, toX, toY] = event.data;
   const canvasLineSerie = smartConcatCanvasLineSeries(
-    mapCanvasLineToLineSerie([fromX, fromY, toX, fromY]),
-    mapCanvasLineToLineSerie([toX, fromY, toX, toY]),
-    mapCanvasLineToLineSerie([toX, toY, fromX, toY]),
-    mapCanvasLineToLineSerie([fromX, toY, fromX, fromY])
+    splitCanvasLine([fromX, fromY, toX, fromY]),
+    splitCanvasLine([toX, fromY, toX, toY]),
+    splitCanvasLine([toX, toY, fromX, toY]),
+    splitCanvasLine([fromX, toY, fromX, fromY])
   );
   const result = buildBrushFrames(canvasLineSerie).map(
     (data) =>

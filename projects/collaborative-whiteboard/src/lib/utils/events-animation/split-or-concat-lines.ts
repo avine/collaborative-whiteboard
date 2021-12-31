@@ -6,7 +6,10 @@ const STEP = 5; // px
 const getDiagonal = ([fromX, fromY, toX, toY]: CanvasLine): number =>
   Math.sqrt(Math.pow(Math.abs(toX - fromX), 2) + Math.pow(Math.abs(toY - fromY), 2)); // Pythagore
 
-export const mapCanvasLineToLineSerie = (canvasLine: CanvasLine): CanvasLineSerie => {
+/**
+ * Split a straight line into several segments
+ */
+export const splitCanvasLine = (canvasLine: CanvasLine): CanvasLineSerie => {
   const distance = getDiagonal(canvasLine);
   if (distance < DISTANCE_MIN) {
     return canvasLine;

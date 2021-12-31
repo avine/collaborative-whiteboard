@@ -1,7 +1,7 @@
 import { getDefaultCanvasSize } from '../../cw.config';
 import { CanvasLine, CanvasLineSerie, CanvasPoint, CanvasSize, DrawEvent, DrawOptions } from '../../cw.types';
 import { ICanvasContext } from './canvas.context.types';
-import { getCanvasContextMethod } from './canvas.context.utils';
+import { getCanvasContextHandler } from './canvas.context.utils';
 
 export class CanvasContext implements ICanvasContext {
   private canvasSize = getDefaultCanvasSize();
@@ -25,7 +25,7 @@ export class CanvasContext implements ICanvasContext {
   }
 
   handleEvent(event: DrawEvent) {
-    this[getCanvasContextMethod[event.type]](event.data as any, event.options as any);
+    this[getCanvasContextHandler[event.type]](event.data as any, event.options as any);
   }
 
   drawPoint([x, y]: CanvasPoint, options: DrawOptions) {
