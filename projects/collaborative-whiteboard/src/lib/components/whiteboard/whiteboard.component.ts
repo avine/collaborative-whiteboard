@@ -67,6 +67,8 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
 
   showDrawSettingsTool = false;
 
+  showDrawModeTool = false;
+
   showCutTool = false;
 
   broadcastHistoryCut!: DrawEventsBroadcast;
@@ -179,8 +181,8 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
     }
   }
 
-  switchDrawMode() {
-    this.service.switchDrawMode();
+  updateDrawMode(drawMode: DrawMode) {
+    this.service.drawMode = drawMode;
     this.storageService.setLocal(StorageKey.DrawMode, this.service.drawMode);
   }
 

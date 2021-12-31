@@ -7,6 +7,48 @@
   font: inherit;
 }
 
+.cw-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+}
+
+.cw-list--column {
+  flex-direction: column;
+}
+
+.cw-list-item {
+  padding: 0.35rem 0.7rem;
+  display: flex;
+  align-items: center;
+  border-radius: var(--cw-border-radius);
+  text-align: left;
+  transition: color ease var(--cw-anim-duration-fast), background-color ease var(--cw-anim-duration-fast);
+
+  &:hover {
+    background-color: rgba(160, 160, 160, 0.133);
+  }
+}
+
+.cw-list-item--clickable {
+  cursor: pointer;
+}
+
+.cw-list-item--active {
+  color: var(--cw-primary-color);
+  cursor: initial;
+
+  &,
+  &:hover {
+    background-color: transparent;
+  }
+}
+
+.cw-list-item__icon {
+  margin-right: 0.7rem;
+}
+
 .cw-control {
   text-align: center;
 }

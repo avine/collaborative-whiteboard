@@ -1,0 +1,12 @@
+<nav class="cw-list cw-list--column">
+  <button
+    class="cw-button--less cw-list-item cw-list-item--clickable"
+    [class.cw-list-item--active]="item === drawMode"
+    [disabled]="item === drawMode"
+    *ngFor="let item of list"
+    (click)="drawModeChange.emit(item)"
+  >
+    <cw-icon class="cw-list-item__icon" [icon]="item"></cw-icon>
+    {{ item | titlecase }}
+  </button>
+</nav>

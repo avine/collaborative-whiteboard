@@ -82,11 +82,6 @@ export class CwService {
     return this.drawMode$$.value;
   }
 
-  switchDrawMode() {
-    const modes: DrawMode[] = ['brush', 'line', 'rectangle', 'ellipse'];
-    this.drawMode = modes[(modes.indexOf(this.drawMode$$.value) + 1) % modes.length];
-  }
-
   private pushHistory(event: DrawEvent) {
     this.historyMap.set(event.id, event);
   }
