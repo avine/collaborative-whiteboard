@@ -1,12 +1,37 @@
-<nav class="cw-list cw-list--column">
-  <button
-    class="cw-button--less cw-list-item cw-list-item--clickable"
-    [class.cw-list-item--active]="item === drawMode"
-    [disabled]="item === drawMode"
-    *ngFor="let item of list"
-    (click)="drawModeChange.emit(item)"
-  >
-    <cw-icon class="cw-list-item__icon" [icon]="item"></cw-icon>
-    {{ item | titlecase }}
-  </button>
-</nav>
+<div class="cw-control">
+  <div class="cw-control__title">
+    <span class="cw-control__title-inner">Tool</span>
+  </div>
+
+  <nav class="cw-list cw-list--column">
+    <button
+      class="cw-button--less cw-list-item cw-list-item--clickable"
+      [class.cw-list-item--active]="item === drawMode"
+      [disabled]="item === drawMode"
+      *ngFor="let item of list"
+      (click)="drawModeChange.emit(item)"
+    >
+      <cw-icon class="cw-list-item__icon" [icon]="item"></cw-icon>
+      {{ item | titlecase }}
+    </button>
+  </nav>
+</div>
+
+<div class="cw-control">
+  <div class="cw-control__title">
+    <span class="cw-control__title-inner">Magnetic guides</span>
+  </div>
+
+  <div class="cw-control__block">
+    <input
+      type="range"
+      min="0"
+      max="30"
+      step="5"
+      [(ngModel)]="pointerMagnet"
+      (ngModelChange)="pointerMagnetChange.emit(this.pointerMagnet)"
+    />
+
+    <span class="cw-control__number cw-control__number--large">{{ pointerMagnet }}px</span>
+  </div>
+</div>

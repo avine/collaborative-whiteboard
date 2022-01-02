@@ -24,6 +24,7 @@ import {
   DrawOptions,
   DrawType,
 } from '../../cw.types';
+import { PointerSensitivityOrigin } from '../../directives/pointer.types';
 import { CanvasContext } from '../../utils/canvas-context';
 import { getEventUID, inferBasicDrawType, isEmptyCanvasLine, moveDrawEvent } from '../../utils/common';
 import { isDrawEventAnimated, mapToDrawEventsAnimated } from '../../utils/events-animation';
@@ -45,6 +46,8 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
   @Input() broadcast!: DrawEventsBroadcast;
 
   @Input() drawOptions = getDefaultDrawOptions();
+
+  @Input() pointerMagnet = 0;
 
   @Input() drawDisabled = false;
 
@@ -208,6 +211,10 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
 
   get pointerSensitivity() {
     return Math.max(3, this.drawOptions.lineWidth / 2);
+  }
+
+  get pointerSensitivityOrigin(): PointerSensitivityOrigin {
+    return this.drawMode === 'brush' ? 'previous' : 'first';
   }
 
   emitStart(canvasPoint: CanvasPoint, options = this.drawOptions) {

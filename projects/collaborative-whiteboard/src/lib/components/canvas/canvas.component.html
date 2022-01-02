@@ -8,7 +8,9 @@
   #canvasEmit
   class="cw-canvas__preview"
   cwPointer
+  [cwPointerMagnet]="pointerMagnet"
   [cwPointerSensitivity]="pointerSensitivity"
+  [cwPointerSensitivityOrigin]="pointerSensitivityOrigin"
   (cwPointerStart)="drawDisabled || emitStart($event)"
   (cwPointerMove)="drawDisabled || emitMove($event)"
   (cwPointerEnd)="drawDisabled || emitEnd($event)"

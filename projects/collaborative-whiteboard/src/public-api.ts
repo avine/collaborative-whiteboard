@@ -22,7 +22,7 @@ export * from './lib/components/tool-group/tool-group.component';
 export * from './lib/components/whiteboard/whiteboard.component';
 
 // Directives
-export * from './lib/components/canvas/pointer.directive';
+export * from './lib/directives/pointer.directive';
 
 // Services
 export * from './lib/services/storage';

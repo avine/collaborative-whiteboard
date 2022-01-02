@@ -6,7 +6,6 @@ import { ModuleWithProviders, NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import { CwCanvasComponent } from './components/canvas/canvas.component';
-import { CwPointerDirective } from './components/canvas/pointer.directive';
 import { CwColorPickerComponent } from './components/color-picker/color-picker.component';
 import { CwCutComponent } from './components/cut/cut.component';
 import { CwDrawModeComponent } from './components/draw-mode/draw-mode.component';
@@ -17,11 +16,11 @@ import { CwToolContentComponent } from './components/tool-content/tool-content.c
 import { CwToolGroupComponent } from './components/tool-group/tool-group.component';
 import { CwToolComponent } from './components/tool/tool.component';
 import { CwWhiteboardComponent } from './components/whiteboard/whiteboard.component';
+import { CwPointerDirective } from './directives/pointer.directive';
 import { CwStorageService } from './services/storage';
 
 const features = [
   CwCanvasComponent,
-  CwPointerDirective,
   CwColorPickerComponent,
   CwCutComponent,
   CwDrawModeComponent,
@@ -32,6 +31,7 @@ const features = [
   CwToolGroupComponent,
   CwToolComponent,
   CwWhiteboardComponent,
+  CwPointerDirective,
 ];
 
 @NgModule({

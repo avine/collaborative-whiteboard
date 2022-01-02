@@ -5,6 +5,7 @@
     [owner]="(service.owner$ | async) || throwMissing()"
     [canvasSize]="canvasSize"
     [drawOptions]="drawOptions"
+    [pointerMagnet]="pointerMagnet"
     class="cw-whiteboard__canvas-draw"
     [showGuides]="showGuides && !showCutTool"
     [broadcast]="(service.broadcast$ | async) || { animate: false, events: [] }"
@@ -27,17 +28,17 @@
   [dragBoundarySelector]="dragBoundarySelector"
   class="cw-whiteboard__tools"
 >
-  <cw-tool title="Fill background" [content]="fillBackgroundTool" [(active)]="showFillBackgroundTool">
+  <cw-tool title="Background" [content]="fillBackgroundTool" [(active)]="showFillBackgroundTool">
     <cw-icon icon="fillBackground"></cw-icon>
   </cw-tool>
 
-  <cw-tool title="Draw settings" [content]="drawSettingsTool" [(active)]="showDrawSettingsTool">
+  <cw-tool title="Forground" [content]="drawSettingsTool" [(active)]="showDrawSettingsTool">
     <cw-icon icon="palette"></cw-icon>
   </cw-tool>
 
   <cw-tool
     *ngIf="service.drawMode$ | async as drawMode"
-    title="Draw tools"
+    title="Draw"
     [content]="drawModeTool"
     [(active)]="showDrawModeTool"
   >
@@ -64,7 +65,7 @@
     [title]="showGuides ? 'Hide guides' : 'Show guides'"
     [noContentSwitchMode]="true"
     [(active)]="showGuides"
-    (activeChange)="storeShowGuides($event)"
+    (activeChange)="storeShowGuides()"
   >
     <cw-icon icon="guides"></cw-icon>
   </cw-tool>
@@ -88,7 +89,7 @@
 </ng-template>
 
 <ng-template #drawSettingsTool>
-  <cw-draw-settings [(drawOptions)]="drawOptions" (drawOptionsChange)="storeDrawOptions($event)"></cw-draw-settings>
+  <cw-draw-settings [(drawOptions)]="drawOptions" (drawOptionsChange)="storeDrawOptions()"></cw-draw-settings>
 </ng-template>
 
 <ng-template #drawModeTool>
@@ -96,6 +97,8 @@
     *ngIf="service.drawMode$ | async as drawMode"
     [drawMode]="drawMode"
     (drawModeChange)="updateDrawMode($event)"
+    [(pointerMagnet)]="pointerMagnet"
+    (pointerMagnetChange)="storePointerMagnet()"
   ></cw-draw-mode>
 </ng-template>
 

@@ -55,6 +55,8 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
 
   showGuides = this.storageService.getLocal(StorageKey.ShowGuides, true);
 
+  pointerMagnet = this.storageService.getLocal(StorageKey.PointerMagnet, 0);
+
   // note: if there's more than one tool-group then set a different name for each one of them
   toolGroupName = '';
 
@@ -154,12 +156,16 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
     this.changeDetectorRef.detectChanges();
   }
 
-  storeShowGuides(showGuides: boolean) {
-    this.storageService.setLocal(StorageKey.ShowGuides, showGuides);
+  storeDrawOptions() {
+    this.storageService.setLocal(StorageKey.DrawOptions, this.drawOptions);
   }
 
-  storeDrawOptions(drawOptions: DrawOptions) {
-    this.storageService.setLocal(StorageKey.DrawOptions, drawOptions);
+  storeShowGuides() {
+    this.storageService.setLocal(StorageKey.ShowGuides, this.showGuides);
+  }
+
+  storePointerMagnet() {
+    this.storageService.setLocal(StorageKey.PointerMagnet, this.pointerMagnet);
   }
 
   private initFillBackground() {

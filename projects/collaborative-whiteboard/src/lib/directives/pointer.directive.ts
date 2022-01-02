@@ -12,7 +12,8 @@ import {
   Output,
 } from '@angular/core';
 
-import { CanvasPoint } from '../../cw.types';
+import { CanvasPoint } from '../cw.types';
+import { PointerSensitivityOrigin } from './pointer.types';
 
 @Directive({
   selector: '[cwPointer]',
@@ -51,7 +52,11 @@ export class CwPointerDirective implements OnInit, OnDestroy {
     this.pointerEnd(clientX, clientY);
   }
 
+  @Input() cwPointerMagnet = 0;
+
   @Input() cwPointerSensitivity = 0;
+
+  @Input() cwPointerSensitivityOrigin: PointerSensitivityOrigin = 'previous';
 
   @Output() cwPointerStart = new EventEmitter<CanvasPoint>();
 
@@ -108,8 +113,7 @@ export class CwPointerDirective implements OnInit, OnDestroy {
     if (!this.dataBuffer.length) {
       return;
     }
-    const fromX = this.dataBuffer[this.dataBuffer.length - 2];
-    const fromY = this.dataBuffer[this.dataBuffer.length - 1];
+    const [fromX, fromY] = this.sensitivityOrigin;
     const [toX, toY] = this.getCanvasPoint(pointerX, pointerY);
     if (Math.abs(toX - fromX) <= this.cwPointerSensitivity && Math.abs(toY - fromY) <= this.cwPointerSensitivity) {
       return;
@@ -136,6 +140,19 @@ export class CwPointerDirective implements OnInit, OnDestroy {
   }
 
   private getCanvasPoint(pointerX: number, pointerY: number): CanvasPoint {
-    return [pointerX - this.element.x, pointerY - this.element.y];
+    return [this.magnetize(pointerX - this.element.x), this.magnetize(pointerY - this.element.y)];
+  }
+
+  private magnetize(n: number) {
+    if (this.cwPointerMagnet === 0) {
+      return n;
+    }
+    return Math.round(n / this.cwPointerMagnet) * this.cwPointerMagnet;
+  }
+
+  private get sensitivityOrigin(): CanvasPoint {
+    return this.cwPointerSensitivityOrigin === 'previous'
+      ? [this.dataBuffer[this.dataBuffer.length - 2], this.dataBuffer[this.dataBuffer.length - 1]]
+      : [this.dataBuffer[0], this.dataBuffer[1]];
   }
 }
