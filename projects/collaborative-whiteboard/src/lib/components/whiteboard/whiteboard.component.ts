@@ -158,6 +158,11 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
 
   storeDrawOptions() {
     this.storageService.setLocal(StorageKey.DrawOptions, this.drawOptions);
+
+    // This is tricky!
+    // Because `<cw-draw-settings>` is rendered in an Overlay, it is not a child of `<cw-whiteboard>`'s DOM tree.
+    // Thus, cLick events that occurs in the overlay does not trigger the change detection of the whiteboard...
+    this.changeDetectorRef.detectChanges();
   }
 
   storeShowGuides() {
@@ -166,6 +171,11 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
 
   storePointerMagnet() {
     this.storageService.setLocal(StorageKey.PointerMagnet, this.pointerMagnet);
+
+    // This is tricky!
+    // Because `<cw-draw-mode>` is rendered in an Overlay, it is not a child of `<cw-whiteboard>`'s DOM tree.
+    // Thus, cLick events that occurs in the overlay does not trigger the change detection of the whiteboard...
+    this.changeDetectorRef.detectChanges();
   }
 
   private initFillBackground() {
