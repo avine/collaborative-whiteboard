@@ -210,11 +210,24 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
   }
 
   get pointerSensitivity() {
-    return Math.max(3, this.drawOptions.lineWidth / 2);
+    const lineWidthRatio = Math.round(this.drawOptions.lineWidth / 3);
+    if (this.pointerMagnet !== 0) {
+      return Math.min(this.pointerMagnet, lineWidthRatio);
+    }
+    const SENSITIVITY_MIN = 3;
+    const SENSITIVITY_MAX = 9;
+    return Math.min(Math.max(SENSITIVITY_MIN, lineWidthRatio), SENSITIVITY_MAX);
   }
 
   get pointerSensitivityOrigin(): PointerSensitivityOrigin {
     return this.drawMode === 'brush' ? 'previous' : 'first';
+  }
+
+  get pointerMagnetShift(): CanvasPoint {
+    if (!this.pointerMagnet) {
+      return [0, 0];
+    }
+    return [(this.canvasSize.width / 2) % this.pointerMagnet, (this.canvasSize.height / 2) % this.pointerMagnet];
   }
 
   emitStart(canvasPoint: CanvasPoint, options = this.drawOptions) {

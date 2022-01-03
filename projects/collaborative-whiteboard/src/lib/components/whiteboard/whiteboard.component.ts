@@ -18,7 +18,7 @@ import {
 
 import { getDefaultCanvasSize, getDefaultDrawOptions } from '../../cw.config';
 import { CwService } from '../../cw.service';
-import { DrawEventsBroadcast, DrawMode, DrawOptions, DrawTransport, FillBackground, Owner } from '../../cw.types';
+import { DrawEventsBroadcast, DrawMode, DrawTransport, FillBackground, Owner } from '../../cw.types';
 import { addStorageKeySuffix, CwStorageService, StorageKey } from '../../services/storage';
 
 @Component({

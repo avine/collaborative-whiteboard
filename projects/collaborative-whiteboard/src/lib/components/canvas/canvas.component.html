@@ -1,6 +1,15 @@
 <canvas #canvasResult class="cw-canvas__result"></canvas>
 
-<div *ngIf="showGuides" class="cw-canvas__guides"></div>
+<div
+  *ngIf="showGuides"
+  class="cw-canvas__guides"
+  [ngClass]="{
+    'cw-canvas__guides--10': pointerMagnet === 10,
+    'cw-canvas__guides--20': pointerMagnet === 20,
+    'cw-canvas__guides--30': pointerMagnet === 30,
+    'cw-canvas__guides--40': pointerMagnet === 40
+  }"
+></div>
 
 <canvas #canvasBroadcast class="cw-canvas__preview"></canvas>
 
@@ -9,6 +18,7 @@
   class="cw-canvas__preview"
   cwPointer
   [cwPointerMagnet]="pointerMagnet"
+  [cwPointerMagnetShift]="pointerMagnetShift"
   [cwPointerSensitivity]="pointerSensitivity"
   [cwPointerSensitivityOrigin]="pointerSensitivityOrigin"
   (cwPointerStart)="drawDisabled || emitStart($event)"

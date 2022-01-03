@@ -20,7 +20,9 @@ export class CwToolContentComponent {
 
   handleTouchEvent(event: Event) {
     // Prevent further "mouse" event from being fired when "touch" event is detected.
-    event.preventDefault();
+    // ! FIXME: this is NOT working on mobile device...
+    // event.preventDefault();
+
     this.focused.emit();
   }
 

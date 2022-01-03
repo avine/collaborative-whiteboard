@@ -54,6 +54,8 @@ export class CwPointerDirective implements OnInit, OnDestroy {
 
   @Input() cwPointerMagnet = 0;
 
+  @Input() cwPointerMagnetShift: CanvasPoint = [0, 0];
+
   @Input() cwPointerSensitivity = 0;
 
   @Input() cwPointerSensitivityOrigin: PointerSensitivityOrigin = 'previous';
@@ -140,14 +142,17 @@ export class CwPointerDirective implements OnInit, OnDestroy {
   }
 
   private getCanvasPoint(pointerX: number, pointerY: number): CanvasPoint {
-    return [this.magnetize(pointerX - this.element.x), this.magnetize(pointerY - this.element.y)];
+    return [
+      this.magnetize(pointerX - this.element.x) + this.cwPointerMagnetShift[0],
+      this.magnetize(pointerY - this.element.y) + this.cwPointerMagnetShift[1],
+    ];
   }
 
   private magnetize(n: number) {
     if (this.cwPointerMagnet === 0) {
-      return n;
+      return Math.round(n);
     }
-    return Math.round(n / this.cwPointerMagnet) * this.cwPointerMagnet;
+    return Math.floor(n / this.cwPointerMagnet) * this.cwPointerMagnet;
   }
 
   private get sensitivityOrigin(): CanvasPoint {
