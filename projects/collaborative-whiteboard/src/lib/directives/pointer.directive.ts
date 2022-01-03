@@ -143,16 +143,16 @@ export class CwPointerDirective implements OnInit, OnDestroy {
 
   private getCanvasPoint(pointerX: number, pointerY: number): CanvasPoint {
     return [
-      this.magnetize(pointerX - this.element.x) + this.cwPointerMagnetShift[0],
-      this.magnetize(pointerY - this.element.y) + this.cwPointerMagnetShift[1],
+      this.magnetize(pointerX - this.element.x, this.cwPointerMagnetShift[0]),
+      this.magnetize(pointerY - this.element.y, this.cwPointerMagnetShift[1]),
     ];
   }
 
-  private magnetize(n: number) {
+  private magnetize(pointer: number, shift: number) {
     if (this.cwPointerMagnet === 0) {
-      return Math.round(n);
+      return Math.round(pointer);
     }
-    return Math.floor(n / this.cwPointerMagnet) * this.cwPointerMagnet;
+    return Math.round((pointer - shift) / this.cwPointerMagnet) * this.cwPointerMagnet + shift;
   }
 
   private get sensitivityOrigin(): CanvasPoint {
