@@ -16,6 +16,7 @@
 <canvas
   #canvasEmit
   class="cw-canvas__preview"
+  [class.cw-canvas__preview--readonly]="drawDisabled"
   cwPointer
   [cwPointerMagnet]="pointerMagnet"
   [cwPointerMagnetShift]="pointerMagnetShift"

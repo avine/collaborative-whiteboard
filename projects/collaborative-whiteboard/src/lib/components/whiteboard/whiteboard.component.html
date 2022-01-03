@@ -1,12 +1,12 @@
 <div class="cw-whiteboard__canvas" #canvasContainer>
   <cw-canvas
     #canvas
+    class="cw-whiteboard__canvas-draw"
     [drawMode]="(service.drawMode$ | async) || throwMissing()"
     [owner]="(service.owner$ | async) || throwMissing()"
     [canvasSize]="canvasSize"
     [drawOptions]="drawOptions"
     [pointerMagnet]="pointerMagnet"
-    class="cw-whiteboard__canvas-draw"
     [showGuides]="showGuides && !showCutTool"
     [broadcast]="(service.broadcast$ | async) || { animate: false, events: [] }"
     (draw)="service.emit($event)"

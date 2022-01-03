@@ -174,6 +174,10 @@ cw-canvas {
   cursor: crosshair;
 }
 
+.cw-canvas__preview--readonly {
+  cursor: initial;
+}
+
 cw-color-picker {
   display: block;
 }
@@ -266,6 +270,9 @@ cw-icon {
 }
 
 .cw-tool-group {
+  overflow: auto;
+  max-width: calc(100vw - 2rem);
+  max-height: calc(100vh - 2rem);
   display: inline-flex;
   box-shadow: var(--cw-box-shadow);
   border-radius: var(--cw-border-radius);
@@ -280,9 +287,10 @@ cw-icon {
 .cw-tool-group__action {
   cursor: pointer;
   user-select: none;
+  flex-shrink: 0;
   width: 2.5em;
   height: 2.5em;
-  line-height: 2.5em;
+  line-height: calc(2.5em - 2px);
   text-align: center;
   color: var(--cw-text-color);
 }
@@ -344,4 +352,31 @@ cw-whiteboard {
   width: 0;
   height: 0;
   overflow: visible;
+}
+
+cw-whiteboard,
+.cw-tool-group {
+  /* Works on Firefox */
+  & {
+    scrollbar-width: thin;
+    scrollbar-color: var(--cw-border-color) transparent;
+  }
+
+  /* Works on Chrome, Edge and Safari */
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--cw-border-color);
+  }
+
+  &::-webkit-scrollbar-corner {
+    background-color: transparent;
+  }
 }
