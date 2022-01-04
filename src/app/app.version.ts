@@ -3,4 +3,4 @@ import { AppVersion } from './app.types';
 /**
  * App version (don't forget to update this value when releasing the app)
  */
-export const APP_VERSION: AppVersion = '2.5.0';
+export const APP_VERSION: AppVersion = '0.7.0';

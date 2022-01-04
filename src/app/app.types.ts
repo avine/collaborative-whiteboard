@@ -1,1 +1,3 @@
-export type AppVersion = `${number}.${number}.${number}`;
+type Preview = '-alpha' | '-beta' | '';
+
+export type AppVersion = `${number}.${number}.${number}${Preview}`;
