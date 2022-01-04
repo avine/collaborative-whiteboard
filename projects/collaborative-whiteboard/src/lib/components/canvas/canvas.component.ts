@@ -197,7 +197,7 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
 
   private getAnimFlushCount(remain: number, total: number) {
     // Let's do some easing!
-    const count = Math.round(Math.sin((remain / total) * Math.PI) * 9) + 1;
+    const count = Math.round(Math.sin((remain / total) * Math.PI) * total / 50) + 1;
     return Math.min(count, remain);
   }
 

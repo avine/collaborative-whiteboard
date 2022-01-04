@@ -1,7 +1,5 @@
 import { CanvasLine, CanvasLineSerie } from '../../cw.types';
-
-const DISTANCE_MIN = 30; // px
-const STEP = 5; // px
+import { MIN_PATH_LENGTH, STEP_LENGTH } from './config';
 
 const getDiagonal = ([fromX, fromY, toX, toY]: CanvasLine): number =>
   Math.sqrt(Math.pow(Math.abs(toX - fromX), 2) + Math.pow(Math.abs(toY - fromY), 2)); // Pythagore
@@ -10,12 +8,12 @@ const getDiagonal = ([fromX, fromY, toX, toY]: CanvasLine): number =>
  * Split a straight line into several segments
  */
 export const splitCanvasLine = (canvasLine: CanvasLine): CanvasLineSerie => {
-  const distance = getDiagonal(canvasLine);
-  if (distance < DISTANCE_MIN) {
+  const pathLength = getDiagonal(canvasLine);
+  if (pathLength < MIN_PATH_LENGTH) {
     return canvasLine;
   }
 
-  const stepsCount = Math.floor(distance / STEP);
+  const stepsCount = Math.floor(pathLength / STEP_LENGTH);
   const [fromX, fromY, toX, toY] = canvasLine;
   const stepX = (toX - fromX) / stepsCount;
   const stepY = (toY - fromY) / stepsCount;
@@ -28,6 +26,15 @@ export const splitCanvasLine = (canvasLine: CanvasLine): CanvasLineSerie => {
   }
   canvasLineSerie.push(...canvasLine.slice(-2));
   return canvasLineSerie;
+};
+
+export const splitCanvasLineSerie = (serie: CanvasLineSerie): CanvasLineSerie => {
+  const result: CanvasLineSerie = [];
+  for (let i = 2; i < serie.length; i += 2) {
+    const split = splitCanvasLine([serie[i - 2], serie[i - 1], serie[i], serie[i + 1]]);
+    result.push(...(i === 2 ? split : split.slice(2)));
+  }
+  return result;
 };
 
 export const smartConcatCanvasLineSeries = (...canvasLineSeries: CanvasLineSerie[]): CanvasLineSerie => {

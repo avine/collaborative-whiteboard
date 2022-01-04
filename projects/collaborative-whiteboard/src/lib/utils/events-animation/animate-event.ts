@@ -1,12 +1,7 @@
 import { DrawEllipse, DrawEventAnimated, DrawLine, DrawLineSerie, DrawRectangle } from '../../cw.types';
 import { buildBrushFrames, buildLineFrames } from './build-frames';
-import { splitCanvasLine, smartConcatCanvasLineSeries } from './split-or-concat-lines';
-
-export const animateDrawLineSerie = (event: DrawLineSerie): DrawEventAnimated[] => {
-  const result = buildBrushFrames(event.data).map((data) => ({ ...event, data, animate: true }));
-  result.push({ ...event, animate: false });
-  return result;
-};
+import { STEP_LENGTH } from './config';
+import { smartConcatCanvasLineSeries, splitCanvasLine, splitCanvasLineSerie } from './split-or-concat-lines';
 
 export const animateDrawLine = (event: DrawLine): DrawEventAnimated[] => {
   const result: DrawEventAnimated[] = buildLineFrames(splitCanvasLine(event.data)).map((data) => ({
@@ -14,6 +9,12 @@ export const animateDrawLine = (event: DrawLine): DrawEventAnimated[] => {
     data,
     animate: true,
   }));
+  result.push({ ...event, animate: false });
+  return result;
+};
+
+export const animateDrawLineSerie = (event: DrawLineSerie): DrawEventAnimated[] => {
+  const result = buildBrushFrames(splitCanvasLineSerie(event.data)).map((data) => ({ ...event, data, animate: true }));
   result.push({ ...event, animate: false });
   return result;
 };
@@ -40,13 +41,11 @@ export const animateDrawRectangle = (event: DrawRectangle): DrawEventAnimated[] 
 };
 
 export const animateDrawEllipse = (event: DrawEllipse): DrawEventAnimated[] => {
-  const STEP = 5; // px
-
   const [fromX, fromY, toX, toY] = event.data;
   // Ellipse perimeter approximation
   const perimeter =
     2 * Math.PI * Math.sqrt((Math.pow(Math.abs(toX - fromX), 2) + Math.pow(Math.abs(toY - fromY), 2)) / 2);
-  const stepsCount = perimeter / STEP;
+  const stepsCount = perimeter / STEP_LENGTH;
 
   const result: DrawEventAnimated[] = [];
   for (let i = 0; i < stepsCount; i += 1) {
