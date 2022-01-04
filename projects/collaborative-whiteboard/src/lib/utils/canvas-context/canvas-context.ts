@@ -63,17 +63,16 @@ export class CanvasContext implements ICanvasContext {
     const y = fromY + offset;
     const w = toX - fromX + offset;
     const h = toY - fromY + offset;
-
+    const xFactor = w >= 0 ? 1 : -1;
+    const yFactor = h >= 0 ? 1 : -1;
     this.applyDrawOptions(options);
-
     this.context.strokeRect(x, y, w, h);
-
     if (options.fillOpacity) {
       this.context.fillRect(
-        x + options.lineWidth / 2,
-        y + options.lineWidth / 2,
-        w - options.lineWidth,
-        h - options.lineWidth
+        x + (xFactor * options.lineWidth) / 2,
+        y + (yFactor * options.lineWidth) / 2,
+        w - xFactor * options.lineWidth,
+        h - yFactor * options.lineWidth
       );
     }
   }
