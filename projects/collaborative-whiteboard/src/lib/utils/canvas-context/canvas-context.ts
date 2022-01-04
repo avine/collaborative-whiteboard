@@ -24,8 +24,8 @@ export class CanvasContext implements ICanvasContext {
     this.context.lineJoin = 'round';
   }
 
-  handleEvent(event: DrawEvent) {
-    this[getCanvasContextHandler[event.type]](event.data as any, event.options as any);
+  handleEvent({ type, data, options }: DrawEvent) {
+    this[getCanvasContextHandler[type]](data as any, options as any);
   }
 
   drawPoint([x, y]: CanvasPoint, options: DrawOptions) {
@@ -58,21 +58,50 @@ export class CanvasContext implements ICanvasContext {
   }
 
   drawRectangle([fromX, fromY, toX, toY]: CanvasLine, options: DrawOptions) {
-    this.applyDrawOptions(options);
     const offset = this.getOffset(options);
-    this.context.beginPath();
-    this.context.rect(fromX + offset, fromY + offset, toX - fromX + offset, toY - fromY + offset);
-    this.context.stroke();
+    const x = fromX + offset;
+    const y = fromY + offset;
+    const w = toX - fromX + offset;
+    const h = toY - fromY + offset;
+
+    this.applyDrawOptions(options);
+
+    this.context.strokeRect(x, y, w, h);
+
+    if (options.fillOpacity) {
+      this.context.fillRect(
+        x + options.lineWidth / 2,
+        y + options.lineWidth / 2,
+        w - options.lineWidth,
+        h - options.lineWidth
+      );
+    }
   }
 
   drawEllipse([fromX, fromY, toX, toY]: CanvasLine, options: DrawOptions) {
-    this.applyDrawOptions(options);
-    this.context.beginPath();
-    const radiusX = (toX - fromX) / 2;
-    const radiusY = (toY - fromY) / 2;
+    const shiftX = (toX - fromX) / 2;
+    const shiftY = (toY - fromY) / 2;
+    const x = fromX + shiftX;
+    const y = fromY + shiftY;
+    const radiusX = Math.abs(shiftX);
+    const radiusY = Math.abs(shiftY);
     const angle = options.angle ?? 2 * Math.PI;
-    this.context.ellipse(fromX + radiusX, fromY + radiusY, Math.abs(radiusX), Math.abs(radiusY), 0, 0, angle);
+
+    this.applyDrawOptions(options, false);
+    this.context.beginPath();
+    this.context.ellipse(x, y, radiusX, radiusY, 0, 0, angle);
     this.context.stroke();
+
+    const isComplete = options.angle === undefined;
+    if (isComplete && options.fillOpacity) {
+      const fillRadiusX = Math.max(0, radiusX - options.lineWidth / 2);
+      const fillRadiusY = Math.max(0, radiusY - options.lineWidth / 2);
+
+      this.applyDrawOptions(options);
+      this.context.beginPath();
+      this.context.ellipse(x, y, fillRadiusX, fillRadiusY, 0, 0, angle);
+      this.context.fill();
+    }
   }
 
   drawFillRect(canvasLine: CanvasLine, options: DrawOptions) {
@@ -85,12 +114,12 @@ export class CanvasContext implements ICanvasContext {
     this.context.clearRect(...canvasLine);
   }
 
-  private applyDrawOptions(options: DrawOptions) {
-    const rgba = `rgba(${options.color}, ${options.opacity})`;
-
-    this.context.lineWidth = options.lineWidth;
-    this.context.strokeStyle = rgba;
-    this.context.fillStyle = rgba;
+  private applyDrawOptions({ color, opacity, fillOpacity, lineWidth }: DrawOptions, withFillStyle = true) {
+    this.context.lineWidth = lineWidth;
+    this.context.strokeStyle = `rgba(${color}, ${opacity})`;
+    if (withFillStyle) {
+      this.context.fillStyle = `rgba(${color}, ${fillOpacity})`;
+    }
   }
 
   private getOffset(drawOptions: DrawOptions): number {

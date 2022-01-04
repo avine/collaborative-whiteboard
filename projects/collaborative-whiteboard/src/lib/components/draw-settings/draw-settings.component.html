@@ -24,6 +24,18 @@
 
 <div class="cw-control">
   <div class="cw-control__title">
+    <span class="cw-control__title-inner">Fill opacity</span>
+  </div>
+
+  <div class="cw-control__block">
+    <input type="range" min="0.2" max="1" step="0.05" [(ngModel)]="drawOptions.fillOpacity" (ngModelChange)="emit()" />
+
+    <span class="cw-control__number cw-control__number--large">{{ drawOptions.fillOpacity | percent }}</span>
+  </div>
+</div>
+
+<div class="cw-control">
+  <div class="cw-control__title">
     <span class="cw-control__title-inner">Color</span>
   </div>
 

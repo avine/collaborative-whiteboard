@@ -68,4 +68,5 @@ export const getDefaultDrawOptions = (): DrawOptions => ({
   lineWidth: 4,
   color: DEFAULT_COLOR,
   opacity: 1,
+  fillOpacity: 0,
 });

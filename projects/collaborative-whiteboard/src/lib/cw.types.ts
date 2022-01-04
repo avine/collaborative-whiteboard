@@ -26,6 +26,7 @@ export interface DrawOptions {
   lineWidth: number;
   color: string;
   opacity: number;
+  fillOpacity: number;
   angle?: number;
 }
 
