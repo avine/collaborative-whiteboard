@@ -36,6 +36,7 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
     this.service.owner = owner;
   }
 
+  // TODO: rename this method into transport ?
   @Input() set broadcast(transport: DrawTransport | null) {
     if (!transport) {
       return;

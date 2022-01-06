@@ -31,6 +31,8 @@ export class CwService {
 
   private history$$ = new BehaviorSubject<DrawEvent[]>([]);
 
+  private selection$$ = new BehaviorSubject<DrawEvent[]>([]);
+
   private cutRange$$ = new BehaviorSubject<CutRange>([0, 0]);
 
   /**
@@ -55,6 +57,8 @@ export class CwService {
 
   historyCutLength$ = this.historyCut$.pipe(map((historyCut) => historyCut.length));
 
+  selection$ = this.selection$$.asObservable();
+
   cutRange$ = this.cutRange$$.asObservable();
 
   broadcastHistoryCut$ = combineLatest([this.historyCut$, this.cutRange$$]).pipe(
@@ -76,6 +80,10 @@ export class CwService {
   }
 
   set drawMode(drawMode: DrawMode) {
+    // Reset selection when leaving 'selection' mode
+    if (this.drawMode$$.value === 'selection' && drawMode !== 'selection') {
+      this.resetSelection();
+    }
     this.drawMode$$.next(drawMode);
   }
   get drawMode(): DrawMode {
@@ -273,6 +281,33 @@ export class CwService {
   redraw(animate = true) {
     const events = [getClearEvent(this.owner), ...this.backgroundEvent, ...this.history];
     this.broadcast$$.next(mapToDrawEventsBroadcast(events, animate));
+  }
+
+  private addSelection(eventsId: string[]) {
+    const removeUndefined = (event: DrawEvent | undefined): event is DrawEvent => !!event;
+    this.selection$$.next([
+      ...this.selection$$.value,
+      ...eventsId.map((eventId) => this.historyMap.get(eventId)).filter(removeUndefined)
+    ]);
+  }
+
+  private removeSelection(eventsId: string[]) {
+    this.selection$$.next(this.selection$$.value.filter(({ id }) => !eventsId.includes(id)));
+  }
+
+  toggleSelection(eventsId: string[]) {
+    eventsId.forEach((eventId) => {
+      // ! FIXME: Should we use a Map<string, DrawEvent> instead of an DrawEvent[] for the selection$$ values ?
+      if (this.selection$$.value.find(({ id }) => eventId === id)) {
+        this.removeSelection([eventId]);
+      } else {
+        this.addSelection([eventId]);
+      }
+    });
+  }
+
+  resetSelection() {
+    this.selection$$.next([]);
   }
 
   setCutRange(data: CutRangeArg) {

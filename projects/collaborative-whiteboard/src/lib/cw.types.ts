@@ -7,7 +7,7 @@ export interface FillBackground {
   opacity: number;
 }
 
-export type DrawMode = 'brush' | 'line' | 'rectangle' | 'ellipse';
+export type DrawMode = 'selection' | 'brush' | 'line' | 'rectangle' | 'ellipse';
 
 export interface CanvasSize {
   width: number;

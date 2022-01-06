@@ -17,5 +17,5 @@ export class CwDrawModeComponent {
 
   @Output() pointerMagnetChange = new EventEmitter<number>();
 
-  list: DrawMode[] = ['brush', 'line', 'rectangle', 'ellipse'];
+  list: DrawMode[] = ['selection', 'brush', 'line', 'rectangle', 'ellipse'];
 }

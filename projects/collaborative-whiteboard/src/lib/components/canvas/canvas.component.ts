@@ -53,6 +53,8 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
 
   @Output() draw = new EventEmitter<DrawEvent>();
 
+  @Output() selection = new EventEmitter<string[]>();
+
   @ViewChild('canvasResult') canvasResultRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild('canvasBroadcast') canvasBroadcastRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild('canvasEmit') canvasEmitRef!: ElementRef<HTMLCanvasElement>;
@@ -123,11 +125,12 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
     if (!events.length) {
       return;
     }
+    this.broadcastEventsBuffer = [];
+    this.contextBroadcast.drawClear(this.canvasSizeAsLine);
+    this.contextResult.resetPaths2D();
     while (events.length) {
       this.handleResult(events.shift() as DrawEvent);
     }
-    this.contextBroadcast.drawClear(this.canvasSizeAsLine);
-    this.broadcastEventsBuffer = [];
   }
 
   private updateBroadcastEventsBuffer() {
@@ -163,7 +166,7 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
         for (let i = 0; i < flushCount; i++) {
           const event = this.broadcastEventsBuffer.shift() as DrawEvent | DrawEventAnimated;
           if (!isDrawEventAnimated(event)) {
-            this.handleResult(event);
+            this.handleResult(event); // TODO: C'est pas redondant, deux foix "handleResult" ici et juste plus bas...?
             continue;
           }
           this.contextBroadcast.drawClear(this.canvasSizeAsLine);
@@ -231,6 +234,10 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
   }
 
   emitStart(canvasPoint: CanvasPoint, options = this.drawOptions) {
+    if (this.drawMode === 'selection') {
+      return;
+    }
+    // ! FIXME: is it better not to draw this point ?
     this.contextEmit.drawPoint(canvasPoint, options);
   }
 
@@ -258,8 +265,12 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
 
   emitEnd(data: number[], options = this.drawOptions) {
     this.contextEmit.drawClear(this.canvasSizeAsLine);
-    let event: DrawEvent;
+    let event: DrawEvent | undefined = undefined;
     switch (this.drawMode) {
+      case 'selection': {
+        this.handleSelection(data);
+        return;
+      }
       case 'brush': {
         event = this.getCompleteEvent(data, options);
         break;
@@ -279,6 +290,24 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
     }
     this.handleResult(event);
     this.draw.emit(moveDrawEvent(event, ...this.getCanvasCenter('emit')));
+  }
+
+  private handleSelection(data: number[]) {
+    switch (data.length) {
+      case 2: {
+        const eventsId = this.contextResult.getSelectedEventsId(...data as CanvasPoint);
+        if (eventsId.length) {
+          this.selection.emit(eventsId);
+        }
+        break;
+      }
+      default: {
+        // TODO: find a way to select multuple events at once...
+        // const canvasLine = [...data.slice(0, 2), ...data.slice(-2)] as CanvasLine;
+        // ...
+        break;
+      }
+    }
   }
 
   private getCompleteEvent(data: number[], options: DrawOptions, forceDrawType?: DrawType): DrawEvent {
