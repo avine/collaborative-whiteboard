@@ -54,7 +54,7 @@
     <cw-icon icon="redo"></cw-icon>
   </cw-tool>
 
-  <cw-tool title="Cut history" [content]="cutTool" [(active)]="showCutTool">
+  <cw-tool title="Cut" (activeChange)="service.cutSelection()">
     <cw-icon icon="cut"></cw-icon>
   </cw-tool>
 
@@ -103,6 +103,3 @@
   ></cw-draw-mode>
 </ng-template>
 
-<ng-template #cutTool>
-  <cw-cut></cw-cut>
-</ng-template>

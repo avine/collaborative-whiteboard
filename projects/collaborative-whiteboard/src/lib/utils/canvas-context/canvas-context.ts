@@ -1,7 +1,8 @@
 import { getDefaultCanvasSize } from '../../cw.config';
 import { CanvasLine, CanvasLineSerie, CanvasPoint, CanvasSize, DrawEvent, DrawOptions } from '../../cw.types';
+import { getSelectionDrawOptions, SELECTION_LINE_DASH, SELECTION_SHIFT } from './canvas-context.config';
 import { ICanvasContext } from './canvas.context.types';
-import { getCanvasContextHandler } from './canvas.context.utils';
+import { getCanvasContextHandler, getExtremities } from './canvas.context.utils';
 
 export class CanvasContext implements ICanvasContext {
   private canvasSize = getDefaultCanvasSize();
@@ -42,7 +43,9 @@ export class CanvasContext implements ICanvasContext {
 
   handleEvent({ id, type, data, options }: DrawEvent) {
     const path2D = this[getCanvasContextHandler[type]](data as any, options as any);
-    this.path2DMap.set(id, path2D);
+    if (path2D) {
+      this.path2DMap.set(id, path2D);
+    }
   }
 
   drawPoint([x, y]: CanvasPoint, options: DrawOptions) {
@@ -59,7 +62,7 @@ export class CanvasContext implements ICanvasContext {
     const offset = this.getOffset(options);
     const path2D = new Path2D();
     path2D.moveTo(fromX + offset, fromY + offset);
-    path2D.lineTo(toX + offset, toY + offset);
+    path2D.lineTo(toX/* + offset*/, toY/* + offset*/); // !FIXME: using offset on both sides does not seems to wrk well...
     this.context.stroke(path2D);
     return path2D;
   }
@@ -82,8 +85,8 @@ export class CanvasContext implements ICanvasContext {
     const offset = this.getOffset(options);
     const x = fromX + offset;
     const y = fromY + offset;
-    const w = toX - fromX + offset;
-    const h = toY - fromY + offset;
+    const w = toX - fromX /*+ offset*/;
+    const h = toY - fromY /*+ offset*/;
     const path2D = new Path2D();
 
     const stroke = new Path2D();
@@ -148,8 +151,25 @@ export class CanvasContext implements ICanvasContext {
   // Note: keep the second parameter for signature consistency
   drawClear(canvasLine: CanvasLine, _?: DrawOptions) {
     this.context.clearRect(...canvasLine);
-    // Note: return a Path2D also for consistency
-    return new Path2D();
+  }
+
+  drawSelection(data: CanvasPoint | CanvasLine | CanvasLineSerie, eventDrawOptions: DrawOptions) {
+    const [fromX, fromY, toX, toY] = getExtremities(data);
+    const selectionDrawOptions = getSelectionDrawOptions();
+    this.applyDrawOptions(selectionDrawOptions);
+    const offset = this.getOffset(selectionDrawOptions);
+    const x = fromX + offset;
+    const y = fromY + offset;
+    const w = toX - fromX /*+ offset*/; // !FIXME: using offset on both sides does not seems to wrk well...
+    const h = toY - fromY /*+ offset*/;
+    const xFactor = w >= 0 ? 1 : -1;
+    const yFactor = h >= 0 ? 1 : -1;
+    const shift = Math.round(eventDrawOptions.lineWidth / 2) + SELECTION_SHIFT;
+    this.context.beginPath();
+    this.context.setLineDash(SELECTION_LINE_DASH);
+    this.context.rect(x - xFactor * shift, y - yFactor * shift, w + xFactor * 2 * shift, h + yFactor * 2 * shift);
+    this.context.stroke();
+    this.context.setLineDash([]);
   }
 
   private applyDrawOptions({ color, opacity, fillOpacity, lineWidth }: DrawOptions, withFillStyle = true) {

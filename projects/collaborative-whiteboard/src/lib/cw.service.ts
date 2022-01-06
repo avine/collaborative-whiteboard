@@ -83,6 +83,7 @@ export class CwService {
     // Reset selection when leaving 'selection' mode
     if (this.drawMode$$.value === 'selection' && drawMode !== 'selection') {
       this.resetSelection();
+      this.redraw(false);
     }
     this.drawMode$$.next(drawMode);
   }
@@ -95,6 +96,14 @@ export class CwService {
   }
 
   private pullHistory(event: DrawEvent): boolean {
+
+    // TODO: Mutualiser ce code
+    const selection = this.selection$$.value.filter(({ id }) => id !== event.id);
+    if (selection.length < this.selection$$.value.length) {
+      this.selection$$.next(selection);
+    }
+    // Mutualiser ce code
+
     return this.historyMap.delete(event.id);
   }
 
@@ -102,6 +111,14 @@ export class CwService {
     if (hash) {
       const removed = this.historyMap.get(hash);
       if (removed) {
+
+        // TODO: Mutualiser ce code
+        const selection = this.selection$$.value.filter(({ id }) => id !== removed.id);
+        if (selection.length < this.selection$$.value.length) {
+          this.selection$$.next(selection);
+        }
+        // Mutualiser ce code
+
         this.historyMap.delete(hash);
         return removed;
       }
@@ -198,7 +215,12 @@ export class CwService {
         this.pushHistoryRedo(ownerEvents);
       }
       this.broadcast$$.next(
-        mapToDrawEventsBroadcast([getClearEvent(this.owner), ...this.backgroundEvent, ...this.history])
+        mapToDrawEventsBroadcast([
+          getClearEvent(this.owner),
+          ...this.backgroundEvent,
+          ...this.history,
+          ...this.selectionEvents,
+        ])
       );
       this.emitHistory();
     }
@@ -236,7 +258,12 @@ export class CwService {
     if (event) {
       this.pushHistoryRedo([event]);
       this.broadcast$$.next(
-        mapToDrawEventsBroadcast([getClearEvent(this.owner), ...this.backgroundEvent, ...this.history])
+        mapToDrawEventsBroadcast([
+          getClearEvent(this.owner),
+          ...this.backgroundEvent,
+          ...this.history,
+          ...this.selectionEvents,
+        ])
       );
       this.emit$$.next({ action: 'remove', events: [event] });
       this.emitHistory();
@@ -253,12 +280,23 @@ export class CwService {
     }
   }
 
+  cutSelection() {
+    const selection = this.selection$$.value;
+    this.resetSelection();
+    this.cut(selection);
+  }
+
   cut(events: DrawEvent[]) {
     const removed = events.filter((event) => this.pullHistory(event));
     if (removed.length) {
       this.pushHistoryRedo(removed);
       this.broadcast$$.next(
-        mapToDrawEventsBroadcast([getClearEvent(this.owner), ...this.backgroundEvent, ...this.history])
+        mapToDrawEventsBroadcast([
+          getClearEvent(this.owner),
+          ...this.backgroundEvent,
+          ...this.history,
+          ...this.selectionEvents,
+        ])
       );
       this.emit$$.next({ action: 'remove', events: removed });
       this.emitHistory();
@@ -279,7 +317,7 @@ export class CwService {
   }
 
   redraw(animate = true) {
-    const events = [getClearEvent(this.owner), ...this.backgroundEvent, ...this.history];
+    const events = [getClearEvent(this.owner), ...this.backgroundEvent, ...this.history, ...this.selectionEvents];
     this.broadcast$$.next(mapToDrawEventsBroadcast(events, animate));
   }
 
@@ -287,7 +325,7 @@ export class CwService {
     const removeUndefined = (event: DrawEvent | undefined): event is DrawEvent => !!event;
     this.selection$$.next([
       ...this.selection$$.value,
-      ...eventsId.map((eventId) => this.historyMap.get(eventId)).filter(removeUndefined)
+      ...eventsId.map((eventId) => this.historyMap.get(eventId)).filter(removeUndefined),
     ]);
   }
 
@@ -304,6 +342,7 @@ export class CwService {
         this.addSelection([eventId]);
       }
     });
+    this.redraw(false);
   }
 
   resetSelection() {
@@ -333,5 +372,9 @@ export class CwService {
       events.push(getFillRectEvent(color, opacity, this.owner));
     }
     return events;
+  }
+
+  private get selectionEvents(): DrawEvent[] {
+    return this.selection$$.value.map((event) => ({ ...event, type: 'selection' }));
   }
 }

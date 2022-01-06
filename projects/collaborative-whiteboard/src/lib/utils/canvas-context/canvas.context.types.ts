@@ -7,5 +7,6 @@ export interface ICanvasContext {
   drawRectangle: (data: CanvasLine, options: DrawOptions) => Path2D;
   drawEllipse: (data: CanvasLine, options: DrawOptions) => Path2D;
   drawFillRect: (data: CanvasLine, options: DrawOptions) => Path2D;
-  drawClear: (data: CanvasLine, options: DrawOptions) => Path2D;
+  drawClear: (data: CanvasLine, options: DrawOptions) => void;
+  drawSelection: (data: CanvasLine, options: DrawOptions) => void;
 }

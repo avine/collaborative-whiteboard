@@ -200,7 +200,7 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
 
   private getAnimFlushCount(remain: number, total: number) {
     // Let's do some easing!
-    const count = Math.round(Math.sin((remain / total) * Math.PI) * total / 50) + 1;
+    const count = Math.round((Math.sin((remain / total) * Math.PI) * total) / 50) + 1;
     return Math.min(count, remain);
   }
 
@@ -230,7 +230,10 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
     if (!this.pointerMagnet) {
       return [0, 0];
     }
-    return [(this.canvasSize.width / 2) % this.pointerMagnet, (this.canvasSize.height / 2) % this.pointerMagnet];
+    return [
+      Math.round((this.canvasSize.width / 2) % this.pointerMagnet),
+      Math.round((this.canvasSize.height / 2) % this.pointerMagnet),
+    ];
   }
 
   emitStart(canvasPoint: CanvasPoint, options = this.drawOptions) {
@@ -295,7 +298,7 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
   private handleSelection(data: number[]) {
     switch (data.length) {
       case 2: {
-        const eventsId = this.contextResult.getSelectedEventsId(...data as CanvasPoint);
+        const eventsId = this.contextResult.getSelectedEventsId(...(data as CanvasPoint));
         if (eventsId.length) {
           this.selection.emit(eventsId);
         }
