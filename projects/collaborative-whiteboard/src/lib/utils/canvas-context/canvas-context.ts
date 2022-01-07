@@ -2,13 +2,12 @@ import { getDefaultCanvasSize } from '../../cw.config';
 import { CanvasLine, CanvasLineSerie, CanvasPoint, CanvasSize, DrawEvent, DrawOptions } from '../../cw.types';
 import { getSelectionDrawOptions, SELECTION_LINE_DASH, SELECTION_SHIFT } from './canvas-context.config';
 import { ICanvasContext } from './canvas.context.types';
-import { getCanvasContextHandler, getExtremities } from './canvas.context.utils';
+import { getCanvasContextHandler, getBoundingRect } from './canvas.context.utils';
 
 export class CanvasContext implements ICanvasContext {
   private canvasSize = getDefaultCanvasSize();
 
-  // TODO: use path2DMap to draw paths when possible...
-  private path2DMap = new Map<string, Path2D>();
+  private path2DMap = new Map<string, Path2D>(); // TODO: use path2DMap to draw paths when possible...
 
   constructor(private context: CanvasRenderingContext2D) {}
 
@@ -17,7 +16,7 @@ export class CanvasContext implements ICanvasContext {
     this.setCanvasSize();
     this.setContextDefault();
 
-    // note: changing the canvas size will reset its context...
+    // Note: changing the canvas size will reset its context.
     this.resetPaths2D();
   }
 
@@ -29,16 +28,6 @@ export class CanvasContext implements ICanvasContext {
   private setContextDefault() {
     this.context.lineCap = 'round';
     this.context.lineJoin = 'round';
-  }
-
-  resetPaths2D() {
-    this.path2DMap.clear();
-  }
-
-  getSelectedEventsId(x: number, y: number): string[] {
-    return Array.from(this.path2DMap.entries())
-      .filter(([, path2D]) => this.context.isPointInPath(path2D, x, y))
-      .map(([eventId]) => eventId);
   }
 
   handleEvent({ id, type, data, options }: DrawEvent) {
@@ -62,7 +51,7 @@ export class CanvasContext implements ICanvasContext {
     const offset = this.getOffset(options);
     const path2D = new Path2D();
     path2D.moveTo(fromX + offset, fromY + offset);
-    path2D.lineTo(toX/* + offset*/, toY/* + offset*/); // !FIXME: using offset on both sides does not seems to wrk well...
+    path2D.lineTo(toX + offset, toY + offset);
     this.context.stroke(path2D);
     return path2D;
   }
@@ -85,8 +74,8 @@ export class CanvasContext implements ICanvasContext {
     const offset = this.getOffset(options);
     const x = fromX + offset;
     const y = fromY + offset;
-    const w = toX - fromX /*+ offset*/;
-    const h = toY - fromY /*+ offset*/;
+    const w = toX - fromX;
+    const h = toY - fromY;
     const path2D = new Path2D();
 
     const stroke = new Path2D();
@@ -111,18 +100,19 @@ export class CanvasContext implements ICanvasContext {
   }
 
   drawEllipse([fromX, fromY, toX, toY]: CanvasLine, options: DrawOptions) {
-    const shiftX = (toX - fromX) / 2;
-    const shiftY = (toY - fromY) / 2;
+    const shiftX = Math.round((toX - fromX) / 2);
+    const shiftY = Math.round((toY - fromY) / 2);
     const x = fromX + shiftX;
     const y = fromY + shiftY;
     const radiusX = Math.abs(shiftX);
     const radiusY = Math.abs(shiftY);
     const angle = options.angle ?? 2 * Math.PI;
+    const offset = this.getOffset(options);
 
     const path2D = new Path2D();
     const stroke = new Path2D();
     path2D.addPath(stroke);
-    stroke.ellipse(x, y, radiusX, radiusY, 0, 0, angle);
+    stroke.ellipse(x + offset, y + offset, radiusX, radiusY, 0, 0, angle);
     this.applyDrawOptions(options, false);
     this.context.stroke(stroke);
 
@@ -132,7 +122,7 @@ export class CanvasContext implements ICanvasContext {
       const fillRadiusY = Math.max(0, radiusY - options.lineWidth / 2);
 
       const fill = new Path2D();
-      fill.ellipse(x, y, fillRadiusX, fillRadiusY, 0, 0, angle);
+      fill.ellipse(x + offset, y + offset, fillRadiusX, fillRadiusY, 0, 0, angle);
       path2D.addPath(fill);
       this.applyDrawOptions(options);
       this.context.fill(fill);
@@ -154,14 +144,14 @@ export class CanvasContext implements ICanvasContext {
   }
 
   drawSelection(data: CanvasPoint | CanvasLine | CanvasLineSerie, eventDrawOptions: DrawOptions) {
-    const [fromX, fromY, toX, toY] = getExtremities(data);
+    const [fromX, fromY, toX, toY] = getBoundingRect(data);
     const selectionDrawOptions = getSelectionDrawOptions();
     this.applyDrawOptions(selectionDrawOptions);
     const offset = this.getOffset(selectionDrawOptions);
     const x = fromX + offset;
     const y = fromY + offset;
-    const w = toX - fromX /*+ offset*/; // !FIXME: using offset on both sides does not seems to wrk well...
-    const h = toY - fromY /*+ offset*/;
+    const w = toX - fromX;
+    const h = toY - fromY;
     const xFactor = w >= 0 ? 1 : -1;
     const yFactor = h >= 0 ? 1 : -1;
     const shift = Math.round(eventDrawOptions.lineWidth / 2) + SELECTION_SHIFT;
@@ -170,6 +160,16 @@ export class CanvasContext implements ICanvasContext {
     this.context.rect(x - xFactor * shift, y - yFactor * shift, w + xFactor * 2 * shift, h + yFactor * 2 * shift);
     this.context.stroke();
     this.context.setLineDash([]);
+  }
+
+  selectEventsId(x: number, y: number): string[] {
+    return Array.from(this.path2DMap.entries())
+      .filter(([, path2D]) => this.context.isPointInPath(path2D, x, y))
+      .map(([eventId]) => eventId);
+  }
+
+  resetPaths2D() {
+    this.path2DMap.clear();
   }
 
   private applyDrawOptions({ color, opacity, fillOpacity, lineWidth }: DrawOptions, withFillStyle = true) {

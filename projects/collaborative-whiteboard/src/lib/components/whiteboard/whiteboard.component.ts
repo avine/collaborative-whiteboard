@@ -58,7 +58,7 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
 
   pointerMagnet = this.storageService.getLocal(StorageKey.PointerMagnet, 0);
 
-  // note: if there's more than one tool-group then set a different name for each one of them
+  // Note: if there's more than one tool-group then set a different name for each one of them
   toolGroupName = '';
 
   toolGroupLayoutVertical = this.storageService.getLocal(

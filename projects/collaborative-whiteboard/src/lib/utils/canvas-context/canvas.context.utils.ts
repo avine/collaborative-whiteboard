@@ -12,7 +12,7 @@ export const getCanvasContextHandler: Record<DrawEvent['type'], keyof ICanvasCon
   selection: 'drawSelection',
 };
 
-export const getExtremities = (data: CanvasPoint | CanvasLine | CanvasLineSerie): CanvasLine => {
+export const getBoundingRect = (data: CanvasPoint | CanvasLine | CanvasLineSerie): CanvasLine => {
   switch (data.length) {
     case 2: {
       return [data[0], data[1], data[0], data[1]];
@@ -25,7 +25,7 @@ export const getExtremities = (data: CanvasPoint | CanvasLine | CanvasLineSerie)
       let xMax = data[0];
       let yMin = data[1];
       let yMax = data[1];
-      for (let i = 2; i <data.length; i += 2) {
+      for (let i = 2; i < data.length; i += 2) {
         xMin = Math.min(xMin, data[i]);
         xMax = Math.max(xMax, data[i]);
         yMin = Math.min(yMin, data[i + 1]);

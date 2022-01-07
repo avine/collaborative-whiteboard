@@ -298,7 +298,7 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
   private handleSelection(data: number[]) {
     switch (data.length) {
       case 2: {
-        const eventsId = this.contextResult.getSelectedEventsId(...(data as CanvasPoint));
+        const eventsId = this.contextResult.selectEventsId(...(data as CanvasPoint));
         if (eventsId.length) {
           this.selection.emit(eventsId);
         }
