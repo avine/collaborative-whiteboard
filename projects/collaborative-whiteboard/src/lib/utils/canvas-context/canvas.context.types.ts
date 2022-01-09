@@ -6,7 +6,20 @@ export interface ICanvasContext {
   drawLineSerie: (data: CanvasLineSerie, options: DrawOptions) => Path2D;
   drawRectangle: (data: CanvasLine, options: DrawOptions) => Path2D;
   drawEllipse: (data: CanvasLine, options: DrawOptions) => Path2D;
-  drawFillRect: (data: CanvasLine, options: DrawOptions) => Path2D;
+  drawFillRect: (data: CanvasLine, options: DrawOptions) => void;
   drawClear: (data: CanvasLine, options: DrawOptions) => void;
-  drawSelection: (data: CanvasLine, options: DrawOptions) => void;
+}
+
+export interface DrawEventPath {
+  path2D: Path2D;
+  eventId: string;
+}
+
+export interface DrawSelectionPath extends DrawEventPath {
+  action: 'select';
+}
+
+export interface SelectedAction {
+  eventId: string;
+  action: 'select';
 }

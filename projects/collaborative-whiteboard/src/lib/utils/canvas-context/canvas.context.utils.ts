@@ -1,7 +1,7 @@
-import { CanvasLine, CanvasLineSerie, CanvasPoint, DrawEvent } from '../../cw.types';
+import { CanvasLine, CanvasLineSerie, CanvasPoint, DrawType } from '../../cw.types';
 import { ICanvasContext } from './canvas.context.types';
 
-export const getCanvasContextHandler: Record<DrawEvent['type'], keyof ICanvasContext> = {
+export const getCanvasContextHandler: Record<Exclude<DrawType, 'selection'>, keyof ICanvasContext> = {
   point: 'drawPoint',
   line: 'drawLine',
   lineSerie: 'drawLineSerie',
@@ -9,7 +9,6 @@ export const getCanvasContextHandler: Record<DrawEvent['type'], keyof ICanvasCon
   ellipse: 'drawEllipse',
   fillRect: 'drawFillRect',
   clear: 'drawClear',
-  selection: 'drawSelection',
 };
 
 export const getBoundingRect = (data: CanvasPoint | CanvasLine | CanvasLineSerie): CanvasLine => {

@@ -62,6 +62,7 @@ export interface DrawEllipse extends DrawBase {
   data: CanvasLine;
 }
 
+// TODO: rename 'fillRect' into 'fillBackground'
 export interface DrawFillRect extends DrawBase {
   type: 'fillRect';
   data: CanvasLine;

@@ -53,7 +53,7 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
 
   @Output() draw = new EventEmitter<DrawEvent>();
 
-  @Output() selection = new EventEmitter<string[]>();
+  @Output() selection = new EventEmitter<{ eventsId: string[]; action: 'add' | 'remove' | 'clear' }>();
 
   @ViewChild('canvasResult') canvasResultRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild('canvasBroadcast') canvasBroadcastRef!: ElementRef<HTMLCanvasElement>;
@@ -127,7 +127,7 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
     }
     this.broadcastEventsBuffer = [];
     this.contextBroadcast.drawClear(this.canvasSizeAsLine);
-    this.contextResult.resetPaths2D();
+    this.contextResult.resetPaths();
     while (events.length) {
       this.handleResult(events.shift() as DrawEvent);
     }
@@ -237,11 +237,19 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
   }
 
   emitStart(canvasPoint: CanvasPoint, options = this.drawOptions) {
-    if (this.drawMode === 'selection') {
-      return;
+    switch (this.drawMode) {
+      case 'selection': {
+        const eventsId = this.contextResult.getSelectedDrawEventsId(...canvasPoint);
+        if (eventsId.length) {
+          this.selection.emit({ eventsId, action: 'add' });
+        }
+        break;
+      }
+      default: {
+        // ! FIXME: is it better not to draw this point ?
+        this.contextEmit.drawPoint(canvasPoint, options);
+      }
     }
-    // ! FIXME: is it better not to draw this point ?
-    this.contextEmit.drawPoint(canvasPoint, options);
   }
 
   emitMove(data: number[], options = this.drawOptions) {
@@ -271,7 +279,7 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
     let event: DrawEvent | undefined = undefined;
     switch (this.drawMode) {
       case 'selection': {
-        this.handleSelection(data);
+        this.handleSelectionEnd(data);
         return;
       }
       case 'brush': {
@@ -295,17 +303,18 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
     this.draw.emit(moveDrawEvent(event, ...this.getCanvasCenter('emit')));
   }
 
-  private handleSelection(data: number[]) {
+  private handleSelectionEnd(data: number[]) {
     switch (data.length) {
       case 2: {
-        const eventsId = this.contextResult.selectEventsId(...(data as CanvasPoint));
-        if (eventsId.length) {
-          this.selection.emit(eventsId);
+        const eventsId = this.contextResult.getSelectedDrawEventsId(...(data as CanvasPoint));
+        if (!eventsId.length) {
+          // !FIXME: find a way to unselect...
+          this.selection.emit({ eventsId, action: eventsId.length ? 'remove' : 'clear' });
         }
         break;
       }
       default: {
-        // TODO: find a way to select multuple events at once...
+        // TODO: find a way to translate events...
         // const canvasLine = [...data.slice(0, 2), ...data.slice(-2)] as CanvasLine;
         // ...
         break;

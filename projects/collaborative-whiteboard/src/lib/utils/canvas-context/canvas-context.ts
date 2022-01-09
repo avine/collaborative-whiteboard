@@ -1,13 +1,15 @@
 import { getDefaultCanvasSize } from '../../cw.config';
 import { CanvasLine, CanvasLineSerie, CanvasPoint, CanvasSize, DrawEvent, DrawOptions } from '../../cw.types';
 import { getSelectionDrawOptions, SELECTION_LINE_DASH, SELECTION_SHIFT } from './canvas-context.config';
-import { ICanvasContext } from './canvas.context.types';
-import { getCanvasContextHandler, getBoundingRect } from './canvas.context.utils';
+import { DrawEventPath, DrawSelectionPath, ICanvasContext, SelectedAction } from './canvas.context.types';
+import { getBoundingRect, getCanvasContextHandler } from './canvas.context.utils';
 
 export class CanvasContext implements ICanvasContext {
   private canvasSize = getDefaultCanvasSize();
 
-  private path2DMap = new Map<string, Path2D>(); // TODO: use path2DMap to draw paths when possible...
+  private drawEventPaths: DrawEventPath[] = []; // TODO: use path2DMap to draw paths when possible...
+
+  private drawSelectionPaths: DrawSelectionPath[] = [];
 
   constructor(private context: CanvasRenderingContext2D) {}
 
@@ -17,7 +19,7 @@ export class CanvasContext implements ICanvasContext {
     this.setContextDefault();
 
     // Note: changing the canvas size will reset its context.
-    this.resetPaths2D();
+    this.resetPaths();
   }
 
   private setCanvasSize() {
@@ -30,10 +32,15 @@ export class CanvasContext implements ICanvasContext {
     this.context.lineJoin = 'round';
   }
 
-  handleEvent({ id, type, data, options }: DrawEvent) {
-    const path2D = this[getCanvasContextHandler[type]](data as any, options as any);
-    if (path2D) {
-      this.path2DMap.set(id, path2D);
+  handleEvent({ id: eventId, type, data, options }: DrawEvent) {
+    if (type === 'selection') {
+      const actions = this.drawSelection(data, options);
+      this.drawSelectionPaths.push(...actions.map((action) => ({ ...action, eventId })));
+    } else {
+      const path2D = this[getCanvasContextHandler[type]](data as any, options as any);
+      if (path2D) {
+        this.drawEventPaths.push({ path2D, eventId });
+      }
     }
   }
 
@@ -132,10 +139,9 @@ export class CanvasContext implements ICanvasContext {
 
   drawFillRect(canvasLine: CanvasLine, options: DrawOptions) {
     this.applyDrawOptions(options);
-    const path2D = new Path2D();
-    path2D.rect(...canvasLine);
-    this.context.fill(path2D);
-    return path2D;
+    this.context.beginPath();
+    this.context.rect(...canvasLine);
+    this.context.fill();
   }
 
   // Note: keep the second parameter for signature consistency
@@ -143,7 +149,10 @@ export class CanvasContext implements ICanvasContext {
     this.context.clearRect(...canvasLine);
   }
 
-  drawSelection(data: CanvasPoint | CanvasLine | CanvasLineSerie, eventDrawOptions: DrawOptions) {
+  drawSelection(
+    data: CanvasPoint | CanvasLine | CanvasLineSerie,
+    eventDrawOptions: DrawOptions
+  ): Omit<DrawSelectionPath, 'eventId'>[] {
     const [fromX, fromY, toX, toY] = getBoundingRect(data);
     const selectionDrawOptions = getSelectionDrawOptions();
     this.applyDrawOptions(selectionDrawOptions);
@@ -155,21 +164,31 @@ export class CanvasContext implements ICanvasContext {
     const xFactor = w >= 0 ? 1 : -1;
     const yFactor = h >= 0 ? 1 : -1;
     const shift = Math.round(eventDrawOptions.lineWidth / 2) + SELECTION_SHIFT;
-    this.context.beginPath();
+
+    const select = new Path2D();
+    select.rect(x - xFactor * shift, y - yFactor * shift, w + xFactor * 2 * shift, h + yFactor * 2 * shift);
     this.context.setLineDash(SELECTION_LINE_DASH);
-    this.context.rect(x - xFactor * shift, y - yFactor * shift, w + xFactor * 2 * shift, h + yFactor * 2 * shift);
-    this.context.stroke();
+    this.context.stroke(select);
     this.context.setLineDash([]);
+    return [{ path2D: select, action: 'select' }];
   }
 
-  selectEventsId(x: number, y: number): string[] {
-    return Array.from(this.path2DMap.entries())
-      .filter(([, path2D]) => this.context.isPointInPath(path2D, x, y))
-      .map(([eventId]) => eventId);
+  getSelectedDrawEventsId(x: number, y: number): string[] {
+    return this.drawEventPaths
+      .filter(({ path2D }) => this.context.isPointInPath(path2D, x, y))
+      .map(({ eventId }) => eventId);
   }
 
-  resetPaths2D() {
-    this.path2DMap.clear();
+  // !FIXME: est-ce qu'on devrait pas ne retourner qu'une seule action ?
+  getSelectedActions(x: number, y: number): SelectedAction[] {
+    return this.drawSelectionPaths
+      .filter(({ path2D }) => this.context.isPointInPath(path2D, x, y))
+      .map(({ eventId, action }) => ({ eventId, action }));
+  }
+
+  resetPaths() {
+    this.drawEventPaths = [];
+    this.drawSelectionPaths = [];
   }
 
   private applyDrawOptions({ color, opacity, fillOpacity, lineWidth }: DrawOptions, withFillStyle = true) {

@@ -219,4 +219,21 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
   throwMissing(): any {
     throw new Error('This code should never be executed!');
   }
+
+  handleSelection({ eventsId, action }: { eventsId: string[]; action: 'add' | 'remove' | 'clear' }) {
+    switch (action) {
+      case 'clear': {
+        this.service.clearSelection();
+        break;
+      }
+      case 'add': {
+        this.service.addSelection(eventsId);
+        break;
+      }
+      case 'remove': {
+        this.service.removeSelection(eventsId);
+        break;
+      }
+    }
+  }
 }

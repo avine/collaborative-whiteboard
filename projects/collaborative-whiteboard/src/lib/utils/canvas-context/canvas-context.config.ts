@@ -9,4 +9,4 @@ export const getSelectionDrawOptions = (): DrawOptions => ({
 
 export const SELECTION_SHIFT = 3;
 
-export const SELECTION_LINE_DASH = [10, 5];
+export const SELECTION_LINE_DASH = [9, 6];

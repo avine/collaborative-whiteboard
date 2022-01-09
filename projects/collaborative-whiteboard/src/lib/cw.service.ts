@@ -31,6 +31,8 @@ export class CwService {
 
   private history$$ = new BehaviorSubject<DrawEvent[]>([]);
 
+  private selectionSet = new Set<string>();
+
   private selection$$ = new BehaviorSubject<DrawEvent[]>([]);
 
   private cutRange$$ = new BehaviorSubject<CutRange>([0, 0]);
@@ -80,12 +82,13 @@ export class CwService {
   }
 
   set drawMode(drawMode: DrawMode) {
-    // Reset selection when leaving 'selection' mode
+    this.drawMode$$.next(drawMode);
+
+    // Clear selection when leaving 'selection' mode
     if (this.drawMode$$.value === 'selection' && drawMode !== 'selection') {
-      this.resetSelection();
+      this.clearSelection();
       this.redraw(false);
     }
-    this.drawMode$$.next(drawMode);
   }
   get drawMode(): DrawMode {
     return this.drawMode$$.value;
@@ -96,14 +99,6 @@ export class CwService {
   }
 
   private pullHistory(event: DrawEvent): boolean {
-
-    // TODO: Mutualiser ce code
-    const selection = this.selection$$.value.filter(({ id }) => id !== event.id);
-    if (selection.length < this.selection$$.value.length) {
-      this.selection$$.next(selection);
-    }
-    // Mutualiser ce code
-
     return this.historyMap.delete(event.id);
   }
 
@@ -111,14 +106,6 @@ export class CwService {
     if (hash) {
       const removed = this.historyMap.get(hash);
       if (removed) {
-
-        // TODO: Mutualiser ce code
-        const selection = this.selection$$.value.filter(({ id }) => id !== removed.id);
-        if (selection.length < this.selection$$.value.length) {
-          this.selection$$.next(selection);
-        }
-        // Mutualiser ce code
-
         this.historyMap.delete(hash);
         return removed;
       }
@@ -171,8 +158,21 @@ export class CwService {
   }
 
   private emitHistory() {
-    this.history$$.next(this.history);
+    this.checkSelection();
     this.checkCutRange();
+    this.history$$.next(this.history);
+  }
+
+  private checkSelection() {
+    const eventsId = Array.from(this.selectionSet);
+    const events = eventsId
+      .map((eventId) => this.historyMap.get(eventId))
+      .filter((event: DrawEvent | undefined): event is DrawEvent => !!event);
+    if (eventsId.length === events.length) {
+      return;
+    }
+    this.selectionSet = new Set(events.map(({ id }) => id));
+    this.selection$$.next(events);
   }
 
   private checkCutRange() {
@@ -203,8 +203,8 @@ export class CwService {
     if (ownerEvents.length) {
       this.dropHistoryRedoAgainst(ownerEvents);
     }
-    this.broadcast$$.next(mapToDrawEventsBroadcast(events, true));
     this.emitHistory();
+    this.broadcast$$.next(mapToDrawEventsBroadcast(events, true));
   }
 
   private broadcastRemove(events: DrawEvent[]) {
@@ -214,6 +214,7 @@ export class CwService {
       if (ownerEvents.length) {
         this.pushHistoryRedo(ownerEvents);
       }
+      this.emitHistory();
       this.broadcast$$.next(
         mapToDrawEventsBroadcast([
           getClearEvent(this.owner),
@@ -222,7 +223,6 @@ export class CwService {
           ...this.selectionEvents,
         ])
       );
-      this.emitHistory();
     }
   }
 
@@ -249,14 +249,15 @@ export class CwService {
   emit(event: DrawEvent) {
     this.pushHistory(event);
     this.dropHistoryRedoAgainst([event]);
-    this.emit$$.next({ action: 'add', events: [event] });
     this.emitHistory();
+    this.emit$$.next({ action: 'add', events: [event] });
   }
 
   undo() {
     const event = this.popHistory();
     if (event) {
       this.pushHistoryRedo([event]);
+      this.emitHistory();
       this.broadcast$$.next(
         mapToDrawEventsBroadcast([
           getClearEvent(this.owner),
@@ -266,7 +267,6 @@ export class CwService {
         ])
       );
       this.emit$$.next({ action: 'remove', events: [event] });
-      this.emitHistory();
     }
   }
 
@@ -274,22 +274,17 @@ export class CwService {
     const events = this.popHistoryRedo();
     if (events) {
       events.forEach((event) => this.pushHistory(event));
+      this.emitHistory();
       this.broadcast$$.next(mapToDrawEventsBroadcast(events, true));
       this.emit$$.next({ action: 'add', events });
-      this.emitHistory();
     }
   }
 
-  cutSelection() {
-    const selection = this.selection$$.value;
-    this.resetSelection();
-    this.cut(selection);
-  }
-
-  cut(events: DrawEvent[]) {
+  private cut(events: DrawEvent[]) {
     const removed = events.filter((event) => this.pullHistory(event));
     if (removed.length) {
       this.pushHistoryRedo(removed);
+      this.emitHistory();
       this.broadcast$$.next(
         mapToDrawEventsBroadcast([
           getClearEvent(this.owner),
@@ -299,8 +294,11 @@ export class CwService {
         ])
       );
       this.emit$$.next({ action: 'remove', events: removed });
-      this.emitHistory();
     }
+  }
+
+  cutSelection() {
+    this.cut(this.selection$$.value);
   }
 
   /**
@@ -321,32 +319,24 @@ export class CwService {
     this.broadcast$$.next(mapToDrawEventsBroadcast(events, animate));
   }
 
-  private addSelection(eventsId: string[]) {
-    const removeUndefined = (event: DrawEvent | undefined): event is DrawEvent => !!event;
-    this.selection$$.next([
-      ...this.selection$$.value,
-      ...eventsId.map((eventId) => this.historyMap.get(eventId)).filter(removeUndefined),
-    ]);
+  addSelection(eventsId: string[]) {
+    eventsId.forEach((eventId) => this.selectionSet.add(eventId));
+    this.emitSelection();
   }
 
-  private removeSelection(eventsId: string[]) {
-    this.selection$$.next(this.selection$$.value.filter(({ id }) => !eventsId.includes(id)));
+  removeSelection(eventsId: string[]) {
+    eventsId.forEach((eventId) => this.selectionSet.delete(eventId));
+    this.emitSelection();
   }
 
-  toggleSelection(eventsId: string[]) {
-    eventsId.forEach((eventId) => {
-      // ! FIXME: Should we use a Map<string, DrawEvent> instead of an DrawEvent[] for the selection$$ values ?
-      if (this.selection$$.value.find(({ id }) => eventId === id)) {
-        this.removeSelection([eventId]);
-      } else {
-        this.addSelection([eventId]);
-      }
-    });
+  clearSelection() {
+    this.selectionSet.clear();
+    this.emitSelection();
+  }
+
+  private emitSelection() {
+    this.selection$$.next(Array.from(this.selectionSet).map((eventId) => this.historyMap.get(eventId) as DrawEvent));
     this.redraw(false);
-  }
-
-  resetSelection() {
-    this.selection$$.next([]);
   }
 
   setCutRange(data: CutRangeArg) {
