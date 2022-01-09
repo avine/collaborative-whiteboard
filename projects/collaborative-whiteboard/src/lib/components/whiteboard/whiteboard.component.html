@@ -10,7 +10,6 @@
     [showGuides]="showGuides && !showCutTool"
     [broadcast]="(service.broadcast$ | async) || { animate: false, events: [] }"
     (draw)="service.emit($event)"
-    (selection)="handleSelection($event)"
   ></cw-canvas>
 
   <cw-canvas

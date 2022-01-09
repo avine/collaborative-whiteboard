@@ -9,12 +9,14 @@ import {
   Inject,
   Input,
   OnChanges,
+  Optional,
   Output,
   SimpleChanges,
   ViewChild,
 } from '@angular/core';
 
 import { DEFAULT_DRAW_MODE, DEFAULT_OWNER, getDefaultCanvasSize, getDefaultDrawOptions } from '../../cw.config';
+import { CwService } from '../../cw.service';
 import {
   CanvasLine,
   CanvasPoint,
@@ -53,8 +55,6 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
 
   @Output() draw = new EventEmitter<DrawEvent>();
 
-  @Output() selection = new EventEmitter<{ eventsId: string[]; action: 'add' | 'remove' | 'clear' }>();
-
   @ViewChild('canvasResult') canvasResultRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild('canvasBroadcast') canvasBroadcastRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild('canvasEmit') canvasEmitRef!: ElementRef<HTMLCanvasElement>;
@@ -67,7 +67,13 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
 
   private broadcastEventsBuffer: (DrawEvent | DrawEventAnimated)[] = [];
 
-  constructor(@Inject(DOCUMENT) private document: Document, private changeDetectorRef: ChangeDetectorRef) {}
+  private skipUnselect!: boolean;
+
+  constructor(
+    @Optional() private service: CwService,
+    @Inject(DOCUMENT) private document: Document,
+    private changeDetectorRef: ChangeDetectorRef
+  ) {}
 
   ngOnChanges({ canvasSize, broadcast }: SimpleChanges) {
     // Note: Skip the `.firstChange` because `this.context` is not yet available
@@ -241,7 +247,7 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
       case 'selection': {
         const eventsId = this.contextResult.getSelectedDrawEventsId(...canvasPoint);
         if (eventsId.length) {
-          this.selection.emit({ eventsId, action: 'add' });
+          this.skipUnselect = this.service?.addSelection(eventsId);
         }
         break;
       }
@@ -306,10 +312,15 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
   private handleSelectionEnd(data: number[]) {
     switch (data.length) {
       case 2: {
+        if (this.skipUnselect) {
+          this.skipUnselect = false;
+          break;
+        }
         const eventsId = this.contextResult.getSelectedDrawEventsId(...(data as CanvasPoint));
-        if (!eventsId.length) {
-          // !FIXME: find a way to unselect...
-          this.selection.emit({ eventsId, action: eventsId.length ? 'remove' : 'clear' });
+        if (eventsId.length) {
+          this.service?.removeSelection(eventsId);
+        } else {
+          this.service?.clearSelection();
         }
         break;
       }

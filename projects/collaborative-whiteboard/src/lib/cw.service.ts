@@ -87,7 +87,6 @@ export class CwService {
     // Clear selection when leaving 'selection' mode
     if (this.drawMode$$.value === 'selection' && drawMode !== 'selection') {
       this.clearSelection();
-      this.redraw(false);
     }
   }
   get drawMode(): DrawMode {
@@ -168,7 +167,7 @@ export class CwService {
     const events = eventsId
       .map((eventId) => this.historyMap.get(eventId))
       .filter((event: DrawEvent | undefined): event is DrawEvent => !!event);
-    if (eventsId.length === events.length) {
+    if (events.length === eventsId.length) {
       return;
     }
     this.selectionSet = new Set(events.map(({ id }) => id));
@@ -319,19 +318,30 @@ export class CwService {
     this.broadcast$$.next(mapToDrawEventsBroadcast(events, animate));
   }
 
-  addSelection(eventsId: string[]) {
-    eventsId.forEach((eventId) => this.selectionSet.add(eventId));
-    this.emitSelection();
+  private updateSelection(action: 'add' | 'delete', eventsId: string[]): boolean {
+    const previousSize = this.selectionSet.size;
+    eventsId.forEach((eventId) => this.selectionSet[action](eventId));
+    if (this.selectionSet.size !== previousSize) {
+      this.emitSelection();
+    }
+    return this.selectionSet.size !== previousSize;
   }
 
-  removeSelection(eventsId: string[]) {
-    eventsId.forEach((eventId) => this.selectionSet.delete(eventId));
-    this.emitSelection();
+  addSelection(eventsId: string[]): boolean {
+    return this.updateSelection('add', eventsId);
   }
 
-  clearSelection() {
+  removeSelection(eventsId: string[]): boolean {
+    return this.updateSelection('delete', eventsId);
+  }
+
+  clearSelection(): boolean {
+    if (!this.selectionSet.size) {
+      return false;
+    }
     this.selectionSet.clear();
     this.emitSelection();
+    return true;
   }
 
   private emitSelection() {
