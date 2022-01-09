@@ -204,13 +204,16 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
   }
 
   download(htmlCanvasElement: HTMLCanvasElement) {
-    const link = this.document.createElement('a');
-    link.href = htmlCanvasElement.toDataURL('image/png');
-    link.download = 'collaborative-whiteboard.png';
+    this.service.clearSelection();
+    this.document.defaultView?.requestAnimationFrame(() => {
+      const link = this.document.createElement('a');
+      link.href = htmlCanvasElement.toDataURL('image/png');
+      link.download = 'collaborative-whiteboard.png';
 
-    this.document.body.appendChild(link);
-    link.click();
-    this.document.body.removeChild(link);
+      this.document.body.appendChild(link);
+      link.click();
+      this.document.body.removeChild(link);
+    })
   }
 
   // This function is used in the template as a fallback value when `service.owner$ | async` is null.
