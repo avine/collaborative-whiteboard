@@ -28,6 +28,7 @@ import {
 } from '../../cw.types';
 import { PointerSensitivityOrigin } from '../../directives/pointer.types';
 import { CanvasContext } from '../../utils/canvas-context';
+import { getSelectionMoveDrawOptions } from '../../utils/canvas-context/canvas-context.config';
 import { getEventUID, inferBasicDrawType, isEmptyCanvasLine, moveDrawEvent } from '../../utils/common';
 import { isDrawEventAnimated, mapToDrawEventsAnimated } from '../../utils/events-animation';
 
@@ -172,7 +173,7 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
         for (let i = 0; i < flushCount; i++) {
           const event = this.broadcastEventsBuffer.shift() as DrawEvent | DrawEventAnimated;
           if (!isDrawEventAnimated(event)) {
-            this.handleResult(event); // TODO: C'est pas redondant, deux foix "handleResult" ici et juste plus bas...?
+            this.handleResult(event);
             continue;
           }
           this.contextBroadcast.drawClear(this.canvasSizeAsLine);
@@ -243,23 +244,19 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
   }
 
   emitStart(canvasPoint: CanvasPoint, options = this.drawOptions) {
-    switch (this.drawMode) {
-      case 'selection': {
-        const eventsId = this.contextResult.getSelectedDrawEventsId(...canvasPoint);
-        if (eventsId.length) {
-          this.skipUnselect = this.service?.addSelection(eventsId);
-        }
-        break;
-      }
-      default: {
-        // ! FIXME: is it better not to draw this point ?
-        this.contextEmit.drawPoint(canvasPoint, options);
-      }
+    if (this.drawMode === 'selection') {
+      this.handleSelectionStart(canvasPoint);
+      return;
     }
+    this.contextEmit.drawPoint(canvasPoint, options); // ! FIXME: is it better not to draw this point ?
   }
 
   emitMove(data: number[], options = this.drawOptions) {
     this.contextEmit.drawClear(this.canvasSizeAsLine);
+    if (this.drawMode === 'selection') {
+      this.handleSelectionMove(data);
+      return;
+    }
     switch (this.drawMode) {
       case 'brush': {
         this.contextEmit.drawLineSerie(data, options);
@@ -282,12 +279,12 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
 
   emitEnd(data: number[], options = this.drawOptions) {
     this.contextEmit.drawClear(this.canvasSizeAsLine);
+    if (this.drawMode === 'selection') {
+      this.handleSelectionEnd(data);
+      return;
+    }
     let event: DrawEvent | undefined = undefined;
     switch (this.drawMode) {
-      case 'selection': {
-        this.handleSelectionEnd(data);
-        return;
-      }
       case 'brush': {
         event = this.getCompleteEvent(data, options);
         break;
@@ -309,6 +306,20 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
     this.draw.emit(moveDrawEvent(event, ...this.getCanvasCenter('emit')));
   }
 
+  private handleSelectionStart(canvasPoint: CanvasPoint) {
+    const eventsId = this.contextResult.getSelectedDrawEventsId(...canvasPoint);
+    if (eventsId.length) {
+      this.skipUnselect = this.service?.addSelection(eventsId);
+    }
+  }
+
+  private handleSelectionMove(data: number[]) {
+    this.contextEmit.drawRectangle(
+      [...data.slice(0, 2), ...data.slice(-2)] as CanvasLine,
+      getSelectionMoveDrawOptions()
+    );
+  }
+
   private handleSelectionEnd(data: number[]) {
     switch (data.length) {
       case 2: {
@@ -325,9 +336,13 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
         break;
       }
       default: {
-        // TODO: find a way to translate events...
-        // const canvasLine = [...data.slice(0, 2), ...data.slice(-2)] as CanvasLine;
-        // ...
+        const canvasLine = [...data.slice(0, 2), ...data.slice(-2)] as CanvasLine;
+        const eventsId = this.contextResult.getSelectedDrawEventsIdInArea(canvasLine);
+        if (eventsId.length) {
+          this.service?.addSelection(eventsId);
+        } else {
+          this.service?.clearSelection();
+        }
         break;
       }
     }

@@ -139,9 +139,7 @@ export class CanvasContext implements ICanvasContext {
 
   drawFillRect(canvasLine: CanvasLine, options: DrawOptions) {
     this.applyDrawOptions(options);
-    this.context.beginPath();
-    this.context.rect(...canvasLine);
-    this.context.fill();
+    this.context.fillRect(...canvasLine);
   }
 
   // Note: keep the second parameter for signature consistency
@@ -171,6 +169,21 @@ export class CanvasContext implements ICanvasContext {
     this.context.stroke(select);
     this.context.setLineDash([]);
     return [{ path2D: select, action: 'select' }];
+  }
+
+  // !FIXME: need to verify performance on this method...
+  getSelectedDrawEventsIdInArea(canvasLine: CanvasLine): string[] {
+    const fromX = Math.min(canvasLine[0], canvasLine[2]);
+    const toX = Math.max(canvasLine[0], canvasLine[2]);
+    const fromY = Math.min(canvasLine[1], canvasLine[3]);
+    const toY = Math.max(canvasLine[1], canvasLine[3]);
+    const eventsId = new Set<string>();
+    for (let x = fromX; x <= toX; x++) {
+      for (let y = fromY; y <= toY; y++) {
+        this.getSelectedDrawEventsId(x, y).forEach((eventId) => eventsId.add(eventId));
+      }
+    }
+    return Array.from(eventsId);
   }
 
   getSelectedDrawEventsId(x: number, y: number): string[] {

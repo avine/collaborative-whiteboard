@@ -82,12 +82,11 @@ export class CwService {
   }
 
   set drawMode(drawMode: DrawMode) {
-    this.drawMode$$.next(drawMode);
-
     // Clear selection when leaving 'selection' mode
     if (this.drawMode$$.value === 'selection' && drawMode !== 'selection') {
       this.clearSelection();
     }
+    this.drawMode$$.next(drawMode);
   }
   get drawMode(): DrawMode {
     return this.drawMode$$.value;
