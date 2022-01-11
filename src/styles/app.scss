@@ -24,6 +24,5 @@
   --app-header-background-color: #{map-get($app-theme, header-background-color)};
   --app-header-link-color: #{map-get($app-theme, header-link-color)};
   --app-header-link-active-color: #{map-get($app-theme, header-link-active-color)};
-  --app-canvas-draw-bg-color: #{map-get($app-theme, canvas-draw-bg-color)};
-  --app-canvas-cut-bg-color: #{map-get($app-theme, canvas-cut-bg-color)};
+  --app-canvas-bg-color: #{map-get($app-theme, canvas-bg-color)};
 }

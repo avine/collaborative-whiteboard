@@ -101,7 +101,3 @@ export interface DrawTransport {
   action: DrawAction;
   events: DrawEvent[];
 }
-
-export type CutRange = [number, number];
-
-export type CutRangeArg = CutRange | number;

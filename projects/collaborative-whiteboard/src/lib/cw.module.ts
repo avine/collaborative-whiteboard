@@ -7,7 +7,6 @@ import { FormsModule } from '@angular/forms';
 
 import { CwCanvasComponent } from './components/canvas/canvas.component';
 import { CwColorPickerComponent } from './components/color-picker/color-picker.component';
-import { CwCutComponent } from './components/cut/cut.component';
 import { CwDrawModeComponent } from './components/draw-mode/draw-mode.component';
 import { CwDrawSettingsComponent } from './components/draw-settings/draw-settings.component';
 import { CwFillBackgroundComponent } from './components/fill-background/fill-background.component';
@@ -22,7 +21,6 @@ import { CwStorageService } from './services/storage';
 const features = [
   CwCanvasComponent,
   CwColorPickerComponent,
-  CwCutComponent,
   CwDrawModeComponent,
   CwDrawSettingsComponent,
   CwFillBackgroundComponent,

@@ -1,8 +1,6 @@
 import { DEFAULT_OWNER, getDefaultColors } from '../cw.config';
 import {
   CanvasLine,
-  CutRange,
-  CutRangeArg,
   DrawClear,
   DrawEvent,
   DrawEventsBroadcast,
@@ -42,20 +40,6 @@ export const mapToDrawEventsBroadcast = (events: DrawEvent[], animate = false): 
   animate,
   events,
 });
-
-export const normalizeCutRange = (data: CutRangeArg): CutRange => {
-  const compareNumbers = (a: number, b: number) => {
-    if (a > b) {
-      return 1;
-    }
-    if (a < b) {
-      return -1;
-    }
-    return 0;
-  };
-  const [from, to] = Array.isArray(data) ? [...data].sort(compareNumbers) : [data, data];
-  return [Math.max(0, from), Math.max(0, to)];
-};
 
 export const inferBasicDrawType = (dataLength: number): DrawType =>
   dataLength === 2 ? 'point' : dataLength === 4 ? 'line' : 'lineSerie';

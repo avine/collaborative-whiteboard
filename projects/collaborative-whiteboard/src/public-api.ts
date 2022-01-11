@@ -11,7 +11,6 @@ export * from './lib/cw.types';
 // Components
 export * from './lib/components/canvas/canvas.component';
 export * from './lib/components/color-picker/color-picker.component';
-export * from './lib/components/cut/cut.component';
 export * from './lib/components/draw-mode/draw-mode.component';
 export * from './lib/components/draw-settings/draw-settings.component';
 export * from './lib/components/fill-background/fill-background.component';

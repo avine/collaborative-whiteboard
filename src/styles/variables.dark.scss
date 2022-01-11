@@ -13,6 +13,5 @@ $app-theme: (
   header-background-color: #212121,
   header-link-color: #767676,
   header-link-active-color: $app-primary-color,
-  canvas-draw-bg-color: #313131,
-  canvas-cut-bg-color: rgba(lighten(#313131, 4), 0.6),
+  canvas-bg-color: #313131,
 );

@@ -18,7 +18,7 @@ import {
 
 import { getDefaultCanvasSize, getDefaultDrawOptions } from '../../cw.config';
 import { CwService } from '../../cw.service';
-import { DrawEventsBroadcast, DrawMode, DrawTransport, FillBackground, Owner } from '../../cw.types';
+import { DrawMode, DrawTransport, FillBackground, Owner } from '../../cw.types';
 import { addStorageKeySuffix, CwStorageService, StorageKey } from '../../services/storage';
 
 @Component({
@@ -46,9 +46,9 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
 
   @Output() emit = new EventEmitter<DrawTransport>();
 
-  @ViewChild('canvasContainer', { static: true, read: ElementRef }) canvasContainer!: ElementRef<HTMLElement>;
+  @ViewChild('canvas', { static: true, read: ElementRef }) canvas!: ElementRef<HTMLCanvasElement>;
 
-  private canvasContainerOverflow!: string;
+  private canvasOverflow!: string;
 
   canvasSize = getDefaultCanvasSize();
 
@@ -72,10 +72,6 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
 
   showDrawModeTool = false;
 
-  showCutTool = false;
-
-  broadcastHistoryCut!: DrawEventsBroadcast;
-
   private subscriptions: Subscription[] = [];
 
   constructor(
@@ -91,27 +87,10 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
         this.emit.emit(transport);
       }),
 
-      // This is tricky!
-      // We can't subscribe to `broadcastHistoryCut$` in the template like this:
-      //
-      //  <cw-canvas
-      //    *ngIf="showCutTool"
-      //    [broadcast]="broadcastHistoryCut$ | async"
-      //  ></cw-canvas>
-      //
-      // Because this canvas is rendered conditionally, the following error was thrown:
-      // "ExpressionChangedAfterItHasBeenCheckedError"
-      //
-      // In other words, we need the data emitted by `broadcastHistoryCut$` to be ready eagerly.
-      this.service.broadcastHistoryCut$.subscribe((broadcastHistoryCut) => {
-        this.broadcastHistoryCut = broadcastHistoryCut;
-        this.changeDetectorRef.detectChanges();
-      }),
-
       this.handleWindowResize()
     );
 
-    this.initCanvasContainerOverflow();
+    this.initCanvasOverflow();
     if (this.fitParentElement) {
       this.fitCanvasSizeToParentElement();
     }
@@ -138,12 +117,12 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
       });
   }
 
-  private initCanvasContainerOverflow() {
-    this.canvasContainerOverflow = this.canvasContainer.nativeElement.style.overflow;
+  private initCanvasOverflow() {
+    this.canvasOverflow = this.canvas.nativeElement.style.overflow;
   }
 
   private fitCanvasSizeToParentElement() {
-    const element = this.canvasContainer.nativeElement;
+    const element = this.canvas.nativeElement;
     // Fit the container
     element.style.width = '100%';
     element.style.height = '100%';
@@ -152,7 +131,7 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
     const { width, height } = element.getBoundingClientRect();
     element.style.width = `${width}px`;
     element.style.height = `${height}px`;
-    element.style.overflow = this.canvasContainerOverflow;
+    element.style.overflow = this.canvasOverflow;
     this.canvasSize = { width, height };
     this.changeDetectorRef.detectChanges();
   }

@@ -1,12 +1,10 @@
-import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { BehaviorSubject, Subject } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { Injectable } from '@angular/core';
 
 import { DEFAULT_DRAW_MODE, DEFAULT_OWNER, getDefaultFillBackground } from './cw.config';
 import {
-  CutRange,
-  CutRangeArg,
   DrawEvent,
   DrawEventsBroadcast,
   DrawFillRect,
@@ -15,7 +13,7 @@ import {
   FillBackground,
   Owner,
 } from './cw.types';
-import { getClearEvent, getFillRectEvent, mapToDrawEventsBroadcast, normalizeCutRange } from './utils/common';
+import { getClearEvent, getFillRectEvent, mapToDrawEventsBroadcast } from './utils/common';
 
 @Injectable()
 export class CwService {
@@ -35,8 +33,6 @@ export class CwService {
 
   private selection$$ = new BehaviorSubject<DrawEvent[]>([]);
 
-  private cutRange$$ = new BehaviorSubject<CutRange>([0, 0]);
-
   /**
    * Dispatch draw events from the server to the client
    */
@@ -55,20 +51,9 @@ export class CwService {
 
   history$ = this.history$$.asObservable();
 
-  historyCut$ = this.history$$.pipe(map((history) => this.getOwnerDrawEvents(history)));
-
-  historyCutLength$ = this.historyCut$.pipe(map((historyCut) => historyCut.length));
+  ownerHistory$ = this.history$$.pipe(map((history) => this.getOwnerDrawEvents(history)));
 
   selection$ = this.selection$$.asObservable();
-
-  cutRange$ = this.cutRange$$.asObservable();
-
-  broadcastHistoryCut$ = combineLatest([this.historyCut$, this.cutRange$$]).pipe(
-    map(([historyCut, [from, to]]) => {
-      const slice = [getClearEvent(this.owner), ...historyCut.slice(from, to + 1)];
-      return mapToDrawEventsBroadcast(slice);
-    })
-  );
 
   broadcast$ = this.broadcast$$.asObservable();
 
@@ -157,7 +142,6 @@ export class CwService {
 
   private emitHistory() {
     this.checkSelection();
-    this.checkCutRange();
     this.history$$.next(this.history);
   }
 
@@ -171,14 +155,6 @@ export class CwService {
     }
     this.selectionSet = new Set(events.map(({ id }) => id));
     this.selection$$.next(events);
-  }
-
-  private checkCutRange() {
-    const [from, to] = this.cutRange$$.value;
-    if (to >= this.history.length) {
-      const lastIndex = this.history.length - 1;
-      this.setCutRange([Math.min(from, lastIndex), lastIndex]);
-    }
   }
 
   private getOwnerDrawEvents(events: DrawEvent[]) {
@@ -299,14 +275,6 @@ export class CwService {
     this.cut(this.selection$$.value);
   }
 
-  /**
-   * @param data Cut range relative to the array emitted by `historyCut$`
-   */
-  cutByRange(data: CutRangeArg) {
-    const [from, to] = normalizeCutRange(data);
-    this.historyCut$.pipe(first()).subscribe((historyCut) => this.cut(historyCut.slice(from, to + 1)));
-  }
-
   undoAll() {
     const events = this.getOwnerDrawEvents(this.history);
     this.cut(events);
@@ -346,14 +314,6 @@ export class CwService {
   private emitSelection() {
     this.selection$$.next(Array.from(this.selectionSet).map((eventId) => this.historyMap.get(eventId) as DrawEvent));
     this.redraw(false);
-  }
-
-  setCutRange(data: CutRangeArg) {
-    const cutRange = normalizeCutRange(data);
-    if (cutRange[0] !== this.cutRange$$.value[0] || cutRange[1] !== this.cutRange$$.value[1]) {
-      this.cutRange$$.next(cutRange);
-    }
-    return cutRange;
   }
 
   setFillBackground(fillBackground: FillBackground) {

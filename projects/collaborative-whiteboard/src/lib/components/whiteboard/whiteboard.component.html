@@ -1,26 +1,15 @@
-<div class="cw-whiteboard__canvas" #canvasContainer>
-  <cw-canvas
-    #canvas
-    class="cw-whiteboard__canvas-draw"
-    [drawMode]="(service.drawMode$ | async) || throwMissing()"
-    [owner]="(service.owner$ | async) || throwMissing()"
-    [canvasSize]="canvasSize"
-    [drawOptions]="drawOptions"
-    [pointerMagnet]="pointerMagnet"
-    [showGuides]="showGuides && !showCutTool"
-    [broadcast]="(service.broadcast$ | async) || { animate: false, events: [] }"
-    (draw)="service.emit($event)"
-  ></cw-canvas>
-
-  <cw-canvas
-    *ngIf="showCutTool"
-    class="cw-whiteboard__canvas-cut"
-    [canvasSize]="canvasSize"
-    [showGuides]="showGuides"
-    [drawDisabled]="true"
-    [broadcast]="broadcastHistoryCut"
-  ></cw-canvas>
-</div>
+<cw-canvas
+  #canvas
+  class="cw-whiteboard__canvas"
+  [drawMode]="(service.drawMode$ | async) || throwMissing()"
+  [owner]="(service.owner$ | async) || throwMissing()"
+  [canvasSize]="canvasSize"
+  [drawOptions]="drawOptions"
+  [pointerMagnet]="pointerMagnet"
+  [showGuides]="showGuides"
+  [broadcast]="(service.broadcast$ | async) || { animate: false, events: [] }"
+  (draw)="service.emit($event)"
+></cw-canvas>
 
 <cw-tool-group
   [name]="toolGroupName"
@@ -53,7 +42,7 @@
     <cw-icon icon="redo"></cw-icon>
   </cw-tool>
 
-  <cw-tool title="Cut" (activeChange)="service.cutSelection()">
+  <cw-tool title="Cut selection" (activeChange)="service.cutSelection()">
     <cw-icon icon="cut"></cw-icon>
   </cw-tool>
 
@@ -101,4 +90,3 @@
     (pointerMagnetChange)="storePointerMagnet()"
   ></cw-draw-mode>
 </ng-template>
-
