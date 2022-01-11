@@ -60,7 +60,7 @@ export const normalizeCutRange = (data: CutRangeArg): CutRange => {
 export const inferBasicDrawType = (dataLength: number): DrawType =>
   dataLength === 2 ? 'point' : dataLength === 4 ? 'line' : 'lineSerie';
 
-export const moveDrawEvent = (event: DrawEvent, x: number, y: number): DrawEvent => {
+export const translateDrawEvent = (event: DrawEvent, x: number, y: number): DrawEvent => {
   const result = { ...event };
   if (!result.data) {
     return result;

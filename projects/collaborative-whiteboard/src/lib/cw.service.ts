@@ -100,11 +100,11 @@ export class CwService {
     return this.historyMap.delete(event.id);
   }
 
-  private popHistory(hash = this.getOwnerLastHash()): DrawEvent | void {
-    if (hash) {
-      const removed = this.historyMap.get(hash);
+  private popHistory(eventId = this.getOwnerLastEventId()): DrawEvent | void {
+    if (eventId) {
+      const removed = this.historyMap.get(eventId);
       if (removed) {
-        this.historyMap.delete(hash);
+        this.historyMap.delete(eventId);
         return removed;
       }
     }
@@ -185,12 +185,12 @@ export class CwService {
     return events.filter((event) => event.owner === this.owner$$.value);
   }
 
-  private getOwnerLastHash(): string | void {
+  private getOwnerLastEventId(): string | void {
     const historyMapEntries = Array.from(this.historyMap.entries());
     for (let i = historyMapEntries.length - 1; i >= 0; i--) {
-      const [hash, event] = historyMapEntries[i];
+      const [eventId, event] = historyMapEntries[i];
       if (event.owner === this.owner$$.value) {
-        return hash;
+        return eventId;
       }
     }
   }

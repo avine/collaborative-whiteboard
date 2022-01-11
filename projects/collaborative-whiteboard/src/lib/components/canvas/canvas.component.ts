@@ -29,8 +29,9 @@ import {
 import { PointerSensitivityOrigin } from '../../directives/pointer.types';
 import { CanvasContext } from '../../utils/canvas-context';
 import { getSelectionMoveDrawOptions } from '../../utils/canvas-context/canvas-context.config';
-import { getEventUID, inferBasicDrawType, isEmptyCanvasLine, moveDrawEvent } from '../../utils/common';
+import { getEventUID, inferBasicDrawType, isEmptyCanvasLine, translateDrawEvent } from '../../utils/common';
 import { isDrawEventAnimated, mapToDrawEventsAnimated } from '../../utils/events-animation';
+import { getAnimFlushCount, getAnimFrameRate } from './canvas.utils';
 
 @Component({
   selector: 'cw-canvas',
@@ -141,7 +142,7 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
   }
 
   private updateBroadcastEventsBuffer() {
-    let events = this.broadcast.events.map((event) => moveDrawEvent(event, ...this.getCanvasCenter('broadcast')));
+    let events = this.broadcast.events.map((event) => translateDrawEvent(event, ...this.getCanvasCenter('broadcast')));
     if (this.broadcast.animate) {
       events = mapToDrawEventsAnimated(events);
     }
@@ -157,7 +158,7 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
       }
     } else {
       const steps = this.broadcastEventsBuffer.length;
-      const frameRate = this.getAnimFrameRate();
+      const frameRate = getAnimFrameRate(steps);
       const step = () => {
         if (id !== this.broadcastId) {
           return;
@@ -169,7 +170,7 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
           this.changeDetectorRef.detectChanges();
           return;
         }
-        const flushCount = this.getAnimFlushCount(this.broadcastEventsBuffer.length, steps);
+        const flushCount = getAnimFlushCount(this.broadcastEventsBuffer.length, steps);
         for (let i = 0; i < flushCount; i++) {
           const event = this.broadcastEventsBuffer.shift() as DrawEvent | DrawEventAnimated;
           if (!isDrawEventAnimated(event)) {
@@ -193,30 +194,22 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
     }
   }
 
-  private getAnimFrameRate(): number {
-    // According to `getAnimFlushCount` implementation, when `broadcastEventsBuffer`
-    // is of length 475, then `expectedAnimDuration` is about 100.
-    const expectedFrameCount = this.broadcastEventsBuffer.length / 4.75;
-    // Note that in reality, the animation will take more time to complete...
-    const expectedAnimDuration = 1500; // ms
-    const frameRate = expectedAnimDuration / expectedFrameCount;
-    const isTooSlow = frameRate > 60;
-    const isTooFast = frameRate < 12; // around 90Hz
-    return isTooSlow || isTooFast ? 0 : frameRate;
-  }
-
-  private getAnimFlushCount(remain: number, total: number) {
-    // Let's do some easing!
-    const count = Math.round((Math.sin((remain / total) * Math.PI) * total) / 50) + 1;
-    return Math.min(count, remain);
-  }
-
   private handleResult(event: DrawEvent) {
     if ((event.type === 'fillRect' || event.type === 'clear') && isEmptyCanvasLine(event.data)) {
       this.contextResult.handleEvent({ ...event, data: this.canvasSizeAsLine });
     } else {
       this.contextResult.handleEvent(event);
     }
+  }
+
+  get pointerMagnetShift(): CanvasPoint {
+    if (!this.pointerMagnet) {
+      return [0, 0];
+    }
+    return [
+      Math.round((this.canvasSize.width / 2) % this.pointerMagnet),
+      Math.round((this.canvasSize.height / 2) % this.pointerMagnet),
+    ];
   }
 
   get pointerSensitivity() {
@@ -231,16 +224,6 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
 
   get pointerSensitivityOrigin(): PointerSensitivityOrigin {
     return this.drawMode === 'brush' ? 'previous' : 'first';
-  }
-
-  get pointerMagnetShift(): CanvasPoint {
-    if (!this.pointerMagnet) {
-      return [0, 0];
-    }
-    return [
-      Math.round((this.canvasSize.width / 2) % this.pointerMagnet),
-      Math.round((this.canvasSize.height / 2) % this.pointerMagnet),
-    ];
   }
 
   emitStart(canvasPoint: CanvasPoint, options = this.drawOptions) {
@@ -303,7 +286,7 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
       }
     }
     this.handleResult(event);
-    this.draw.emit(moveDrawEvent(event, ...this.getCanvasCenter('emit')));
+    this.draw.emit(translateDrawEvent(event, ...this.getCanvasCenter('emit')));
   }
 
   private handleSelectionStart(canvasPoint: CanvasPoint) {
