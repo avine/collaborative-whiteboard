@@ -43,8 +43,7 @@ export const animateDrawRectangle = (event: DrawRectangle): DrawEventAnimated[] 
 export const animateDrawEllipse = (event: DrawEllipse): DrawEventAnimated[] => {
   const [fromX, fromY, toX, toY] = event.data;
   // Ellipse perimeter approximation
-  const perimeter =
-    2 * Math.PI * Math.sqrt((Math.pow(Math.abs(toX - fromX), 2) + Math.pow(Math.abs(toY - fromY), 2)) / 2);
+  const perimeter = Math.PI * Math.sqrt((Math.pow(Math.abs(toX - fromX), 2) + Math.pow(Math.abs(toY - fromY), 2)) / 2);
   const stepsCount = perimeter / STEP_LENGTH;
 
   const result: DrawEventAnimated[] = [];

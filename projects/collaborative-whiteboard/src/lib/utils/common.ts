@@ -1,12 +1,5 @@
 import { DEFAULT_OWNER, getDefaultColors } from '../cw.config';
-import {
-  CanvasLine,
-  DrawClear,
-  DrawEvent,
-  DrawEventsBroadcast,
-  DrawFillRect,
-  DrawType,
-} from '../cw.types';
+import { CanvasLine, DrawClear, DrawEvent, DrawEventsBroadcast, DrawFillRect, DrawType } from '../cw.types';
 
 export const getColorsMatrix = (colors = getDefaultColors(), maxColorsPerRow = 6) => {
   const matrix: string[][] = [];

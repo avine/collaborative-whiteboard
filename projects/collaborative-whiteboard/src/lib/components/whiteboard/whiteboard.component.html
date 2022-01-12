@@ -17,20 +17,15 @@
   [dragBoundarySelector]="dragBoundarySelector"
   class="cw-whiteboard__tools"
 >
-  <cw-tool title="Background" [content]="fillBackgroundTool" [(active)]="showFillBackgroundTool">
+  <cw-tool title="Background" [content]="fillBackgroundTool">
     <cw-icon icon="fillBackground"></cw-icon>
   </cw-tool>
 
-  <cw-tool title="Forground" [content]="drawSettingsTool" [(active)]="showDrawSettingsTool">
+  <cw-tool title="Forground" [content]="drawSettingsTool">
     <cw-icon icon="palette"></cw-icon>
   </cw-tool>
 
-  <cw-tool
-    *ngIf="service.drawMode$ | async as drawMode"
-    title="Draw"
-    [content]="drawModeTool"
-    [(active)]="showDrawModeTool"
-  >
+  <cw-tool *ngIf="service.drawMode$ | async as drawMode" title="Draw" [content]="drawModeTool">
     <cw-icon [icon]="drawMode"></cw-icon>
   </cw-tool>
 

@@ -78,7 +78,7 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
   ) {}
 
   ngOnChanges({ canvasSize, broadcast }: SimpleChanges) {
-    // Note: Skip the `.firstChange` because `this.context` is not yet available
+    // Note: Skip the `.firstChange` because `this.context*` is not yet available
     if (canvasSize?.currentValue && !canvasSize.firstChange) {
       this.applyCanvasSize();
     }

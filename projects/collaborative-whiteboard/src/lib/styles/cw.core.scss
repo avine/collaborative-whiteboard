@@ -268,6 +268,8 @@ cw-icon {
 }
 
 .cw-tool-content__content {
+  max-height: 80vh;
+  overflow: auto;
   padding: var(--cw-spacing-md);
   padding-top: var(--cw-spacing-lg);
   text-align: center;
@@ -358,6 +360,7 @@ cw-whiteboard {
 }
 
 cw-whiteboard,
+.cw-tool-content__content,
 .cw-tool-group {
   /* Works on Firefox */
   & {

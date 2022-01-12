@@ -66,12 +66,6 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
     true
   );
 
-  showFillBackgroundTool = false;
-
-  showDrawSettingsTool = false;
-
-  showDrawModeTool = false;
-
   private end$ = new Subject<void>();
 
   constructor(
@@ -82,9 +76,7 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    this.service.emit$
-      .pipe(takeUntil(this.end$))
-      .subscribe((transport: DrawTransport) => this.emit.emit(transport));
+    this.service.emit$.pipe(takeUntil(this.end$)).subscribe((transport: DrawTransport) => this.emit.emit(transport));
 
     this.handleWindowResize();
 

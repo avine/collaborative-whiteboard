@@ -1,21 +1,11 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  EventEmitter,
-  Input,
-  OnChanges,
-  Output,
-  SimpleChanges,
-  TemplateRef,
-  ViewChild,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, TemplateRef, ViewChild } from '@angular/core';
 
 @Component({
   selector: 'cw-tool',
   templateUrl: './tool.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CwToolComponent implements OnChanges {
+export class CwToolComponent {
   @Input() title!: string;
 
   @Input() content!: TemplateRef<any>;
@@ -30,18 +20,23 @@ export class CwToolComponent implements OnChanges {
 
   @Output() activeChange = new EventEmitter<boolean>();
 
-  @Input() isDisabled = false;
+  private _isDisabled = false;
+
+  @Input() set isDisabled(value: boolean) {
+    if (this._isDisabled === value) {
+      return;
+    }
+    this._isDisabled = value;
+
+    // Here's the trick! Setting the @Input acts as a trigger to @Output the same value.
+    // `CwToolComponent` is just a proxy for `CwToolGroupComponent` that subscribes to its changes
+    this.isDisabledChange.emit(value);
+  }
+  get isDisabled() {
+    return this._isDisabled;
+  }
 
   @Output() isDisabledChange = new EventEmitter<boolean>();
 
   @ViewChild('label', { static: true }) label!: TemplateRef<any>;
-
-  ngOnChanges({ active, isDisabled }: SimpleChanges) {
-    if (active && !active.firstChange) {
-      this.activeChange.emit(this.active);
-    }
-    if (isDisabled && !isDisabled.firstChange) {
-      this.isDisabledChange.emit(this.isDisabled);
-    }
-  }
 }

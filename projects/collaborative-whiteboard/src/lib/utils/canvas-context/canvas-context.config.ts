@@ -1,4 +1,4 @@
-import { DrawOptions } from "../../cw.types";
+import { DrawOptions } from '../../cw.types';
 
 export const getSelectionDrawOptions = (): DrawOptions => ({
   lineWidth: 1,
