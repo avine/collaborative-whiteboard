@@ -268,7 +268,7 @@ cw-icon {
 }
 
 .cw-tool-content__content {
-  max-height: 80vh;
+  max-height: 65vh;
   overflow: auto;
   padding: var(--cw-spacing-md);
   padding-top: var(--cw-spacing-lg);
@@ -278,7 +278,7 @@ cw-icon {
 .cw-tool-group {
   overflow: auto;
   max-width: calc(100vw - 2rem);
-  max-height: calc(100vh - 2rem);
+  max-height: calc(100vh - 2rem - 40px); // Hack: Hard coded header's height!
   display: inline-flex;
   box-shadow: var(--cw-box-shadow);
   border-radius: var(--cw-border-radius);
