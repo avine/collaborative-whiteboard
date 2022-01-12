@@ -13,7 +13,7 @@ import {
   FillBackground,
   Owner,
 } from './cw.types';
-import { getClearEvent, getFillRectEvent, mapToDrawEventsBroadcast } from './utils/common';
+import { getClearEvent, getFillRectEvent, getSelectionEvents, mapToDrawEventsBroadcast } from './utils/common';
 
 @Injectable()
 export class CwService {
@@ -336,7 +336,7 @@ export class CwService {
     return events;
   }
 
-  private get selectionEvents(): DrawEvent[] {
-    return this.selection$$.value.map((event) => ({ ...event, type: 'selection' }));
+  private get selectionEvents() {
+    return getSelectionEvents(this.selection$$.value, this.owner);
   }
 }
