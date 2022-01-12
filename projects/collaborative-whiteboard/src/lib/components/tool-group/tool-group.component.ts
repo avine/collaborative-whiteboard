@@ -42,8 +42,8 @@ export class CwToolGroupComponent implements AfterViewInit, OnDestroy {
 
   private toolPositions = new Map<CwToolComponent, ToolContentPosition>();
 
-  private activeChangeSubscriptions: Subscription[] = [];
-  private toolsChangeSubscription!: Subscription;
+  private readonly toolPropsSubscriptions = new Subscription();
+  private readonly toolsChangeSubscription = new Subscription();
 
   collapse = this.storageService.getLocal(addStorageKeySuffix(StorageKey.ToolGroupCollapse, this.name), false);
 
@@ -56,38 +56,39 @@ export class CwToolGroupComponent implements AfterViewInit, OnDestroy {
   ) {}
 
   ngAfterViewInit() {
-    this.subscribeToActiveChange();
-    this.subscribeToToolsChange();
+    this.watchToolPropsChange();
+    this.watchToolsChange();
   }
 
   ngOnDestroy() {
-    this.unsubscribeFromActiveChange();
-    this.unsubscribeFromToolsChange();
+    this.unwatchToolPropsChange();
+    this.unwatchToolsChange();
     this.closeAllContent();
   }
 
-  private subscribeToActiveChange() {
-    this.activeChangeSubscriptions = [];
+  private watchToolPropsChange() {
     this.tools.forEach((tool) => {
-      const subscription = tool.activeChange.subscribe(() => this.checkContent(tool));
-      this.activeChangeSubscriptions.push(subscription);
+      this.toolPropsSubscriptions.add(tool.isDisabledChange.subscribe(() => this.changeDetectorRef.detectChanges()));
+      this.toolPropsSubscriptions.add(tool.activeChange.subscribe(() => this.checkContent(tool)));
       this.checkContent(tool);
     });
   }
 
-  private unsubscribeFromActiveChange() {
-    this.activeChangeSubscriptions.forEach((subscription) => subscription.unsubscribe());
+  private unwatchToolPropsChange() {
+    this.toolPropsSubscriptions.unsubscribe();
   }
 
-  private subscribeToToolsChange() {
-    this.toolsChangeSubscription = this.tools.changes.subscribe(() => {
-      this.checkActiveTools();
-      this.unsubscribeFromActiveChange();
-      this.subscribeToActiveChange();
-    });
+  private watchToolsChange() {
+    this.toolsChangeSubscription.add(
+      this.tools.changes.subscribe(() => {
+        this.checkActiveTools();
+        this.unwatchToolPropsChange();
+        this.watchToolPropsChange();
+      })
+    );
   }
 
-  private unsubscribeFromToolsChange() {
+  private unwatchToolsChange() {
     this.toolsChangeSubscription.unsubscribe();
   }
 

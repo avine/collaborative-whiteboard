@@ -1,5 +1,5 @@
-import { fromEvent, of, Subscription } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
+import { fromEvent, Subject } from 'rxjs';
+import { debounceTime, takeUntil } from 'rxjs/operators';
 
 import { DOCUMENT } from '@angular/common';
 import {
@@ -72,7 +72,7 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
 
   showDrawModeTool = false;
 
-  private subscriptions: Subscription[] = [];
+  private end$ = new Subject<void>();
 
   constructor(
     public service: CwService,
@@ -82,13 +82,11 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    this.subscriptions.push(
-      this.service.emit$.subscribe((transport: DrawTransport) => {
-        this.emit.emit(transport);
-      }),
+    this.service.emit$
+      .pipe(takeUntil(this.end$))
+      .subscribe((transport: DrawTransport) => this.emit.emit(transport));
 
-      this.handleWindowResize()
-    );
+    this.handleWindowResize();
 
     this.initCanvasOverflow();
     if (this.fitParentElement) {
@@ -100,15 +98,16 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.subscriptions.forEach((subscription) => subscription.unsubscribe());
+    this.end$.next();
+    this.end$.complete();
   }
 
   private handleWindowResize() {
     if (!this.document.defaultView) {
-      return of().subscribe();
+      return;
     }
-    return fromEvent(this.document.defaultView, 'resize')
-      .pipe(debounceTime(250))
+    fromEvent(this.document.defaultView, 'resize')
+      .pipe(debounceTime(250), takeUntil(this.end$))
       .subscribe(() => {
         if (this.fitParentElement) {
           this.fitCanvasSizeToParentElement();
@@ -192,7 +191,7 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
       this.document.body.appendChild(link);
       link.click();
       this.document.body.removeChild(link);
-    })
+    });
   }
 
   // This function is used in the template as a fallback value when `service.owner$ | async` is null.

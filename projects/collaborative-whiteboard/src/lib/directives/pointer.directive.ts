@@ -1,4 +1,5 @@
-import { fromEvent, Subscription, throttleTime } from 'rxjs';
+import { fromEvent, Subject } from 'rxjs';
+import { takeUntil, throttleTime } from 'rxjs/operators';
 
 import {
   Directive,
@@ -70,7 +71,7 @@ export class CwPointerDirective implements OnInit, OnDestroy {
 
   private dataBuffer: number[] = [];
 
-  private readonly moveSubscriptions = new Subscription();
+  private end$ = new Subject<void>();
 
   constructor(private elementRef: ElementRef<HTMLElement>, private ngZone: NgZone) {}
 
@@ -79,28 +80,26 @@ export class CwPointerDirective implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.moveSubscriptions.unsubscribe();
+    this.end$.next();
+    this.end$.complete();
   }
 
   private initMoveListeners() {
     // Prevent unnecessary change detection
     this.ngZone.runOutsideAngular(() => {
-      this.moveSubscriptions.add(
-        fromEvent<TouchEvent>(this.elementRef.nativeElement, 'touchmove')
-          .pipe(throttleTime(10))
-          .subscribe((e) => {
-            const { clientX, clientY } = e.touches[0];
-            this.pointerMove(clientX, clientY);
-          })
-      );
-      this.moveSubscriptions.add(
-        fromEvent<MouseEvent>(this.elementRef.nativeElement, 'mousemove')
-          .pipe(throttleTime(10))
-          .subscribe((e) => {
-            const { clientX, clientY } = e;
-            this.pointerMove(clientX, clientY);
-          })
-      );
+      fromEvent<TouchEvent>(this.elementRef.nativeElement, 'touchmove')
+        .pipe(throttleTime(10), takeUntil(this.end$))
+        .subscribe((e) => {
+          const { clientX, clientY } = e.touches[0];
+          this.pointerMove(clientX, clientY);
+        });
+
+      fromEvent<MouseEvent>(this.elementRef.nativeElement, 'mousemove')
+        .pipe(throttleTime(10), takeUntil(this.end$))
+        .subscribe((e) => {
+          const { clientX, clientY } = e;
+          this.pointerMove(clientX, clientY);
+        });
     });
   }
 

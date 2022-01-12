@@ -16,7 +16,8 @@
     <button
       *ngFor="let tool of tools"
       class="cw-tool-group__action cw-tool-group__action--tool cw-button--less"
-      [class.cw-tool-group__action--active]="tool.active"
+      [class.cw-tool-group__action--active]="!tool.isDisabled && tool.active"
+      [class.cw-tool-group__action--disabled]="tool.isDisabled"
       [title]="tool.title"
       (click)="toggleActive(tool)"
     >

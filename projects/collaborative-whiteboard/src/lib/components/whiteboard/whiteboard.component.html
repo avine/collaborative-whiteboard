@@ -42,7 +42,11 @@
     <cw-icon icon="redo"></cw-icon>
   </cw-tool>
 
-  <cw-tool title="Cut selection" (activeChange)="service.cutSelection()">
+  <cw-tool
+    title="Cut selection"
+    [isDisabled]="(service.selection$ | async)?.length === 0"
+    (activeChange)="service.cutSelection()"
+  >
     <cw-icon icon="cut"></cw-icon>
   </cw-tool>
 

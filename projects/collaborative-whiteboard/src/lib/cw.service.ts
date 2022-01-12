@@ -17,6 +17,7 @@ import { getClearEvent, getFillRectEvent, mapToDrawEventsBroadcast } from './uti
 
 @Injectable()
 export class CwService {
+  // !FIXME: should we use the owner ?
   private owner$$ = new BehaviorSubject<Owner>(DEFAULT_OWNER);
 
   private drawMode$$ = new BehaviorSubject<DrawMode>(DEFAULT_DRAW_MODE);
@@ -51,8 +52,10 @@ export class CwService {
 
   history$ = this.history$$.asObservable();
 
+  // !FIXME: does the selection should be based on ownerHistory ?
   ownerHistory$ = this.history$$.pipe(map((history) => this.getOwnerDrawEvents(history)));
 
+  // TODO: use this to disable the cut button when nothing selected...
   selection$ = this.selection$$.asObservable();
 
   broadcast$ = this.broadcast$$.asObservable();

@@ -30,11 +30,18 @@ export class CwToolComponent implements OnChanges {
 
   @Output() activeChange = new EventEmitter<boolean>();
 
+  @Input() isDisabled = false;
+
+  @Output() isDisabledChange = new EventEmitter<boolean>();
+
   @ViewChild('label', { static: true }) label!: TemplateRef<any>;
 
-  ngOnChanges({ active }: SimpleChanges) {
+  ngOnChanges({ active, isDisabled }: SimpleChanges) {
     if (active && !active.firstChange) {
       this.activeChange.emit(this.active);
+    }
+    if (isDisabled && !isDisabled.firstChange) {
+      this.isDisabledChange.emit(this.isDisabled);
     }
   }
 }

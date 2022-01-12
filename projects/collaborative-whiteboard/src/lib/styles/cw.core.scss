@@ -300,7 +300,8 @@ cw-icon {
 }
 
 .cw-tool-group__action--tool {
-  transition: background-color ease var(--cw-anim-duration-fast), color ease var(--cw-anim-duration-fast);
+  transition: background-color ease var(--cw-anim-duration-fast), color ease var(--cw-anim-duration-fast),
+    opacity ease var(--cw-anim-duration-fast);
 
   &:hover {
     background-color: rgba(160, 160, 160, 0.133);
@@ -312,6 +313,14 @@ cw-icon {
 .cw-tool-group__action--active:hover {
   background-color: transparent;
   color: var(--cw-primary-color);
+}
+
+.cw-tool-group__action--disabled,
+.cw-tool-group__action--disabled:hover {
+  cursor: initial;
+  background-color: transparent;
+  color: var(--cw-text-color);
+  opacity: var(--cw-opacity-low);
 }
 
 .cw-tool-group__action--drag {
