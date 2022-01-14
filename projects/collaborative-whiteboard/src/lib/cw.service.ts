@@ -13,7 +13,13 @@ import {
   FillBackground,
   Owner,
 } from './cw.types';
-import { getClearEvent, getFillRectEvent, getSelectionEvents, mapToDrawEventsBroadcast } from './utils/common';
+import {
+  getClearEvent,
+  getFillRectEvent,
+  getSelectionEvents,
+  mapToDrawEventsBroadcast,
+  translateDrawEvent,
+} from './utils/common';
 
 @Injectable()
 export class CwService {
@@ -55,7 +61,6 @@ export class CwService {
   // !FIXME: does the selection should be based on ownerHistory ?
   ownerHistory$ = this.history$$.pipe(map((history) => this.getOwnerDrawEvents(history)));
 
-  // TODO: use this to disable the cut button when nothing selected...
   selection$ = this.selection$$.asObservable();
 
   broadcast$ = this.broadcast$$.asObservable();
@@ -89,23 +94,15 @@ export class CwService {
   }
 
   private popHistory(eventId = this.getOwnerLastEventId()): DrawEvent | void {
-    if (eventId) {
-      const removed = this.historyMap.get(eventId);
-      if (removed) {
-        this.historyMap.delete(eventId);
-        return removed;
-      }
+    if (!eventId) {
+      return;
     }
-  }
-
-  private replaceHistory(event: DrawEvent, index = 0): boolean {
-    const historyMapEntries = Array.from(this.historyMap.entries());
-    if (index >= historyMapEntries.length - 1) {
-      return false;
+    const removed = this.historyMap.get(eventId);
+    if (!removed) {
+      return;
     }
-    historyMapEntries[index] = [event.id, event];
-    this.historyMap = new Map(historyMapEntries);
-    return true;
+    this.historyMap.delete(eventId);
+    return removed;
   }
 
   private pushHistoryRedo(events: DrawEvent[]) {
@@ -126,7 +123,7 @@ export class CwService {
         while (redos.length) {
           const redo = redos.shift();
           if (redo?.id === event.id) {
-            // FIXME: Is there a bug ?
+            // FIXME: Is this a bug ?
             // At this point we should do something like this, no?
             // But is this case really exists ?
             /*if (redos.length) {
@@ -144,20 +141,61 @@ export class CwService {
   }
 
   private emitHistory() {
-    this.checkSelection();
     this.history$$.next(this.history);
+  }
+
+  private updateSelection(action: 'add' | 'delete', eventsId: string[]): boolean {
+    const previousSize = this.selectionSet.size;
+    eventsId.forEach((eventId) => this.selectionSet[action](eventId));
+    return this.selectionSet.size !== previousSize;
+  }
+
+  addSelection(eventsId: string[]): boolean {
+    if (!this.updateSelection('add', eventsId)) {
+      return false;
+    }
+    this.emitSelection();
+    this.redraw();
+    return true;
+  }
+
+  removeSelection(eventsId: string[]): boolean {
+    if (!this.updateSelection('delete', eventsId)) {
+      return false;
+    }
+    this.emitSelection();
+    this.redraw();
+    return true;
+  }
+
+  clearSelection(): boolean {
+    if (!this.selectionSet.size) {
+      return false;
+    }
+    this.selectionSet.clear();
+    this.emitSelection();
+    this.redraw();
+    return true;
+  }
+
+  private emitSelection() {
+    this.selection$$.next(Array.from(this.selectionSet).map((eventId) => this.historyMap.get(eventId) as DrawEvent));
   }
 
   private checkSelection() {
     const eventsId = Array.from(this.selectionSet);
-    const events = eventsId
-      .map((eventId) => this.historyMap.get(eventId))
-      .filter((event: DrawEvent | undefined): event is DrawEvent => !!event);
+    const events = this.mapEventsIdToDrawEvents(eventsId);
     if (events.length === eventsId.length) {
       return;
     }
     this.selectionSet = new Set(events.map(({ id }) => id));
     this.selection$$.next(events);
+  }
+
+  private mapEventsIdToDrawEvents(eventsId: string[]): DrawEvent[] {
+    return eventsId
+      .map((eventId) => this.historyMap.get(eventId))
+      .filter((event: DrawEvent | undefined): event is DrawEvent => !!event);
   }
 
   private getOwnerDrawEvents(events: DrawEvent[]) {
@@ -176,9 +214,9 @@ export class CwService {
 
   private broadcastAdd(events: DrawEvent[]) {
     events.forEach((event) => this.pushHistory(event));
-    const ownerEvents = this.getOwnerDrawEvents(events);
-    if (ownerEvents.length) {
-      this.dropHistoryRedoAgainst(ownerEvents);
+    const ownerDrawEvents = this.getOwnerDrawEvents(events);
+    if (ownerDrawEvents.length) {
+      this.dropHistoryRedoAgainst(ownerDrawEvents);
     }
     this.emitHistory();
     this.broadcast$$.next(mapToDrawEventsBroadcast(events, true));
@@ -187,20 +225,21 @@ export class CwService {
   private broadcastRemove(events: DrawEvent[]) {
     const removed = events.filter((event) => this.pullHistory(event));
     if (removed.length) {
-      const ownerEvents = this.getOwnerDrawEvents(removed);
-      if (ownerEvents.length) {
-        this.pushHistoryRedo(ownerEvents);
+      const ownerDrawEvents = this.getOwnerDrawEvents(removed);
+      if (ownerDrawEvents.length) {
+        this.pushHistoryRedo(ownerDrawEvents);
       }
+      this.checkSelection();
       this.emitHistory();
-      this.broadcast$$.next(
-        mapToDrawEventsBroadcast([
-          getClearEvent(this.owner),
-          ...this.backgroundEvent,
-          ...this.history,
-          ...this.selectionEvents,
-        ])
-      );
+      this.redraw();
     }
+  }
+
+  private broadcastTranslate(eventsId: string[], x: number, y: number) {
+    this.translateDrawEvents(this.mapEventsIdToDrawEvents(eventsId), x, y);
+    this.emitHistory();
+    this.emitSelection();
+    this.redraw();
   }
 
   /**
@@ -208,15 +247,22 @@ export class CwService {
    */
   broadcast(transport: DrawTransport) {
     switch (transport.action) {
-      case 'add':
+      case 'add': {
         this.broadcastAdd(transport.events);
         break;
-      case 'remove':
-        this.broadcastRemove(transport.events);
+      }
+      case 'remove': {
+        this.broadcastRemove(this.mapEventsIdToDrawEvents(transport.eventsId));
         break;
-      default:
+      }
+      case 'translate': {
+        this.broadcastTranslate(transport.eventsId, ...transport.translate);
+        break;
+      }
+      default: {
         console.error('Unhandled "DrawTransport" event', transport);
         break;
+      }
     }
   }
 
@@ -234,16 +280,10 @@ export class CwService {
     const event = this.popHistory();
     if (event) {
       this.pushHistoryRedo([event]);
+      this.checkSelection();
       this.emitHistory();
-      this.broadcast$$.next(
-        mapToDrawEventsBroadcast([
-          getClearEvent(this.owner),
-          ...this.backgroundEvent,
-          ...this.history,
-          ...this.selectionEvents,
-        ])
-      );
-      this.emit$$.next({ action: 'remove', events: [event] });
+      this.redraw();
+      this.emit$$.next({ action: 'remove', eventsId: [event.id] });
     }
   }
 
@@ -261,67 +301,47 @@ export class CwService {
     const removed = events.filter((event) => this.pullHistory(event));
     if (removed.length) {
       this.pushHistoryRedo(removed);
+      this.checkSelection();
       this.emitHistory();
-      this.broadcast$$.next(
-        mapToDrawEventsBroadcast([
-          getClearEvent(this.owner),
-          ...this.backgroundEvent,
-          ...this.history,
-          ...this.selectionEvents,
-        ])
-      );
-      this.emit$$.next({ action: 'remove', events: removed });
+      this.redraw();
+      this.emit$$.next({ action: 'remove', eventsId: removed.map(({ id }) => id) });
     }
+  }
+
+  undoAll() {
+    this.cut(this.getOwnerDrawEvents(this.history));
   }
 
   cutSelection() {
     this.cut(this.selection$$.value);
   }
 
-  undoAll() {
-    const events = this.getOwnerDrawEvents(this.history);
-    this.cut(events);
+  // !FIXME: for now, the event.id remains the same. Is this a problem ?
+  private translateDrawEvents(events: DrawEvent[], x: number, y: number) {
+    events.forEach((event) => this.pushHistory(translateDrawEvent(event, x, y)));
   }
 
-  redraw(animate = true) {
-    const events = [getClearEvent(this.owner), ...this.backgroundEvent, ...this.history, ...this.selectionEvents];
-    this.broadcast$$.next(mapToDrawEventsBroadcast(events, animate));
-  }
-
-  private updateSelection(action: 'add' | 'delete', eventsId: string[]): boolean {
-    const previousSize = this.selectionSet.size;
-    eventsId.forEach((eventId) => this.selectionSet[action](eventId));
-    if (this.selectionSet.size !== previousSize) {
-      this.emitSelection();
-    }
-    return this.selectionSet.size !== previousSize;
-  }
-
-  addSelection(eventsId: string[]): boolean {
-    return this.updateSelection('add', eventsId);
-  }
-
-  removeSelection(eventsId: string[]): boolean {
-    return this.updateSelection('delete', eventsId);
-  }
-
-  clearSelection(): boolean {
-    if (!this.selectionSet.size) {
-      return false;
-    }
-    this.selectionSet.clear();
+  // !FIXME: there's too much emit$$ events fired! We need some throttleTime...
+  translateSelection(x: number, y: number) {
+    this.translateDrawEvents(this.selection$$.value, x, y);
+    this.emitHistory();
     this.emitSelection();
-    return true;
+    this.redraw();
+    this.emit$$.next({ action: 'translate', eventsId: Array.from(this.selectionSet.values()), translate: [x, y] });
   }
 
-  private emitSelection() {
-    this.selection$$.next(Array.from(this.selectionSet).map((eventId) => this.historyMap.get(eventId) as DrawEvent));
-    this.redraw(false);
+  redraw(animate = false) {
+    this.broadcast$$.next(
+      mapToDrawEventsBroadcast(
+        [getClearEvent(this.owner), ...this.backgroundEvent, ...this.history, ...this.selectionEvents],
+        animate
+      )
+    );
   }
 
   setFillBackground(fillBackground: FillBackground) {
     this.fillBackground$$.next(fillBackground);
-    this.redraw(false);
+    this.redraw();
   }
 
   private get backgroundEvent(): DrawFillRect[] {

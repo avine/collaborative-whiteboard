@@ -95,9 +95,26 @@ export interface DrawEventsBroadcast {
   events: DrawEvent[];
 }
 
-export type DrawAction = 'add' | 'remove';
+export type DrawTransportAction = 'add' | 'remove' | 'translate';
 
-export interface DrawTransport {
-  action: DrawAction;
+export interface DrawTransportBase {
+  action: DrawTransportAction;
+}
+
+export interface DrawTransportAdd extends DrawTransportBase {
+  action: 'add';
   events: DrawEvent[];
 }
+
+export interface DrawTransportRemove extends DrawTransportBase {
+  action: 'remove';
+  eventsId: string[];
+}
+
+export interface DrawTransportTranslate extends DrawTransportBase {
+  action: 'translate';
+  eventsId: string[];
+  translate: CanvasPoint;
+}
+
+export type DrawTransport = DrawTransportAdd | DrawTransportRemove | DrawTransportTranslate;

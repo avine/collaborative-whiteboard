@@ -8,6 +8,7 @@ import {
   EventEmitter,
   Inject,
   Input,
+  NgZone,
   OnChanges,
   Optional,
   Output,
@@ -70,11 +71,13 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
   private broadcastEventsBuffer: (DrawEvent | DrawEventAnimated)[] = [];
 
   private skipUnselect!: boolean;
+  private canTranslateSelection!: boolean;
 
   constructor(
     @Optional() private service: CwService,
     @Inject(DOCUMENT) private document: Document,
-    private changeDetectorRef: ChangeDetectorRef
+    private changeDetectorRef: ChangeDetectorRef,
+    private ngZone: NgZone
   ) {}
 
   ngOnChanges({ canvasSize, broadcast }: SimpleChanges) {
@@ -294,13 +297,22 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
     if (eventsId.length) {
       this.skipUnselect = this.service?.addSelection(eventsId);
     }
+    const actions = this.contextResult.getSelectedActions(...canvasPoint);
+    this.canTranslateSelection = !!(actions.length || eventsId.length);
   }
 
   private handleSelectionMove(data: number[]) {
-    this.contextEmit.drawRectangle(
-      [...data.slice(0, 2), ...data.slice(-2)] as CanvasLine,
-      getSelectionMoveDrawOptions()
-    );
+    if (this.canTranslateSelection) {
+      this.ngZone.run(() => {
+        const [fromX, fromY, toX, toY] = data.slice(-4);
+        this.service?.translateSelection(toX - fromX, toY - fromY);
+      });
+    } else {
+      this.contextEmit.drawRectangle(
+        [...data.slice(0, 2), ...data.slice(-2)] as CanvasLine,
+        getSelectionMoveDrawOptions()
+      );
+    }
   }
 
   private handleSelectionEnd(data: number[]) {
@@ -319,6 +331,9 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
         break;
       }
       default: {
+        if (this.canTranslateSelection) {
+          break;
+        }
         const canvasLine = [...data.slice(0, 2), ...data.slice(-2)] as CanvasLine;
         const eventsId = this.contextResult.getSelectedDrawEventsIdInArea(canvasLine);
         if (eventsId.length) {
@@ -329,6 +344,7 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
         break;
       }
     }
+    this.canTranslateSelection = false;
   }
 
   private getCompleteEvent(data: number[], options: DrawOptions, forceDrawType?: DrawType): DrawEvent {

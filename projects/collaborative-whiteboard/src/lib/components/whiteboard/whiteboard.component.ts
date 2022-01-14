@@ -103,7 +103,7 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
       .subscribe(() => {
         if (this.fitParentElement) {
           this.fitCanvasSizeToParentElement();
-          this.service.redraw(false);
+          this.service.redraw();
         }
       });
   }
