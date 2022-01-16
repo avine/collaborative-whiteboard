@@ -87,7 +87,7 @@ export class CwPointerDirective implements OnInit, OnDestroy {
 
   private initMoveListeners() {
     // Prevent unnecessary change detection
-    // this.ngZone.runOutsideAngular(() => {
+    this.ngZone.runOutsideAngular(() => {
       fromEvent<TouchEvent>(this.elementRef.nativeElement, 'touchmove')
         .pipe(throttleTime(10), takeUntil(this.end$))
         .subscribe((e) => {
@@ -101,7 +101,7 @@ export class CwPointerDirective implements OnInit, OnDestroy {
           const { clientX, clientY } = e;
           this.pointerMove(clientX, clientY);
         });
-    // });
+    });
   }
 
   pointerStart(pointerX: number, pointerY: number) {
@@ -165,7 +165,10 @@ export class CwPointerDirective implements OnInit, OnDestroy {
 
   private get sensitivityOrigin(): CanvasPoint {
     return this.cwPointerSensitivityOrigin === 'previous'
-      ? [this.magnetizedBuffer[this.magnetizedBuffer.length - 2], this.magnetizedBuffer[this.magnetizedBuffer.length - 1]]
+      ? [
+          this.magnetizedBuffer[this.magnetizedBuffer.length - 2],
+          this.magnetizedBuffer[this.magnetizedBuffer.length - 1],
+        ]
       : [this.magnetizedBuffer[0], this.magnetizedBuffer[1]];
   }
 }
