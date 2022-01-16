@@ -18,11 +18,11 @@
   class="cw-canvas__preview"
   [class.cw-canvas__preview--readonly]="drawDisabled"
   cwPointer
-  [cwPointerMagnet]="drawMode === 'selection' ? 0 : pointerMagnet"
+  [cwPointerMagnet]="pointerMagnet"
   [cwPointerMagnetShift]="pointerMagnetShift"
   [cwPointerSensitivity]="pointerSensitivity"
   [cwPointerSensitivityOrigin]="pointerSensitivityOrigin"
-  (cwPointerStart)="drawDisabled || emitStart($event)"
-  (cwPointerMove)="drawDisabled || emitMove($event)"
-  (cwPointerEnd)="drawDisabled || emitEnd($event)"
+  (cwPointerStart)="drawDisabled || pointerStart($event[0], $event[1])"
+  (cwPointerMove)="drawDisabled || pointerMove($event[0], $event[1])"
+  (cwPointerEnd)="drawDisabled || pointerEnd($event[0], $event[1])"
 ></canvas>

@@ -61,15 +61,16 @@ export class CwPointerDirective implements OnInit, OnDestroy {
 
   @Input() cwPointerSensitivityOrigin: PointerSensitivityOrigin = 'previous';
 
-  @Output() cwPointerStart = new EventEmitter<CanvasPoint>();
+  @Output() cwPointerStart = new EventEmitter<[CanvasPoint, CanvasPoint]>();
 
-  @Output() cwPointerMove = new EventEmitter<number[]>();
+  @Output() cwPointerMove = new EventEmitter<[number[], number[]]>();
 
-  @Output() cwPointerEnd = new EventEmitter<number[]>();
+  @Output() cwPointerEnd = new EventEmitter<[number[], number[]]>();
 
   private element!: { x: number; y: number };
 
-  private dataBuffer: number[] = [];
+  private magnetizedBuffer: number[] = [];
+  private originalBuffer: number[] = [];
 
   private end$ = new Subject<void>();
 
@@ -86,7 +87,7 @@ export class CwPointerDirective implements OnInit, OnDestroy {
 
   private initMoveListeners() {
     // Prevent unnecessary change detection
-    this.ngZone.runOutsideAngular(() => {
+    // this.ngZone.runOutsideAngular(() => {
       fromEvent<TouchEvent>(this.elementRef.nativeElement, 'touchmove')
         .pipe(throttleTime(10), takeUntil(this.end$))
         .subscribe((e) => {
@@ -100,38 +101,42 @@ export class CwPointerDirective implements OnInit, OnDestroy {
           const { clientX, clientY } = e;
           this.pointerMove(clientX, clientY);
         });
-    });
+    // });
   }
 
   pointerStart(pointerX: number, pointerY: number) {
     this.snapshotElementXY();
-    const canvasPoint = this.getCanvasPoint(pointerX, pointerY);
-    this.dataBuffer = canvasPoint;
-    this.cwPointerStart.emit(canvasPoint);
+    const magnetized = this.getMagnetizedCanvasPoint(pointerX, pointerY);
+    this.magnetizedBuffer = magnetized;
+    const original = this.getOriginalCanvasPoint(pointerX, pointerY);
+    this.originalBuffer = original;
+    this.cwPointerStart.emit([magnetized, original]);
   }
 
   private pointerMove(pointerX: number, pointerY: number) {
-    if (!this.dataBuffer.length) {
+    if (!this.magnetizedBuffer.length) {
       return;
     }
     const [fromX, fromY] = this.sensitivityOrigin;
-    const [toX, toY] = this.getCanvasPoint(pointerX, pointerY);
+    const [toX, toY] = this.getMagnetizedCanvasPoint(pointerX, pointerY);
     if (Math.abs(toX - fromX) <= this.cwPointerSensitivity && Math.abs(toY - fromY) <= this.cwPointerSensitivity) {
       return;
     }
-    this.dataBuffer.push(toX, toY);
-    this.cwPointerMove.emit(this.dataBuffer);
+    this.magnetizedBuffer.push(toX, toY);
+    this.originalBuffer.push(...this.getOriginalCanvasPoint(pointerX, pointerY));
+    this.cwPointerMove.emit([this.magnetizedBuffer, this.originalBuffer]);
   }
 
   private pointerEnd(pointerX?: number, pointerY?: number) {
-    if (!this.dataBuffer.length) {
+    if (!this.magnetizedBuffer.length) {
       return;
     }
     if (pointerX && pointerY) {
       this.pointerMove(pointerX, pointerY);
     }
-    this.cwPointerEnd.emit(this.dataBuffer);
-    this.dataBuffer = [];
+    this.cwPointerEnd.emit([this.magnetizedBuffer, this.originalBuffer]);
+    this.magnetizedBuffer = [];
+    this.originalBuffer = [];
   }
 
   // Note: we assume the `nativeElement` coords will not change between `pointerStart` and `pointerEnd` events
@@ -140,7 +145,11 @@ export class CwPointerDirective implements OnInit, OnDestroy {
     this.element = { x, y };
   }
 
-  private getCanvasPoint(pointerX: number, pointerY: number): CanvasPoint {
+  private getOriginalCanvasPoint(pointerX: number, pointerY: number): CanvasPoint {
+    return [Math.round(pointerX - this.element.x), Math.round(pointerY - this.element.y)];
+  }
+
+  private getMagnetizedCanvasPoint(pointerX: number, pointerY: number): CanvasPoint {
     return [
       this.magnetize(pointerX - this.element.x, this.cwPointerMagnetShift[0]),
       this.magnetize(pointerY - this.element.y, this.cwPointerMagnetShift[1]),
@@ -156,7 +165,7 @@ export class CwPointerDirective implements OnInit, OnDestroy {
 
   private get sensitivityOrigin(): CanvasPoint {
     return this.cwPointerSensitivityOrigin === 'previous'
-      ? [this.dataBuffer[this.dataBuffer.length - 2], this.dataBuffer[this.dataBuffer.length - 1]]
-      : [this.dataBuffer[0], this.dataBuffer[1]];
+      ? [this.magnetizedBuffer[this.magnetizedBuffer.length - 2], this.magnetizedBuffer[this.magnetizedBuffer.length - 1]]
+      : [this.magnetizedBuffer[0], this.magnetizedBuffer[1]];
   }
 }

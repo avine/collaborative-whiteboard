@@ -229,62 +229,76 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
     return this.drawMode === 'brush' ? 'previous' : 'first';
   }
 
-  emitStart(canvasPoint: CanvasPoint, options = this.drawOptions) {
+  pointerStart(magnetized: CanvasPoint, original: CanvasPoint) {
     if (this.drawMode === 'selection') {
-      this.handleSelectionStart(canvasPoint);
+      this.handleSelectionStart(original);
       return;
     }
-    this.contextEmit.drawPoint(canvasPoint, options); // ! FIXME: is it better not to draw this point ?
+    this.contextEmit.drawPoint(magnetized, this.drawOptions); // ! FIXME: is it better not to draw this point ?
   }
 
-  emitMove(data: number[], options = this.drawOptions) {
+  pointerMove(magnetized: number[], original: number[]) {
     this.contextEmit.drawClear(this.canvasSizeAsLine);
     if (this.drawMode === 'selection') {
-      this.handleSelectionMove(data);
+      this.handleSelectionMove(magnetized, original);
       return;
     }
     switch (this.drawMode) {
       case 'brush': {
-        this.contextEmit.drawLineSerie(data, options);
+        this.contextEmit.drawLineSerie(magnetized, this.drawOptions);
         break;
       }
       case 'line': {
-        this.contextEmit.drawLine([...data.slice(0, 2), ...data.slice(-2)] as CanvasLine, options);
+        this.contextEmit.drawLine([...magnetized.slice(0, 2), ...magnetized.slice(-2)] as CanvasLine, this.drawOptions);
         break;
       }
       case 'rectangle': {
-        this.contextEmit.drawRectangle([...data.slice(0, 2), ...data.slice(-2)] as CanvasLine, options);
+        this.contextEmit.drawRectangle(
+          [...magnetized.slice(0, 2), ...magnetized.slice(-2)] as CanvasLine,
+          this.drawOptions
+        );
         break;
       }
       case 'ellipse': {
-        this.contextEmit.drawEllipse([...data.slice(0, 2), ...data.slice(-2)] as CanvasLine, options);
+        this.contextEmit.drawEllipse(
+          [...magnetized.slice(0, 2), ...magnetized.slice(-2)] as CanvasLine,
+          this.drawOptions
+        );
         break;
       }
     }
   }
 
-  emitEnd(data: number[], options = this.drawOptions) {
+  pointerEnd(magnetized: number[], original: number[]) {
     this.contextEmit.drawClear(this.canvasSizeAsLine);
     if (this.drawMode === 'selection') {
-      this.handleSelectionEnd(data);
+      this.handleSelectionEnd(original);
       return;
     }
     let event: DrawEvent | undefined = undefined;
     switch (this.drawMode) {
       case 'brush': {
-        event = this.getCompleteEvent(data, options);
+        event = this.getCompleteEvent(magnetized, this.drawOptions);
         break;
       }
       case 'line': {
-        event = this.getCompleteEvent([...data.slice(0, 2), ...data.slice(-2)], options);
+        event = this.getCompleteEvent([...magnetized.slice(0, 2), ...magnetized.slice(-2)], this.drawOptions);
         break;
       }
       case 'rectangle': {
-        event = this.getCompleteEvent([...data.slice(0, 2), ...data.slice(-2)], options, 'rectangle');
+        event = this.getCompleteEvent(
+          [...magnetized.slice(0, 2), ...magnetized.slice(-2)],
+          this.drawOptions,
+          'rectangle'
+        );
         break;
       }
       case 'ellipse': {
-        event = this.getCompleteEvent([...data.slice(0, 2), ...data.slice(-2)], options, 'ellipse');
+        event = this.getCompleteEvent(
+          [...magnetized.slice(0, 2), ...magnetized.slice(-2)],
+          this.drawOptions,
+          'ellipse'
+        );
         break;
       }
     }
@@ -292,37 +306,36 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
     this.draw.emit(translateDrawEvent(event, ...this.getCanvasCenter('emit')));
   }
 
-  private handleSelectionStart(canvasPoint: CanvasPoint) {
-    const eventsId = this.contextResult.getSelectedDrawEventsId(...canvasPoint);
+  private handleSelectionStart(original: CanvasPoint) {
+    const eventsId = this.contextResult.getSelectedDrawEventsId(...original);
     if (eventsId.length) {
       this.skipUnselect = this.service?.addSelection(eventsId);
     }
-    const actions = this.contextResult.getSelectedActions(...canvasPoint);
+    const actions = this.contextResult.getSelectedActions(...original);
     this.canTranslateSelection = !!(actions.length || eventsId.length);
   }
 
-  private handleSelectionMove(data: number[]) {
+  private handleSelectionMove(magnetized: number[], original: number[]) {
     if (this.canTranslateSelection) {
       this.ngZone.run(() => {
-        const [fromX, fromY, toX, toY] = data.slice(-4);
+        const [fromX, fromY, toX, toY] = magnetized.slice(-4);
         this.service?.translateSelection(toX - fromX, toY - fromY);
       });
     } else {
       this.contextEmit.drawRectangle(
-        [...data.slice(0, 2), ...data.slice(-2)] as CanvasLine,
+        [...original.slice(0, 2), ...original.slice(-2)] as CanvasLine,
         getSelectionMoveDrawOptions()
       );
     }
   }
 
-  private handleSelectionEnd(data: number[]) {
-    switch (data.length) {
+  private handleSelectionEnd(original: number[]) {
+    switch (original.length) {
       case 2: {
         if (this.skipUnselect) {
-          this.skipUnselect = false;
           break;
         }
-        const eventsId = this.contextResult.getSelectedDrawEventsId(...(data as CanvasPoint));
+        const eventsId = this.contextResult.getSelectedDrawEventsId(...(original as CanvasPoint));
         if (eventsId.length) {
           this.service?.removeSelection(eventsId);
         } else {
@@ -334,7 +347,7 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
         if (this.canTranslateSelection) {
           break;
         }
-        const canvasLine = [...data.slice(0, 2), ...data.slice(-2)] as CanvasLine;
+        const canvasLine = [...original.slice(0, 2), ...original.slice(-2)] as CanvasLine;
         const eventsId = this.contextResult.getSelectedDrawEventsIdInArea(canvasLine);
         if (eventsId.length) {
           this.service?.addSelection(eventsId);
@@ -344,6 +357,7 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
         break;
       }
     }
+    this.skipUnselect = false;
     this.canTranslateSelection = false;
   }
 
