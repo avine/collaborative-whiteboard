@@ -272,7 +272,7 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
   pointerEnd(magnetized: number[], original: number[]) {
     this.contextEmit.drawClear(this.canvasSizeAsLine);
     if (this.drawMode === 'selection') {
-      this.handleSelectionEnd(original);
+      this.handleSelectionEnd(magnetized, original);
       return;
     }
     let event: DrawEvent | undefined = undefined;
@@ -329,7 +329,7 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
     }
   }
 
-  private handleSelectionEnd(original: number[]) {
+  private handleSelectionEnd(magnetized: number[], original: number[]) {
     switch (original.length) {
       case 2: {
         if (this.skipUnselect) {
@@ -345,6 +345,8 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
       }
       default: {
         if (this.canTranslateSelection) {
+          const [fromX, fromY, toX, toY] = [...magnetized.slice(0, 2), ...magnetized.slice(-2)] as CanvasLine;
+          this.service?.emitTranslatedSelection(toX - fromX, toY - fromY);
           break;
         }
         const canvasLine = [...original.slice(0, 2), ...original.slice(-2)] as CanvasLine;

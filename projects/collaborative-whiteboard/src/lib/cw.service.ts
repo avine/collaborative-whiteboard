@@ -321,12 +321,14 @@ export class CwService {
     events.forEach((event) => this.pushHistory(translateDrawEvent(event, x, y)));
   }
 
-  // !FIXME: there's too much emit$$ events fired! We need some throttleTime...
   translateSelection(x: number, y: number) {
     this.translateDrawEvents(this.selection$$.value, x, y);
     this.emitHistory();
     this.emitSelection();
     this.redraw();
+  }
+
+  emitTranslatedSelection(x: number, y: number) {
     this.emit$$.next({ action: 'translate', eventsId: Array.from(this.selectionSet.values()), translate: [x, y] });
   }
 
