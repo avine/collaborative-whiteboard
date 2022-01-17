@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 
-import { getColorsMatrix } from '../../utils/common';
+import { getColorsMatrix } from '../../utils';
 
 @Component({
   selector: 'cw-color-picker',

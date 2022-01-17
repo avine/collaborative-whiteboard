@@ -13,13 +13,7 @@ import {
   FillBackground,
   Owner,
 } from './cw.types';
-import {
-  getClearEvent,
-  getFillRectEvent,
-  getSelectionEvents,
-  mapToDrawEventsBroadcast,
-  translateDrawEvent,
-} from './utils/common';
+import { getClearEvent, getFillRectEvent, getSelectionEvents, mapToDrawEventsBroadcast, translateEvent } from './utils';
 
 @Injectable()
 export class CwService {
@@ -318,7 +312,7 @@ export class CwService {
 
   // !FIXME: for now, the event.id remains the same. Is this a problem ?
   private translateDrawEvents(events: DrawEvent[], x: number, y: number) {
-    events.forEach((event) => this.pushHistory(translateDrawEvent(event, x, y)));
+    events.forEach((event) => this.pushHistory(translateEvent(event, x, y)));
   }
 
   translateSelection(x: number, y: number) {

@@ -28,10 +28,16 @@ import {
   DrawType,
 } from '../../cw.types';
 import { PointerSensitivityOrigin } from '../../directives/pointer.types';
-import { CanvasContext } from '../../utils/canvas-context';
-import { getSelectionMoveDrawOptions } from '../../utils/canvas-context/canvas-context.config';
-import { getEventUID, inferBasicDrawType, isEmptyCanvasLine, translateDrawEvent } from '../../utils/common';
-import { isDrawEventAnimated, mapToDrawEventsAnimated } from '../../utils/events-animation';
+import {
+  CanvasContext,
+  getDrawEventUID,
+  getSelectionMoveDrawOptions,
+  inferBasicDrawType,
+  isDrawEventAnimated,
+  isEmptyCanvasLine,
+  mapToDrawEventsAnimated,
+  translateEvent,
+} from '../../utils';
 import { getAnimFlushCount, getAnimFrameRate } from './canvas.utils';
 
 @Component({
@@ -145,7 +151,7 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
   }
 
   private updateBroadcastEventsBuffer() {
-    let events = this.broadcast.events.map((event) => translateDrawEvent(event, ...this.getCanvasCenter('broadcast')));
+    let events = this.broadcast.events.map((event) => translateEvent(event, ...this.getCanvasCenter('broadcast')));
     if (this.broadcast.animate) {
       events = mapToDrawEventsAnimated(events);
     }
@@ -303,7 +309,7 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
       }
     }
     this.handleResult(event);
-    this.draw.emit(translateDrawEvent(event, ...this.getCanvasCenter('emit')));
+    this.draw.emit(translateEvent(event, ...this.getCanvasCenter('emit')));
   }
 
   private handleSelectionStart(original: CanvasPoint) {
@@ -365,7 +371,7 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
 
   private getCompleteEvent(data: number[], options: DrawOptions, forceDrawType?: DrawType): DrawEvent {
     return {
-      id: getEventUID(),
+      id: getDrawEventUID(),
       owner: this.owner,
       type: forceDrawType ?? inferBasicDrawType(data.length),
       data,

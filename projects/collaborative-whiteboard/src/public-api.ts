@@ -27,6 +27,4 @@ export * from './lib/directives/pointer.directive';
 export * from './lib/services/storage';
 
 // Utils
-export * from './lib/utils/canvas-context';
-export * from './lib/utils/events-animation';
-export * from './lib/utils/common';
+export * from './lib/utils';

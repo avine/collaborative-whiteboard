@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from 
 
 import { DEFAULT_OWNER, getDefaultFillBackground, getDefaultFillBackgroundColor } from '../../cw.config';
 import { FillBackground, Owner } from '../../cw.types';
-import { getUID } from '../../utils/common';
+import { getDomUID } from '../../utils';
 
 @Component({
   selector: 'cw-fill-background',
@@ -22,7 +22,7 @@ export class CwFillBackgroundComponent {
 
   colors = getDefaultFillBackgroundColor();
 
-  checkboxId = getUID();
+  checkboxId = getDomUID();
 
   emit() {
     this.fillBackgroundChange.emit({ ...this.fillBackground, owner: this.ownerSnapshot });
