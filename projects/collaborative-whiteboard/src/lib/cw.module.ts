@@ -5,16 +5,18 @@ import { CommonModule } from '@angular/common';
 import { ModuleWithProviders, NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
-import { CwCanvasComponent } from './components/canvas/canvas.component';
-import { CwColorPickerComponent } from './components/color-picker/color-picker.component';
-import { CwDrawModeComponent } from './components/draw-mode/draw-mode.component';
-import { CwDrawSettingsComponent } from './components/draw-settings/draw-settings.component';
-import { CwFillBackgroundComponent } from './components/fill-background/fill-background.component';
-import { CwIconComponent } from './components/icon/icon.component';
-import { CwToolContentComponent } from './components/tool-content/tool-content.component';
-import { CwToolGroupComponent } from './components/tool-group/tool-group.component';
-import { CwToolComponent } from './components/tool/tool.component';
-import { CwWhiteboardComponent } from './components/whiteboard/whiteboard.component';
+import {
+  CwCanvasComponent,
+  CwColorPickerComponent,
+  CwDrawModeComponent,
+  CwDrawSettingsComponent,
+  CwFillBackgroundComponent,
+  CwIconComponent,
+  CwToolComponent,
+  CwToolContentComponent,
+  CwToolGroupComponent,
+  CwWhiteboardComponent,
+} from './components';
 import { CwPointerDirective } from './directives/pointer.directive';
 import { CwStorageService } from './services/storage';
 
@@ -25,9 +27,9 @@ const features = [
   CwDrawSettingsComponent,
   CwFillBackgroundComponent,
   CwIconComponent,
+  CwToolComponent,
   CwToolContentComponent,
   CwToolGroupComponent,
-  CwToolComponent,
   CwWhiteboardComponent,
   CwPointerDirective,
 ];
