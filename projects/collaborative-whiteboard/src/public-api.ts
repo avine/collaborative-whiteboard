@@ -8,14 +8,8 @@ export * from './lib/cw.module';
 export * from './lib/cw.service';
 export * from './lib/cw.types';
 
-// Components
+// Features
 export * from './lib/components';
-
-// Directives
-export * from './lib/directives/pointer.directive';
-
-// Services
-export * from './lib/services/storage';
-
-// Utils
+export * from './lib/directives';
+export * from './lib/services';
 export * from './lib/utils';

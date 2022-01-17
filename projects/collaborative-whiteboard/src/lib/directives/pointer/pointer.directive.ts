@@ -13,7 +13,7 @@ import {
   Output,
 } from '@angular/core';
 
-import { CanvasPoint } from '../cw.types';
+import { CanvasPoint } from '../../cw.types';
 import { PointerSensitivityOrigin } from './pointer.types';
 
 @Directive({

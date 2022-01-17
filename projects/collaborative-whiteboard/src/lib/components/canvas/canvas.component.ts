@@ -27,7 +27,7 @@ import {
   DrawOptions,
   DrawType,
 } from '../../cw.types';
-import { PointerSensitivityOrigin } from '../../directives/pointer.types';
+import { PointerSensitivityOrigin } from '../../directives';
 import {
   CanvasContext,
   getDrawEventUID,

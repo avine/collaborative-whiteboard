@@ -16,7 +16,7 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 
-import { addStorageKeySuffix, CwStorageService, StorageKey } from '../../services/storage';
+import { addStorageKeySuffix, CwStorageService, StorageKey } from '../../services';
 import { CwToolContentComponent } from '../tool-content/tool-content.component';
 import { ToolContentPosition } from '../tool-content/tool-content.types';
 import { CwToolComponent } from '../tool/tool.component';

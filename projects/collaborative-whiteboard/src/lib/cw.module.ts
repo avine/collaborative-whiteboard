@@ -17,8 +17,8 @@ import {
   CwToolGroupComponent,
   CwWhiteboardComponent,
 } from './components';
-import { CwPointerDirective } from './directives/pointer.directive';
-import { CwStorageService } from './services/storage';
+import { CwPointerDirective } from './directives';
+import { CwStorageService } from './services';
 
 const features = [
   CwCanvasComponent,

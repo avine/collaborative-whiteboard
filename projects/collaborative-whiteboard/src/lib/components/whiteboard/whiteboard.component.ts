@@ -19,7 +19,7 @@ import {
 import { getDefaultCanvasSize, getDefaultDrawOptions } from '../../cw.config';
 import { CwService } from '../../cw.service';
 import { DrawMode, DrawTransport, FillBackground, Owner } from '../../cw.types';
-import { addStorageKeySuffix, CwStorageService, StorageKey } from '../../services/storage';
+import { addStorageKeySuffix, CwStorageService, StorageKey } from '../../services';
 
 @Component({
   selector: 'cw-whiteboard',
