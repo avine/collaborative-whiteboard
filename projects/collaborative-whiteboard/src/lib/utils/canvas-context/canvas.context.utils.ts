@@ -7,7 +7,7 @@ export const getCanvasContextHandler: Record<Exclude<DrawType, 'selection'>, key
   lineSerie: 'drawLineSerie',
   rectangle: 'drawRectangle',
   ellipse: 'drawEllipse',
-  fillRect: 'drawFillRect',
+  fillBackground: 'drawFillBackground',
   clear: 'drawClear',
 };
 

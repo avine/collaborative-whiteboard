@@ -20,7 +20,15 @@ export type CanvasLine = [number, number, number, number];
 
 export type CanvasLineSerie = number[];
 
-export type DrawType = 'point' | 'line' | 'lineSerie' | 'rectangle' | 'ellipse' | 'fillRect' | 'clear' | 'selection';
+export type DrawType =
+  | 'point'
+  | 'line'
+  | 'lineSerie'
+  | 'rectangle'
+  | 'ellipse'
+  | 'fillBackground'
+  | 'clear'
+  | 'selection';
 
 export interface DrawOptions {
   lineWidth: number;
@@ -62,9 +70,8 @@ export interface DrawEllipse extends DrawBase {
   data: CanvasLine;
 }
 
-// TODO: rename 'fillRect' into 'fillBackground'
-export interface DrawFillRect extends DrawBase {
-  type: 'fillRect';
+export interface DrawFillBackground extends DrawBase {
+  type: 'fillBackground';
   data: CanvasLine;
 }
 
@@ -84,7 +91,7 @@ export type DrawEvent =
   | DrawLineSerie
   | DrawRectangle
   | DrawEllipse
-  | DrawFillRect
+  | DrawFillBackground
   | DrawClear
   | DrawSelection;
 

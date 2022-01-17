@@ -7,13 +7,13 @@ import { DEFAULT_DRAW_MODE, DEFAULT_OWNER, getDefaultFillBackground } from './cw
 import {
   DrawEvent,
   DrawEventsBroadcast,
-  DrawFillRect,
+  DrawFillBackground,
   DrawMode,
   DrawTransport,
   FillBackground,
   Owner,
 } from './cw.types';
-import { getClearEvent, getFillRectEvent, getSelectionEvents, mapToDrawEventsBroadcast, translateEvent } from './utils';
+import { getClearEvent, getFillBackgroundEvent, getSelectionEvents, mapToDrawEventsBroadcast, translateEvent } from './utils';
 
 @Injectable()
 export class CwService {
@@ -329,7 +329,7 @@ export class CwService {
   redraw(animate = false) {
     this.broadcast$$.next(
       mapToDrawEventsBroadcast(
-        [getClearEvent(this.owner), ...this.backgroundEvent, ...this.history, ...this.selectionEvents],
+        [getClearEvent(this.owner), ...this.backgroundEvents, ...this.history, ...this.selectionEvents],
         animate
       )
     );
@@ -340,14 +340,14 @@ export class CwService {
     this.redraw();
   }
 
-  private get backgroundEvent(): DrawFillRect[] {
-    const events: DrawFillRect[] = [];
+  private get backgroundEvents(): DrawFillBackground[] {
+    const events: DrawFillBackground[] = [];
     const { transparent, color, opacity } = this.fillBackground$$.value;
     if (!transparent) {
-      events.push(getFillRectEvent('255, 255, 255', 1, this.owner));
+      events.push(getFillBackgroundEvent('255, 255, 255', 1, this.owner));
     }
     if (color) {
-      events.push(getFillRectEvent(color, opacity, this.owner));
+      events.push(getFillBackgroundEvent(color, opacity, this.owner));
     }
     return events;
   }
