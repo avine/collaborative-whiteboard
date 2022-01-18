@@ -15,11 +15,9 @@ export interface DrawEventPath {
   eventId: string;
 }
 
-export interface DrawSelectionPath extends DrawEventPath {
-  action: 'select';
+export interface DrawBoundingSelectionPath extends DrawEventPath {
+  action: 'translate' | 'resize';
+  bounding: CanvasLine;
 }
 
-export interface SelectedAction {
-  eventId: string;
-  action: 'select';
-}
+export type BoundingSelectionAction = Omit<DrawBoundingSelectionPath, 'path2D'>;

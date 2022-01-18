@@ -1,7 +1,7 @@
 import { DEFAULT_OWNER } from '../cw.config';
 import { DrawEvent } from '../cw.types';
 import { SELECTION_SHIFT } from './canvas-context';
-import { getBoundingRect } from './canvas-context/canvas.context.utils';
+import { getBounding } from './canvas-context/canvas.context.utils';
 import { getDrawEventUID } from './id';
 
 export const getSelectionEvents = (events: DrawEvent[], owner = DEFAULT_OWNER): DrawEvent[] => {
@@ -11,9 +11,9 @@ export const getSelectionEvents = (events: DrawEvent[], owner = DEFAULT_OWNER): 
     selection.push({
       id: getDrawEventUID(),
       owner,
-      type: 'selection',
+      type: 'boundingSelection',
       options: { lineWidth: lineWidthMax + 2 * SELECTION_SHIFT, opacity: 0, fillOpacity: 0, color: '0, 0, 0' },
-      data: getBoundingRect(...events.map(({ data }) => data)),
+      data: getBounding(...events.map(({ data }) => data)),
     });
   }
   return selection;

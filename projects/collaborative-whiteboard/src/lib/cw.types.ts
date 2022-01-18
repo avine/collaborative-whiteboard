@@ -28,7 +28,8 @@ export type DrawType =
   | 'ellipse'
   | 'fillBackground'
   | 'clear'
-  | 'selection';
+  | 'selection'
+  | 'boundingSelection';
 
 export interface DrawOptions {
   lineWidth: number;
@@ -43,6 +44,7 @@ export interface DrawBase {
   owner: Owner;
   type: DrawType;
   options: DrawOptions;
+  dataSnapshot?: CanvasPoint | CanvasLine | CanvasLineSerie;
 }
 
 export interface DrawPoint extends DrawBase {
@@ -85,6 +87,11 @@ export interface DrawSelection extends DrawBase {
   data: CanvasPoint | CanvasLine | CanvasLineSerie;
 }
 
+export interface DrawBoundingSelection extends DrawBase {
+  type: 'boundingSelection';
+  data: CanvasLine;
+}
+
 export type DrawEvent =
   | DrawPoint
   | DrawLine
@@ -93,7 +100,8 @@ export type DrawEvent =
   | DrawEllipse
   | DrawFillBackground
   | DrawClear
-  | DrawSelection;
+  | DrawSelection
+  | DrawBoundingSelection;
 
 export type DrawEventAnimated = (DrawLine | DrawLineSerie | DrawRectangle | DrawEllipse) & { animate: boolean };
 
@@ -102,7 +110,7 @@ export interface DrawEventsBroadcast {
   events: DrawEvent[];
 }
 
-export type DrawTransportAction = 'add' | 'remove' | 'translate';
+export type DrawTransportAction = 'add' | 'remove' | 'translate' | 'resize';
 
 export interface DrawTransportBase {
   action: DrawTransportAction;
@@ -124,4 +132,11 @@ export interface DrawTransportTranslate extends DrawTransportBase {
   translate: CanvasPoint;
 }
 
-export type DrawTransport = DrawTransportAdd | DrawTransportRemove | DrawTransportTranslate;
+export interface DrawTransportResize extends DrawTransportBase {
+  action: 'resize';
+  eventsId: string[];
+  origin: [number, number];
+  scale: [number, number];
+}
+
+export type DrawTransport = DrawTransportAdd | DrawTransportRemove | DrawTransportTranslate | DrawTransportResize;

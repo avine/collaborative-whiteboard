@@ -1,7 +1,10 @@
 import { CanvasLine, CanvasLineSerie, CanvasPoint, DrawType } from '../../cw.types';
 import { ICanvasContext } from './canvas.context.types';
 
-export const getCanvasContextHandler: Record<Exclude<DrawType, 'selection'>, keyof ICanvasContext> = {
+export const getCanvasContextHandler: Record<
+  Exclude<DrawType, 'selection' | 'boundingSelection'>,
+  keyof ICanvasContext
+> = {
   point: 'drawPoint',
   line: 'drawLine',
   lineSerie: 'drawLineSerie',
@@ -19,9 +22,9 @@ export const normalizeCanvasLine = (canvasLine: CanvasLine): CanvasLine => {
   return [fromX, fromY, toX, toY];
 };
 
-type BoundingRectData = CanvasPoint | CanvasLine | CanvasLineSerie;
+type BoundingData = CanvasPoint | CanvasLine | CanvasLineSerie;
 
-const _getBoundingRect = (data: BoundingRectData): CanvasLine => {
+const _getBounding = (data: BoundingData): CanvasLine => {
   switch (data.length) {
     case 2: {
       return [data[0], data[1], data[0], data[1]];
@@ -45,13 +48,13 @@ const _getBoundingRect = (data: BoundingRectData): CanvasLine => {
   }
 };
 
-export const getBoundingRect = (...items: BoundingRectData[]): CanvasLine => {
+export const getBounding = (...items: BoundingData[]): CanvasLine => {
   if (items.length === 0) {
     return [0, 0, 0, 0];
   }
-  let [xMin, yMin, xMax, yMax] = _getBoundingRect(items[0]);
+  let [xMin, yMin, xMax, yMax] = _getBounding(items[0]);
   for (let i = 1; i < items.length; i++) {
-    const [fromX, fromY, toX, toY] = _getBoundingRect(items[i]);
+    const [fromX, fromY, toX, toY] = _getBounding(items[i]);
     xMin = Math.min(xMin, fromX);
     yMin = Math.min(yMin, fromY);
     xMax = Math.max(xMax, toX);

@@ -5,6 +5,7 @@ import { Injectable } from '@angular/core';
 
 import { DEFAULT_DRAW_MODE, DEFAULT_OWNER, getDefaultFillBackground } from './cw.config';
 import {
+  CanvasLine,
   DrawEvent,
   DrawEventsBroadcast,
   DrawFillBackground,
@@ -13,7 +14,16 @@ import {
   FillBackground,
   Owner,
 } from './cw.types';
-import { getClearEvent, getFillBackgroundEvent, getSelectionEvents, mapToDrawEventsBroadcast, translateEvent } from './utils';
+import {
+  deleteEventDataSnapshot,
+  getClearEvent,
+  getFillBackgroundEvent,
+  getSelectionEvents,
+  mapToDrawEventsBroadcast,
+  resizeEvent,
+  defineEventDataSnapshot,
+  translateEvent,
+} from './utils';
 
 @Injectable()
 export class CwService {
@@ -236,6 +246,10 @@ export class CwService {
     this.redraw();
   }
 
+  private broadcastResize(eventsId: string[]) {
+    // TODO...
+  }
+
   /**
    * Dispatch draw events from the server to the client
    */
@@ -251,6 +265,10 @@ export class CwService {
       }
       case 'translate': {
         this.broadcastTranslate(transport.eventsId, ...transport.translate);
+        break;
+      }
+      case 'resize': {
+        this.broadcastResize(transport.eventsId);
         break;
       }
       default: {
@@ -324,6 +342,23 @@ export class CwService {
 
   emitTranslatedSelection(x: number, y: number) {
     this.emit$$.next({ action: 'translate', eventsId: Array.from(this.selectionSet.values()), translate: [x, y] });
+  }
+
+  private resizeDrawEvents(events: DrawEvent[], origin: [number, number], scale: [number, number]) {
+    events.forEach((event) => this.pushHistory(resizeEvent(event, origin, scale)));
+  }
+
+  resizeSelection(origin: [number, number], scale: [number, number]) {
+    this.selection$$.value.forEach((event) => defineEventDataSnapshot(event));
+    this.resizeDrawEvents(this.selection$$.value, origin, scale);
+    this.emitHistory();
+    this.emitSelection();
+    this.redraw();
+  }
+
+  emitResizedSelection(origin: [number, number], scale: [number, number]) {
+    this.selection$$.value.forEach((event) => deleteEventDataSnapshot(event));
+    this.emit$$.next({ action: 'resize', eventsId: Array.from(this.selectionSet.values()), origin, scale });
   }
 
   redraw(animate = false) {
