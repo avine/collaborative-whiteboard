@@ -334,8 +334,8 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
       });
     } else if (this.canResizeSelection) {
       this.ngZone.run(() => {
-        const { origin, scale, corner } = this.getResizeConfig(magnetized);
-        this.service?.resizeSelection(origin, scale, corner);
+        const { origin, scale } = this.getResizeConfig(magnetized);
+        this.service?.resizeSelection(origin, scale);
       });
     } else {
       this.contextEmit.drawRectangle(
@@ -366,8 +366,8 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
           break;
         }
         if (this.canResizeSelection) {
-          const { origin, scale, corner } = this.getResizeConfig(magnetized);
-          this.service?.emitResizedSelection(origin, scale, corner);
+          const { origin, scale } = this.getResizeConfig(magnetized);
+          this.service?.emitResizedSelection(origin, scale);
           break;
         }
         const canvasLine = [...original.slice(0, 2), ...original.slice(-2)] as CanvasLine;
@@ -404,11 +404,7 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
     return [0, 0, this.canvasSize.width, this.canvasSize.height];
   }
 
-  private getResizeConfig(magnetized: number[]): {
-    origin: CanvasPoint;
-    scale: [number, number];
-    corner: ResizeCorner;
-  } {
+  private getResizeConfig(magnetized: number[]): { origin: CanvasPoint; scale: [number, number] } {
     const { bounding, corner } = this.canResizeSelection as ResizeAction;
 
     const [fromX, fromY, toX, toY] = bounding;
@@ -433,6 +429,6 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
     const scaleX = (w + shiftW * factorX) / w;
     const scaleY = (h + shiftH * factorY) / h;
 
-    return { origin: [originX, originY], scale: [scaleX, scaleY], corner };
+    return { origin: [originX, originY], scale: [scaleX, scaleY] };
   }
 }

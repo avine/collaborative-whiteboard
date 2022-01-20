@@ -1,5 +1,4 @@
 import { CanvasLine, DrawEvent } from '../cw.types';
-import { ResizeCorner } from './canvas-context';
 
 export const translateEvent = (event: DrawEvent, x: number, y: number): DrawEvent => {
   const result: DrawEvent = { ...event };
@@ -17,8 +16,7 @@ export const translateEvent = (event: DrawEvent, x: number, y: number): DrawEven
 export const resizeEvent = (
   event: DrawEvent,
   [originX, originY]: [number, number],
-  [scaleX, scaleY]: [number, number],
-  corner: ResizeCorner // TODO: use corner when resizing!
+  [scaleX, scaleY]: [number, number]
 ): DrawEvent => {
   const result: DrawEvent = { ...event };
   if (!result.data) {
@@ -37,7 +35,10 @@ export const resizeEvent = (
       ];
       break;
     }
-    case 'point':
+    case 'point': {
+      // TODO: NOT IMPLEMENTED YET...
+      break;
+    }
     case 'lineSerie': {
       // TODO: NOT IMPLEMENTED YET...
       break;

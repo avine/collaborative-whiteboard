@@ -22,7 +22,6 @@ import {
   resizeEvent,
   translateEvent,
 } from './utils';
-import { ResizeCorner } from './utils/canvas-context';
 
 @Injectable()
 export class CwService {
@@ -343,25 +342,19 @@ export class CwService {
     this.emit$$.next({ action: 'translate', eventsId: Array.from(this.selectionSet.values()), translate: [x, y] });
   }
 
-  private resizeDrawEvents(
-    events: DrawEvent[],
-    origin: [number, number],
-    scale: [number, number],
-    corner: ResizeCorner
-  ) {
-    events.forEach((event) => this.pushHistory(resizeEvent(event, origin, scale, corner)));
+  private resizeDrawEvents(events: DrawEvent[], origin: [number, number], scale: [number, number]) {
+    events.forEach((event) => this.pushHistory(resizeEvent(event, origin, scale)));
   }
 
-  resizeSelection(origin: [number, number], scale: [number, number], corner: ResizeCorner) {
+  resizeSelection(origin: [number, number], scale: [number, number]) {
     this.selection$$.value.forEach((event) => defineEventDataSnapshot(event));
-    this.resizeDrawEvents(this.selection$$.value, origin, scale, corner);
+    this.resizeDrawEvents(this.selection$$.value, origin, scale);
     this.emitHistory();
     this.emitSelection();
     this.redraw();
   }
 
-  // TODO: need to send the `corner` parameter
-  emitResizedSelection(origin: [number, number], scale: [number, number], corner: ResizeCorner) {
+  emitResizedSelection(origin: [number, number], scale: [number, number]) {
     this.selection$$.value.forEach((event) => deleteEventDataSnapshot(event));
     this.emit$$.next({ action: 'resize', eventsId: Array.from(this.selectionSet.values()), origin, scale });
   }

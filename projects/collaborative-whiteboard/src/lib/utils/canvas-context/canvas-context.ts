@@ -219,16 +219,27 @@ export class CanvasContext implements ICanvasContext {
     return [translateAction, ...resizeActions];
   }
 
-  // !FIXME: need to verify performance on this method...
+  // !FIXME: this function has performance issues...
   getSelectedEventsIdInArea(canvasLine: CanvasLine): string[] {
     const fromX = Math.min(canvasLine[0], canvasLine[2]);
     const toX = Math.max(canvasLine[0], canvasLine[2]);
     const fromY = Math.min(canvasLine[1], canvasLine[3]);
     const toY = Math.max(canvasLine[1], canvasLine[3]);
+    let buffer = [...this.drawEventPaths];
     const eventsId = new Set<string>();
-    for (let x = fromX; x <= toX; x++) {
+    loop: for (let x = fromX; x <= toX; x++) {
       for (let y = fromY; y <= toY; y++) {
-        this.getSelectedEventsId(x, y).forEach((eventId) => eventsId.add(eventId));
+        buffer = buffer.filter(({ path2D, eventId }) => {
+          if (this.context.isPointInPath(path2D, x, y, 'evenodd')) {
+            eventsId.add(eventId);
+            return false;
+          } else {
+            return true;
+          }
+        });
+        if (!buffer.length) {
+          break loop;
+        }
       }
     }
     return Array.from(eventsId);
