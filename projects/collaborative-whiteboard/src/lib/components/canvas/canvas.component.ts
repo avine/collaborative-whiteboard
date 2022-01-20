@@ -38,7 +38,7 @@ import {
   mapToDrawEventsAnimated,
   translateEvent,
 } from '../../utils';
-import { BoundingSelectionAction } from '../../utils/canvas-context/canvas.context.types';
+import { ResizeAction, ResizeCorner } from '../../utils/';
 import { getAnimFlushCount, getAnimFrameRate } from './canvas.utils';
 
 @Component({
@@ -74,12 +74,11 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
   private contextEmit!: CanvasContext;
 
   private broadcastId = 0;
-
   private broadcastEventsBuffer: (DrawEvent | DrawEventAnimated)[] = [];
 
   private skipUnselect = false;
   private canTranslateSelection = false;
-  private canResizeSelection: BoundingSelectionAction | undefined = undefined;
+  private canResizeSelection: ResizeAction | undefined = undefined;
 
   constructor(
     @Optional() private service: CwService,
@@ -335,8 +334,8 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
       });
     } else if (this.canResizeSelection) {
       this.ngZone.run(() => {
-        const { origin, scale } = this.getResizeConfig(magnetized);
-        this.service?.resizeSelection(origin, scale);
+        const { origin, scale, corner } = this.getResizeConfig(magnetized);
+        this.service?.resizeSelection(origin, scale, corner);
       });
     } else {
       this.contextEmit.drawRectangle(
@@ -367,8 +366,8 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
           break;
         }
         if (this.canResizeSelection) {
-          const { origin, scale } = this.getResizeConfig(magnetized);
-          this.service?.emitResizedSelection(origin, scale);
+          const { origin, scale, corner } = this.getResizeConfig(magnetized);
+          this.service?.emitResizedSelection(origin, scale, corner);
           break;
         }
         const canvasLine = [...original.slice(0, 2), ...original.slice(-2)] as CanvasLine;
@@ -405,21 +404,32 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
     return [0, 0, this.canvasSize.width, this.canvasSize.height];
   }
 
-  private getResizeConfig(magnetized: number[]): { origin: CanvasPoint; scale: [number, number] } {
-    const [fromX, fromY, toX, toY] = this.canResizeSelection?.bounding as CanvasLine;
+  private getResizeConfig(magnetized: number[]): {
+    origin: CanvasPoint;
+    scale: [number, number];
+    corner: ResizeCorner;
+  } {
+    const { bounding, corner } = this.canResizeSelection as ResizeAction;
+
+    const [fromX, fromY, toX, toY] = bounding;
+
+    const [centerX, centerY] = this.getCanvasCenter('emit');
+    const originX = Math.floor(fromX + centerX);
+    const originY = Math.floor(fromY + centerY);
+
+    const w = toX - fromX;
+    const h = toY - fromY;
 
     const shiftRect = [...magnetized.slice(0, 2), ...magnetized.slice(-2)] as CanvasLine;
     const shiftW = shiftRect[2] - shiftRect[0];
     const shiftH = shiftRect[3] - shiftRect[1];
 
-    const scaleX = (toX - fromX + shiftW) / (toX - fromX);
-    const scaleY = (toY - fromY + shiftH) / (toY - fromY);
+    const factorX = ['topRight', 'bottomRight'].includes(corner) ? 1 : -1;
+    const factorY = ['bottomLeft', 'bottomRight'].includes(corner) ? 1 : -1;
 
-    const [centerX, centerY] = this.getCanvasCenter('emit');
+    const scaleX = (w + shiftW * factorX) / w;
+    const scaleY = (h + shiftH * factorY) / h;
 
-    const originX = Math.floor(fromX + centerX);
-    const originY = Math.floor(fromY + centerY);
-
-    return { origin: [originX, originY], scale: [scaleX, scaleY] };
+    return { origin: [originX, originY], scale: [scaleX, scaleY], corner };
   }
 }

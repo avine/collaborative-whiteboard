@@ -5,7 +5,6 @@ import { Injectable } from '@angular/core';
 
 import { DEFAULT_DRAW_MODE, DEFAULT_OWNER, getDefaultFillBackground } from './cw.config';
 import {
-  CanvasLine,
   DrawEvent,
   DrawEventsBroadcast,
   DrawFillBackground,
@@ -15,15 +14,16 @@ import {
   Owner,
 } from './cw.types';
 import {
+  defineEventDataSnapshot,
   deleteEventDataSnapshot,
   getClearEvent,
   getFillBackgroundEvent,
   getSelectionEvents,
   mapToDrawEventsBroadcast,
   resizeEvent,
-  defineEventDataSnapshot,
   translateEvent,
 } from './utils';
+import { ResizeCorner } from './utils/canvas-context';
 
 @Injectable()
 export class CwService {
@@ -344,19 +344,25 @@ export class CwService {
     this.emit$$.next({ action: 'translate', eventsId: Array.from(this.selectionSet.values()), translate: [x, y] });
   }
 
-  private resizeDrawEvents(events: DrawEvent[], origin: [number, number], scale: [number, number]) {
-    events.forEach((event) => this.pushHistory(resizeEvent(event, origin, scale)));
+  private resizeDrawEvents(
+    events: DrawEvent[],
+    origin: [number, number],
+    scale: [number, number],
+    corner: ResizeCorner
+  ) {
+    events.forEach((event) => this.pushHistory(resizeEvent(event, origin, scale, corner)));
   }
 
-  resizeSelection(origin: [number, number], scale: [number, number]) {
+  resizeSelection(origin: [number, number], scale: [number, number], corner: ResizeCorner) {
     this.selection$$.value.forEach((event) => defineEventDataSnapshot(event));
-    this.resizeDrawEvents(this.selection$$.value, origin, scale);
+    this.resizeDrawEvents(this.selection$$.value, origin, scale, corner);
     this.emitHistory();
     this.emitSelection();
     this.redraw();
   }
 
-  emitResizedSelection(origin: [number, number], scale: [number, number]) {
+  // TODO: need to send the `corner` parameter
+  emitResizedSelection(origin: [number, number], scale: [number, number], corner: ResizeCorner) {
     this.selection$$.value.forEach((event) => deleteEventDataSnapshot(event));
     this.emit$$.next({ action: 'resize', eventsId: Array.from(this.selectionSet.values()), origin, scale });
   }

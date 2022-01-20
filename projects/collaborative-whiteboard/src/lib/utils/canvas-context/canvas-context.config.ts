@@ -27,4 +27,4 @@ export const SELECTION_LINE_DASH = [9, 6];
 
 export const BOUNDING_SELECTION_LINE_DASH = [2, 3];
 
-export const RESIZE_ACTION_WIDTH = 10;
+export const RESIZE_ACTION_WIDTH = 12;

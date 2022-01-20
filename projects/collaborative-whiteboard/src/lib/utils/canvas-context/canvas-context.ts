@@ -9,19 +9,21 @@ import {
   SELECTION_SHIFT,
 } from './canvas-context.config';
 import {
-  BoundingSelectionAction,
-  DrawBoundingSelectionPath,
+  DrawEventAction,
   DrawEventPath,
   ICanvasContext,
-} from './canvas.context.types';
-import { getBounding, getCanvasContextHandler } from './canvas.context.utils';
+  ResizeAction,
+  ResizeCorner,
+  TranslateAction,
+} from './canvas-context.types';
+import { getBounding, getCanvasContextHandler } from './canvas-context.utils';
 
 export class CanvasContext implements ICanvasContext {
   private canvasSize = getDefaultCanvasSize();
 
   private drawEventPaths: DrawEventPath[] = []; // TODO: use path2DMap to redraw paths when possible...
 
-  private drawBoundingSelectionPaths: DrawBoundingSelectionPath[] = [];
+  private drawBoundingSelectionPaths: DrawEventAction[] = [];
 
   constructor(private context: CanvasRenderingContext2D) {}
 
@@ -52,7 +54,7 @@ export class CanvasContext implements ICanvasContext {
       }
       case 'boundingSelection': {
         const actions = this.drawBoundingSelection(data as CanvasLine, options);
-        this.drawBoundingSelectionPaths.push(...actions.map((action) => ({ ...action, eventId })));
+        this.drawBoundingSelectionPaths.push(...actions.map((action) => ({ ...action, eventId } as DrawEventAction)));
         break;
       }
       default: {
@@ -185,7 +187,7 @@ export class CanvasContext implements ICanvasContext {
   drawBoundingSelection(
     [fromX, fromY, toX, toY]: CanvasLine,
     eventDrawOptions: DrawOptions
-  ): Omit<DrawBoundingSelectionPath, 'eventId'>[] {
+  ): Omit<DrawEventAction, 'eventId'>[] {
     const selectionDrawOptions = getBoundingSelectionDrawOptions();
     this.applyDrawOptions(selectionDrawOptions);
     const offset = this.getOffset(selectionDrawOptions);
@@ -195,25 +197,26 @@ export class CanvasContext implements ICanvasContext {
     this.context.setLineDash(BOUNDING_SELECTION_LINE_DASH);
     this.context.stroke(translatePath);
     this.context.setLineDash([]);
+    const translateAction: Omit<TranslateAction, 'eventId'> = { path2D: translatePath, action: 'translate' };
 
     const bounding: CanvasLine = [fromX + offset, fromY + offset, toX + offset, toY + offset];
 
     const a = RESIZE_ACTION_WIDTH; // Just an alias...
-    const resizeAreas: Array<[number, number, number, number]> = [
-      [x - a, y - a, a, a], // TopLeft
-      [x + w, y - a, a, a], // TopRight
-      [x + w, y + h, a, a], // BottomRight
-      [x - a, y + h, a, a], // BottomLeft
+    const resizeAreas: Array<{ area: [number, number, number, number]; corner: ResizeCorner }> = [
+      { area: [x - a, y - a, a, a], corner: 'topLeft' },
+      { area: [x + w, y - a, a, a], corner: 'topRight' },
+      { area: [x + w, y + h, a, a], corner: 'bottomRight' },
+      { area: [x - a, y + h, a, a], corner: 'bottomLeft' },
     ];
-    const resizeActions: Omit<DrawBoundingSelectionPath, 'eventId'>[] = resizeAreas.map((area) => {
+    const resizeActions: Omit<ResizeAction, 'eventId'>[] = resizeAreas.map(({ area, corner }) => {
       const resizePath = new Path2D();
       resizePath.rect(...area);
       this.context.stroke(resizePath);
       this.context.fill(resizePath);
-      return { path2D: resizePath, action: 'resize', bounding };
+      return { path2D: resizePath, action: 'resize', bounding, corner };
     });
 
-    return [{ path2D: translatePath, action: 'translate', bounding: bounding }, ...resizeActions];
+    return [translateAction, ...resizeActions];
   }
 
   // !FIXME: need to verify performance on this method...
@@ -237,10 +240,8 @@ export class CanvasContext implements ICanvasContext {
       .map(({ eventId }) => eventId);
   }
 
-  getSelectedAction(x: number, y: number): BoundingSelectionAction | undefined {
-    return this.drawBoundingSelectionPaths
-      .filter(({ path2D }) => this.context.isPointInPath(path2D, x, y))
-      .map(({ eventId, action, bounding }) => ({ eventId, action, bounding }))[0];
+  getSelectedAction(x: number, y: number): DrawEventAction | undefined {
+    return this.drawBoundingSelectionPaths.filter(({ path2D }) => this.context.isPointInPath(path2D, x, y))[0];
   }
 
   resetPaths() {

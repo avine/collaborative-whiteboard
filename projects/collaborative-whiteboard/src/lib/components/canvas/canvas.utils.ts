@@ -4,7 +4,7 @@ export const getAnimFrameRate = (steps: number): number => {
   const expectedFrameCount = steps / 4.75;
 
   // Note that in reality, the animation will take more time to complete...
-  const expectedAnimDuration = 1500; // ms
+  const expectedAnimDuration = 1000; // ms
 
   const frameRate = expectedAnimDuration / expectedFrameCount;
 

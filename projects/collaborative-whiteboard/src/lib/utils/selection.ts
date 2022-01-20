@@ -1,7 +1,6 @@
 import { DEFAULT_OWNER } from '../cw.config';
 import { DrawEvent } from '../cw.types';
-import { SELECTION_SHIFT } from './canvas-context';
-import { getBounding } from './canvas-context/canvas.context.utils';
+import { SELECTION_SHIFT, getBounding } from './canvas-context';
 import { getDrawEventUID } from './id';
 
 export const getSelectionEvents = (events: DrawEvent[], owner = DEFAULT_OWNER): DrawEvent[] => {

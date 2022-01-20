@@ -15,9 +15,16 @@ export interface DrawEventPath {
   eventId: string;
 }
 
-export interface DrawBoundingSelectionPath extends DrawEventPath {
-  action: 'translate' | 'resize';
-  bounding: CanvasLine;
+export interface TranslateAction extends DrawEventPath {
+  action: 'translate';
 }
 
-export type BoundingSelectionAction = Omit<DrawBoundingSelectionPath, 'path2D'>;
+export interface ResizeAction extends DrawEventPath {
+  action: 'resize';
+  bounding: CanvasLine;
+  corner: ResizeCorner;
+}
+
+export type ResizeCorner = 'topLeft' | 'topRight' | 'bottomRight' | 'bottomLeft';
+
+export type DrawEventAction = TranslateAction | ResizeAction;

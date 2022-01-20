@@ -1,5 +1,5 @@
 import { CanvasLine, CanvasLineSerie, CanvasPoint, DrawType } from '../../cw.types';
-import { ICanvasContext } from './canvas.context.types';
+import { ICanvasContext } from './canvas-context.types';
 
 export const getCanvasContextHandler: Record<
   Exclude<DrawType, 'selection' | 'boundingSelection'>,
