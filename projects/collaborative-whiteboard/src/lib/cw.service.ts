@@ -19,7 +19,6 @@ import {
   getClearEvent,
   getFillBackgroundEvent,
   getSelectionEvents,
-  mapToDrawEventsBroadcast,
   resizeEvent,
   translateEvent,
 } from './utils';
@@ -223,7 +222,7 @@ export class CwService {
       this.dropHistoryRedoAgainst(ownerDrawEvents);
     }
     this.emitHistory();
-    this.broadcast$$.next(mapToDrawEventsBroadcast(events, true));
+    this.broadcast$$.next({ events, animate: true });
   }
 
   private broadcastRemove(events: DrawEvent[]) {
@@ -304,7 +303,7 @@ export class CwService {
     if (events) {
       events.forEach((event) => this.pushHistory(event));
       this.emitHistory();
-      this.broadcast$$.next(mapToDrawEventsBroadcast(events, true));
+      this.broadcast$$.next({ events, animate: true });
       this.emit$$.next({ action: 'add', events });
     }
   }
@@ -368,12 +367,13 @@ export class CwService {
   }
 
   redraw(animate = false) {
-    this.broadcast$$.next(
-      mapToDrawEventsBroadcast(
-        [getClearEvent(this.owner), ...this.backgroundEvents, ...this.history, ...this.selectionEvents],
-        animate
-      )
-    );
+    const events: DrawEvent[] = [
+      getClearEvent(this.owner),
+      ...this.backgroundEvents,
+      ...this.history,
+      ...this.selectionEvents,
+    ];
+    this.broadcast$$.next({ events, animate });
   }
 
   setFillBackground(fillBackground: FillBackground) {

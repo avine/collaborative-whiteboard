@@ -1,6 +1,28 @@
 import { DrawEvent, DrawEventAnimated } from '../../cw.types';
 import { animateDrawEllipse, animateDrawLine, animateDrawLineSerie, animateDrawRectangle } from './animate-event';
 
+// Alternate implementation
+/*type DrawTypeToAnimate = Extract<DrawType, 'line' | 'lineSerie' | 'rectangle' | 'ellipse'>;
+
+export const animateDrawEventMap: Record<DrawTypeToAnimate, (event: any) => DrawEventAnimated[]> = {
+  line: animateDrawLine,
+  lineSerie: animateDrawLineSerie,
+  rectangle: animateDrawRectangle,
+  ellipse: animateDrawEllipse,
+};
+
+export const mapToDrawEventsAnimated = (events: DrawEvent[]): (DrawEvent | DrawEventAnimated)[] => {
+  const result: (DrawEvent | DrawEventAnimated)[] = [];
+  events.forEach((event) => {
+    if (event.type in animateDrawEventMap) {
+      result.push(...animateDrawEventMap[event.type as DrawTypeToAnimate](event));
+    } else {
+      result.push(event);
+    }
+  });
+  return result;
+};*/
+
 export const mapToDrawEventsAnimated = (events: DrawEvent[]): (DrawEvent | DrawEventAnimated)[] => {
   const result: (DrawEvent | DrawEventAnimated)[] = [];
   events.forEach((event) => {
