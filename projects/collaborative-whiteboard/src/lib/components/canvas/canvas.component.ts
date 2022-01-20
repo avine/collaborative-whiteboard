@@ -413,9 +413,12 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
 
     const [fromX, fromY, toX, toY] = bounding;
 
+    const boundingOriginX = ['topRight', 'bottomRight'].includes(corner) ? fromX : toX;
+    const boundingOriginY = ['bottomLeft', 'bottomRight'].includes(corner) ? fromY : toY;
+
     const [centerX, centerY] = this.getCanvasCenter('emit');
-    const originX = Math.floor(fromX + centerX);
-    const originY = Math.floor(fromY + centerY);
+    const originX = Math.floor(boundingOriginX + centerX);
+    const originY = Math.floor(boundingOriginY + centerY);
 
     const w = toX - fromX;
     const h = toY - fromY;
