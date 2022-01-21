@@ -147,7 +147,8 @@ export class CanvasContext implements ICanvasContext {
     this.context.stroke(stroke);
 
     const isComplete = options.angle === undefined;
-    if (isComplete && options.fillOpacity) {
+    // Hack: we need to always fill the ellispe otherwise it can not be selected using `context.isPointInPath()`
+    if (isComplete /*&& options.fillOpacity*/) {
       const fillRadiusX = Math.max(0, radiusX - options.lineWidth / 2);
       const fillRadiusY = Math.max(0, radiusY - options.lineWidth / 2);
 
@@ -230,7 +231,7 @@ export class CanvasContext implements ICanvasContext {
     loop: for (let x = fromX; x <= toX; x++) {
       for (let y = fromY; y <= toY; y++) {
         buffer = buffer.filter(({ path2D, eventId }) => {
-          if (this.context.isPointInPath(path2D, x, y, 'evenodd')) {
+          if (this.context.isPointInPath(path2D, x, y)) {
             eventsId.add(eventId);
             return false;
           } else {
