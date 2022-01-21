@@ -76,6 +76,7 @@ export class CanvasContext implements ICanvasContext {
     return path2D;
   }
 
+  // !FIXME: when lineWidth is odd, line can not be selected
   drawLine([fromX, fromY, toX, toY]: CanvasLine, options: DrawOptions) {
     this.applyDrawOptions(options);
     const offset = this.getOffset(options);
@@ -86,6 +87,7 @@ export class CanvasContext implements ICanvasContext {
     return path2D;
   }
 
+  // !FIXME: when lineWidth is odd, lineSerie can not be selected
   drawLineSerie(serie: CanvasLineSerie, options: DrawOptions) {
     this.applyDrawOptions(options);
     const offset = this.getOffset(options);
