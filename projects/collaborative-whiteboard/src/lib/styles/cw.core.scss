@@ -175,7 +175,7 @@ cw-canvas {
   position: absolute;
   top: 0;
   left: 0;
-  cursor: crosshair;
+  cursor: crosshair; // TODO: move this elsewhere...
 }
 
 .cw-canvas__preview--readonly {

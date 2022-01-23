@@ -11,7 +11,12 @@
   }"
 ></div>
 
-<canvas #canvasBroadcast class="cw-canvas__preview"></canvas>
+<cw-canvas-broadcast-preview
+  [broadcast]="broadcast"
+  [canvasSize]="canvasSize"
+  (redraw)="redraw()"
+  (drawEvent)="handleResult($event)"
+></cw-canvas-broadcast-preview>
 
 <canvas
   #canvasEmit

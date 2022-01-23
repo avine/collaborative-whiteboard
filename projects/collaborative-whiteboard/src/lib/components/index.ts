@@ -1,4 +1,5 @@
 export { CwCanvasComponent } from './canvas/canvas.component';
+export { CwCanvasBroadcastPreviewComponent } from './canvas-broadcast-preview/canvas-broadcast-preview.component';
 export { CwColorPickerComponent } from './color-picker/color-picker.component';
 export { CwDrawModeComponent } from './draw-mode/draw-mode.component';
 export { CwDrawSettingsComponent } from './draw-settings/draw-settings.component';

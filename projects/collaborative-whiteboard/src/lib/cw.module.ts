@@ -6,6 +6,7 @@ import { ModuleWithProviders, NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import {
+  CwCanvasBroadcastPreviewComponent,
   CwCanvasComponent,
   CwColorPickerComponent,
   CwDrawModeComponent,
@@ -21,6 +22,7 @@ import { CwPointerDirective } from './directives';
 import { CwStorageService } from './services';
 
 const features = [
+  CwCanvasBroadcastPreviewComponent,
   CwCanvasComponent,
   CwColorPickerComponent,
   CwDrawModeComponent,

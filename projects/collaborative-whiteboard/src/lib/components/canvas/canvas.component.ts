@@ -1,12 +1,9 @@
-import { DOCUMENT } from '@angular/common';
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   ElementRef,
   EventEmitter,
-  Inject,
   Input,
   NgZone,
   OnChanges,
@@ -22,7 +19,6 @@ import {
   CanvasLine,
   CanvasPoint,
   DrawEvent,
-  DrawEventAnimated,
   DrawEventsBroadcast,
   DrawOptions,
   DrawType,
@@ -33,13 +29,10 @@ import {
   getDrawEventUID,
   getSelectionMoveDrawOptions,
   inferBasicDrawType,
-  isDrawEventAnimated,
   isEmptyCanvasLine,
-  mapToDrawEventsAnimated,
   translateEvent,
 } from '../../utils';
-import { ResizeAction, ResizeCorner } from '../../utils/';
-import { getAnimFlushCount, getAnimFrameRate } from './canvas.utils';
+import { ResizeAction } from '../../utils/';
 
 @Component({
   selector: 'cw-canvas',
@@ -66,15 +59,10 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
   @Output() draw = new EventEmitter<DrawEvent>();
 
   @ViewChild('canvasResult') canvasResultRef!: ElementRef<HTMLCanvasElement>;
-  @ViewChild('canvasBroadcast') canvasBroadcastRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild('canvasEmit') canvasEmitRef!: ElementRef<HTMLCanvasElement>;
 
   private contextResult!: CanvasContext;
-  private contextBroadcast!: CanvasContext;
   private contextEmit!: CanvasContext;
-
-  private broadcastId = 0;
-  private broadcastEventsBuffer: (DrawEvent | DrawEventAnimated)[] = [];
 
   private skipUnselect = false;
   private canTranslateSelection = false;
@@ -82,129 +70,38 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
 
   constructor(
     @Optional() private service: CwService,
-    @Inject(DOCUMENT) private document: Document,
-    private changeDetectorRef: ChangeDetectorRef,
     private ngZone: NgZone
   ) {}
 
-  ngOnChanges({ canvasSize, broadcast }: SimpleChanges) {
+  ngOnChanges({ canvasSize }: SimpleChanges) {
     // Note: Skip the `.firstChange` because `this.context*` is not yet available
     if (canvasSize?.currentValue && !canvasSize.firstChange) {
       this.applyCanvasSize();
-    }
-    if (broadcast?.currentValue && !broadcast.firstChange) {
-      this.handleBroadcast();
     }
   }
 
   ngAfterViewInit() {
     this.initContext();
     this.applyCanvasSize();
-    if (this.broadcast) {
-      this.handleBroadcast();
-    }
   }
 
   private initContext() {
     const contextResult = this.canvasResultRef.nativeElement?.getContext('2d');
-    const contextBroadcast = this.canvasBroadcastRef.nativeElement?.getContext('2d');
     const contextEmit = this.canvasEmitRef.nativeElement?.getContext('2d');
-    if (!contextResult || !contextBroadcast || !contextEmit) {
+    if (!contextResult || !contextEmit) {
       console.error('Canvas NOT supported!');
       return;
     }
     this.contextResult = new CanvasContext(contextResult);
-    this.contextBroadcast = new CanvasContext(contextBroadcast);
     this.contextEmit = new CanvasContext(contextEmit);
   }
 
   private applyCanvasSize() {
     this.contextResult.applyCanvasSize(this.canvasSize);
-    this.contextBroadcast.applyCanvasSize(this.canvasSize);
     this.contextEmit.applyCanvasSize(this.canvasSize);
   }
 
-  private handleBroadcast() {
-    this.handleBroadcastBackground();
-    this.updateBroadcastEventsBuffer();
-    this.flushBroadcastEventsBuffer();
-  }
-
-  private handleBroadcastBackground() {
-    const events: DrawEvent[] = [];
-    const drawTypesInOrder: DrawType[] = ['clear', 'fillBackground', 'fillBackground'];
-    for (let i = 0; i < drawTypesInOrder.length; i++) {
-      const currFirstEvent = this.broadcast.events[0];
-      if (currFirstEvent?.type !== drawTypesInOrder[i] || !isEmptyCanvasLine(currFirstEvent?.data as CanvasLine)) {
-        break;
-      }
-      events.push(this.broadcast.events.shift() as DrawEvent);
-    }
-    if (!events.length) {
-      return;
-    }
-    this.broadcastEventsBuffer = [];
-    this.contextBroadcast.drawClear(this.canvasSizeAsLine);
-    this.contextResult.resetPaths();
-    while (events.length) {
-      this.handleResult(events.shift() as DrawEvent);
-    }
-  }
-
-  private updateBroadcastEventsBuffer() {
-    let events = this.broadcast.events.map((event) => translateEvent(event, ...this.getCanvasCenter('broadcast')));
-    if (this.broadcast.animate) {
-      events = mapToDrawEventsAnimated(events);
-    }
-    this.broadcastEventsBuffer.push(...events);
-  }
-
-  private flushBroadcastEventsBuffer() {
-    const id = ++this.broadcastId; // Do this on top (and NOT inside the `else` statement)
-    if (!this.broadcast.animate || !this.document.defaultView) {
-      this.contextBroadcast.drawClear(this.canvasSizeAsLine);
-      while (this.broadcastEventsBuffer.length) {
-        this.handleResult(this.broadcastEventsBuffer.shift() as DrawEvent);
-      }
-    } else {
-      const steps = this.broadcastEventsBuffer.length;
-      const frameRate = getAnimFrameRate(steps);
-      const step = () => {
-        if (id !== this.broadcastId) {
-          return;
-        }
-        if (!this.broadcastEventsBuffer.length) {
-          // Because we are using `ChangeDetectionStrategy.OnPush`, the end of the
-          // animation (which occurs asynchronously) is NOT detected by Angular.
-          // For this reason, we have to detect this change manually.
-          this.changeDetectorRef.detectChanges();
-          return;
-        }
-        const flushCount = getAnimFlushCount(this.broadcastEventsBuffer.length, steps);
-        for (let i = 0; i < flushCount; i++) {
-          const event = this.broadcastEventsBuffer.shift() as DrawEvent | DrawEventAnimated;
-          if (!isDrawEventAnimated(event)) {
-            this.handleResult(event);
-            continue;
-          }
-          this.contextBroadcast.drawClear(this.canvasSizeAsLine);
-          if (event.animate) {
-            this.contextBroadcast.handleEvent(event);
-          } else {
-            this.handleResult(event);
-          }
-        }
-        if (frameRate) {
-          setTimeout(() => this.document.defaultView?.requestAnimationFrame(step), frameRate);
-        } else {
-          this.document.defaultView?.requestAnimationFrame(step);
-        }
-      };
-      this.document.defaultView.requestAnimationFrame(step);
-    }
-  }
-
-  private handleResult(event: DrawEvent) {
+  handleResult(event: DrawEvent) {
     if ((event.type === 'fillBackground' || event.type === 'clear') && isEmptyCanvasLine(event.data)) {
       this.contextResult.handleEvent({ ...event, data: this.canvasSizeAsLine });
     } else {
@@ -430,5 +327,9 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
     const scaleY = (h + shiftH * factorY) / h;
 
     return { origin: [originX, originY], scale: [scaleX, scaleY] };
+  }
+
+  redraw() {
+    this.contextResult.resetPaths();
   }
 }
