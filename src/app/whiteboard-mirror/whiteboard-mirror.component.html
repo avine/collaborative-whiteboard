@@ -1,0 +1,13 @@
+<cw-whiteboard
+  class="whiteboard__left"
+  dragBoundarySelector=".main"
+  #left
+  (emit)="right.broadcast = $event"
+  ></cw-whiteboard>
+
+  <cw-whiteboard
+  class="whiteboard__right"
+  dragBoundarySelector=".main"
+  #right
+  (emit)="left.broadcast = $event"
+></cw-whiteboard>

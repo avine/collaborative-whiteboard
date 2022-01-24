@@ -15,6 +15,8 @@ export class CwSelectionPreviewDirective {
 
   @Input() cwContextResult!: CanvasContext;
 
+  @Input() cwDrawDisabled = false;
+
   @Input() cwDrawMode = DEFAULT_DRAW_MODE;
 
   @Input() cwDrawOptions = getDefaultDrawOptions();
@@ -41,6 +43,7 @@ export class CwSelectionPreviewDirective {
     }
     this.cwContextOwner.drawClear(this.canvasSizeAsLine);
     if (this.canTranslateSelection) {
+      // We need to reenter `ngZone` because the move listeners in CwPointerDirective are executed in `runOutsideAngular`.
       this.ngZone.run(() => {
         const [fromX, fromY, toX, toY] = magnetized.slice(-4);
         this.service?.translateSelection(toX - fromX, toY - fromY);
@@ -109,7 +112,7 @@ export class CwSelectionPreviewDirective {
   constructor(@Optional() private service: CwService, private ngZone: NgZone) {}
 
   private get isDisabled() {
-    return this.cwDrawMode !== 'selection';
+    return this.cwDrawDisabled || this.cwDrawMode !== 'selection';
   }
 
   private get canvasSizeAsLine(): CanvasLine {

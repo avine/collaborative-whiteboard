@@ -1,5 +1,7 @@
 <canvas #canvasResult class="cw-canvas__result"></canvas>
 
+<canvas #canvasBroadcast class="cw-canvas__preview"></canvas>
+
 <div
   *ngIf="showGuides"
   class="cw-canvas__guides"
@@ -10,8 +12,6 @@
     'cw-canvas__guides--40': pointerMagnet === 40
   }"
 ></div>
-
-<canvas #canvasBroadcast class="cw-canvas__preview"></canvas>
 
 <canvas
   #canvasOwner
@@ -28,6 +28,7 @@
   [cwCanvasSize]="canvasSize"
   [cwContextOwner]="contextOwner"
   [cwContextResult]="contextResult"
+  [cwDrawDisabled]="drawDisabled"
   [cwDrawMode]="drawMode"
   [cwDrawOptions]="drawOptions"
 ></canvas>

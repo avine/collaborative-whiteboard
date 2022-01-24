@@ -12,6 +12,8 @@ export class CwEmitPreviewDirective {
 
   @Input() cwContextOwner!: CanvasContext;
 
+  @Input() cwDrawDisabled = false;
+
   @Input() cwDrawMode = DEFAULT_DRAW_MODE;
 
   @Input() cwDrawOptions = getDefaultDrawOptions();
@@ -65,7 +67,7 @@ export class CwEmitPreviewDirective {
   }
 
   private get isDisabled() {
-    return this.cwDrawMode === 'selection';
+    return this.cwDrawDisabled || this.cwDrawMode === 'selection';
   }
 
   private get canvasSizeAsLine(): CanvasLine {
