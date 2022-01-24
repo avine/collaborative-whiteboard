@@ -5,34 +5,16 @@ import {
   ElementRef,
   EventEmitter,
   Input,
-  NgZone,
   OnChanges,
-  Optional,
   Output,
   SimpleChanges,
   ViewChild,
 } from '@angular/core';
 
 import { DEFAULT_DRAW_MODE, DEFAULT_OWNER, getDefaultCanvasSize, getDefaultDrawOptions } from '../../cw.config';
-import { CwService } from '../../cw.service';
-import {
-  CanvasLine,
-  CanvasPoint,
-  DrawEvent,
-  DrawEventsBroadcast,
-  DrawOptions,
-  DrawType,
-} from '../../cw.types';
+import { CanvasLine, CanvasPoint, DrawEvent, DrawEventsBroadcast, DrawOptions, DrawType } from '../../cw.types';
 import { PointerSensitivityOrigin } from '../../directives';
-import {
-  CanvasContext,
-  getDrawEventUID,
-  getSelectionMoveDrawOptions,
-  inferBasicDrawType,
-  isEmptyCanvasLine,
-  translateEvent,
-} from '../../utils';
-import { ResizeAction } from '../../utils/';
+import { CanvasContext, getDrawEventUID, inferBasicDrawType, isEmptyCanvasLine, translateEvent } from '../../utils';
 
 @Component({
   selector: 'cw-canvas',
@@ -61,17 +43,8 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
   @ViewChild('canvasResult') canvasResultRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild('canvasEmit') canvasEmitRef!: ElementRef<HTMLCanvasElement>;
 
-  private contextResult!: CanvasContext;
-  private contextEmit!: CanvasContext;
-
-  private skipUnselect = false;
-  private canTranslateSelection = false;
-  private canResizeSelection: ResizeAction | undefined = undefined;
-
-  constructor(
-    @Optional() private service: CwService,
-    private ngZone: NgZone
-  ) {}
+  contextResult!: CanvasContext;
+  contextEmit!: CanvasContext;
 
   ngOnChanges({ canvasSize }: SimpleChanges) {
     // Note: Skip the `.firstChange` because `this.context*` is not yet available
@@ -133,50 +106,8 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
     return this.drawMode === 'brush' ? 'previous' : 'first';
   }
 
-  pointerStart(magnetized: CanvasPoint, original: CanvasPoint) {
-    if (this.drawMode === 'selection') {
-      this.handleSelectionStart(original);
-      return;
-    }
-    this.contextEmit.drawPoint(magnetized, this.drawOptions); // ! FIXME: is it better not to draw this point ?
-  }
-
-  pointerMove(magnetized: number[], original: number[]) {
-    this.contextEmit.drawClear(this.canvasSizeAsLine);
-    if (this.drawMode === 'selection') {
-      this.handleSelectionMove(magnetized, original);
-      return;
-    }
-    switch (this.drawMode) {
-      case 'brush': {
-        this.contextEmit.drawLineSerie(magnetized, this.drawOptions);
-        break;
-      }
-      case 'line': {
-        this.contextEmit.drawLine([...magnetized.slice(0, 2), ...magnetized.slice(-2)] as CanvasLine, this.drawOptions);
-        break;
-      }
-      case 'rectangle': {
-        this.contextEmit.drawRectangle(
-          [...magnetized.slice(0, 2), ...magnetized.slice(-2)] as CanvasLine,
-          this.drawOptions
-        );
-        break;
-      }
-      case 'ellipse': {
-        this.contextEmit.drawEllipse(
-          [...magnetized.slice(0, 2), ...magnetized.slice(-2)] as CanvasLine,
-          this.drawOptions
-        );
-        break;
-      }
-    }
-  }
-
   pointerEnd(magnetized: number[], original: number[]) {
-    this.contextEmit.drawClear(this.canvasSizeAsLine);
     if (this.drawMode === 'selection') {
-      this.handleSelectionEnd(magnetized, original);
       return;
     }
     let event: DrawEvent | undefined = undefined;
@@ -210,78 +141,6 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
     this.draw.emit(translateEvent(event, ...this.getCanvasCenter('emit')));
   }
 
-  private handleSelectionStart(original: CanvasPoint) {
-    const eventsId = this.contextResult.getSelectedEventsId(...original);
-    if (eventsId.length) {
-      this.skipUnselect = this.service?.addSelection(eventsId);
-    }
-    const action = this.contextResult.getSelectedAction(...original);
-    if (action?.action === 'resize') {
-      this.canResizeSelection = action;
-    } else {
-      this.canTranslateSelection = !!(action?.action === 'translate' || eventsId.length);
-    }
-  }
-
-  private handleSelectionMove(magnetized: number[], original: number[]) {
-    if (this.canTranslateSelection) {
-      this.ngZone.run(() => {
-        const [fromX, fromY, toX, toY] = magnetized.slice(-4);
-        this.service?.translateSelection(toX - fromX, toY - fromY);
-      });
-    } else if (this.canResizeSelection) {
-      this.ngZone.run(() => {
-        const { origin, scale } = this.getResizeConfig(magnetized);
-        this.service?.resizeSelection(origin, scale);
-      });
-    } else {
-      this.contextEmit.drawRectangle(
-        [...original.slice(0, 2), ...original.slice(-2)] as CanvasLine,
-        getSelectionMoveDrawOptions()
-      );
-    }
-  }
-
-  private handleSelectionEnd(magnetized: number[], original: number[]) {
-    switch (original.length) {
-      case 2: {
-        if (this.skipUnselect) {
-          break;
-        }
-        const eventsId = this.contextResult.getSelectedEventsId(...(original as CanvasPoint));
-        if (eventsId.length) {
-          this.service?.removeSelection(eventsId);
-        } else {
-          this.service?.clearSelection();
-        }
-        break;
-      }
-      default: {
-        if (this.canTranslateSelection) {
-          const [fromX, fromY, toX, toY] = [...magnetized.slice(0, 2), ...magnetized.slice(-2)] as CanvasLine;
-          this.service?.emitTranslatedSelection(toX - fromX, toY - fromY);
-          break;
-        }
-        if (this.canResizeSelection) {
-          const { origin, scale } = this.getResizeConfig(magnetized);
-          this.service?.emitResizedSelection(origin, scale);
-          break;
-        }
-        const canvasLine = [...original.slice(0, 2), ...original.slice(-2)] as CanvasLine;
-        const eventsId = this.contextResult.getSelectedEventsIdInArea(canvasLine);
-        if (eventsId.length) {
-          this.service?.addSelection(eventsId);
-        } else {
-          this.service?.clearSelection();
-        }
-        break;
-      }
-    }
-    this.skipUnselect = false;
-    this.canTranslateSelection = false;
-    this.canResizeSelection = undefined;
-  }
-
   private getCompleteEvent(data: number[], options: DrawOptions, forceDrawType?: DrawType): DrawEvent {
     return {
       id: getDrawEventUID(),
@@ -297,36 +156,8 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
     return [factor * Math.floor(this.canvasSize.width / 2), factor * Math.floor(this.canvasSize.height / 2)];
   }
 
-  private get canvasSizeAsLine(): CanvasLine {
+  get canvasSizeAsLine(): CanvasLine {
     return [0, 0, this.canvasSize.width, this.canvasSize.height];
-  }
-
-  private getResizeConfig(magnetized: number[]): { origin: CanvasPoint; scale: [number, number] } {
-    const { bounding, corner } = this.canResizeSelection as ResizeAction;
-
-    const [fromX, fromY, toX, toY] = bounding;
-
-    const boundingOriginX = ['topRight', 'bottomRight'].includes(corner) ? fromX : toX;
-    const boundingOriginY = ['bottomLeft', 'bottomRight'].includes(corner) ? fromY : toY;
-
-    const [centerX, centerY] = this.getCanvasCenter('emit');
-    const originX = Math.floor(boundingOriginX + centerX);
-    const originY = Math.floor(boundingOriginY + centerY);
-
-    const w = toX - fromX;
-    const h = toY - fromY;
-
-    const shiftRect = [...magnetized.slice(0, 2), ...magnetized.slice(-2)] as CanvasLine;
-    const shiftW = shiftRect[2] - shiftRect[0];
-    const shiftH = shiftRect[3] - shiftRect[1];
-
-    const factorX = ['topRight', 'bottomRight'].includes(corner) ? 1 : -1;
-    const factorY = ['bottomLeft', 'bottomRight'].includes(corner) ? 1 : -1;
-
-    const scaleX = (w + shiftW * factorX) / w;
-    const scaleY = (h + shiftH * factorY) / h;
-
-    return { origin: [originX, originY], scale: [scaleX, scaleY] };
   }
 
   redraw() {

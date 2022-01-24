@@ -27,7 +27,14 @@
   [cwPointerMagnetShift]="pointerMagnetShift"
   [cwPointerSensitivity]="pointerSensitivity"
   [cwPointerSensitivityOrigin]="pointerSensitivityOrigin"
-  (cwPointerStart)="drawDisabled || pointerStart($event[0], $event[1])"
-  (cwPointerMove)="drawDisabled || pointerMove($event[0], $event[1])"
   (cwPointerEnd)="drawDisabled || pointerEnd($event[0], $event[1])"
+
+  [cwEmitPreview]="this.drawMode !== 'selection'"
+  [cwSelectionPreview]="this.drawMode === 'selection'"
+
+  [cwContextResult]="contextResult"
+
+  [cwContext]="contextEmit"
+  [cwDrawMode]="drawMode"
+  [cwDrawOptions]="drawOptions"
 ></canvas>

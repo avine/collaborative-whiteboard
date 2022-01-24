@@ -18,7 +18,7 @@ import {
   CwToolGroupComponent,
   CwWhiteboardComponent,
 } from './components';
-import { CwPointerDirective } from './directives';
+import { CwEmitPreviewDirective, CwPointerDirective, CwSelectionPreviewDirective } from './directives';
 import { CwStorageService } from './services';
 
 const features = [
@@ -33,7 +33,9 @@ const features = [
   CwToolContentComponent,
   CwToolGroupComponent,
   CwWhiteboardComponent,
+  CwEmitPreviewDirective,
   CwPointerDirective,
+  CwSelectionPreviewDirective,
 ];
 
 @NgModule({
