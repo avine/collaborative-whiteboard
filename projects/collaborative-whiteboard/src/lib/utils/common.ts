@@ -1,5 +1,5 @@
 import { DEFAULT_OWNER } from '../cw.config';
-import { CanvasLine, DrawClear, DrawFillBackground, DrawType } from '../cw.types';
+import { CanvasLine, CanvasSize, DrawClear, DrawFillBackground, DrawType } from '../cw.types';
 import { getDrawEventUID } from './id';
 
 export const getEmptyCanvasLine = (): CanvasLine => [0, 0, 0, 0];
@@ -24,3 +24,8 @@ export const getClearEvent = (owner = DEFAULT_OWNER): DrawClear => ({
 
 export const inferBasicDrawType = (dataLength: number): DrawType =>
   dataLength === 2 ? 'point' : dataLength === 4 ? 'line' : 'lineSerie';
+
+export const getCanvasCenter = (canvasSize: CanvasSize, target: 'emit' | 'broadcast'): [number, number] => {
+  const factor = target === 'emit' ? -1 : 1;
+  return [factor * Math.floor(canvasSize.width / 2), factor * Math.floor(canvasSize.height / 2)];
+};

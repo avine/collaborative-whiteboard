@@ -8,16 +8,13 @@ import {
   EventEmitter,
   Inject,
   Input,
-  NgZone,
   OnChanges,
-  Optional,
   Output,
   SimpleChanges,
   ViewChild,
 } from '@angular/core';
 
 import { DEFAULT_DRAW_MODE, DEFAULT_OWNER, getDefaultCanvasSize, getDefaultDrawOptions } from '../../cw.config';
-import { CwService } from '../../cw.service';
 import {
   CanvasLine,
   CanvasPoint,
@@ -30,15 +27,14 @@ import {
 import { PointerSensitivityOrigin } from '../../directives';
 import {
   CanvasContext,
+  getCanvasCenter,
   getDrawEventUID,
-  getSelectionMoveDrawOptions,
   inferBasicDrawType,
   isDrawEventAnimated,
   isEmptyCanvasLine,
   mapToDrawEventsAnimated,
   translateEvent,
 } from '../../utils';
-import { ResizeAction, ResizeCorner } from '../../utils/';
 import { getAnimFlushCount, getAnimFrameRate } from './canvas.utils';
 
 @Component({
@@ -65,27 +61,18 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
 
   @Output() draw = new EventEmitter<DrawEvent>();
 
-  @ViewChild('canvasResult') canvasResultRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild('canvasBroadcast') canvasBroadcastRef!: ElementRef<HTMLCanvasElement>;
-  @ViewChild('canvasEmit') canvasEmitRef!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('canvasOwner') canvasOwnerRef!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('canvasResult') canvasResultRef!: ElementRef<HTMLCanvasElement>;
 
-  private contextResult!: CanvasContext;
   private contextBroadcast!: CanvasContext;
-  private contextEmit!: CanvasContext;
+  contextOwner!: CanvasContext;
+  contextResult!: CanvasContext;
 
   private broadcastId = 0;
   private broadcastEventsBuffer: (DrawEvent | DrawEventAnimated)[] = [];
 
-  private skipUnselect = false;
-  private canTranslateSelection = false;
-  private canResizeSelection: ResizeAction | undefined = undefined;
-
-  constructor(
-    @Optional() private service: CwService,
-    @Inject(DOCUMENT) private document: Document,
-    private changeDetectorRef: ChangeDetectorRef,
-    private ngZone: NgZone
-  ) {}
+  constructor(@Inject(DOCUMENT) private document: Document, private changeDetectorRef: ChangeDetectorRef) {}
 
   ngOnChanges({ canvasSize, broadcast }: SimpleChanges) {
     // Note: Skip the `.firstChange` because `this.context*` is not yet available
@@ -106,22 +93,22 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
   }
 
   private initContext() {
-    const contextResult = this.canvasResultRef.nativeElement?.getContext('2d');
     const contextBroadcast = this.canvasBroadcastRef.nativeElement?.getContext('2d');
-    const contextEmit = this.canvasEmitRef.nativeElement?.getContext('2d');
-    if (!contextResult || !contextBroadcast || !contextEmit) {
+    const contextOwner = this.canvasOwnerRef.nativeElement?.getContext('2d');
+    const contextResult = this.canvasResultRef.nativeElement?.getContext('2d');
+    if (!contextBroadcast || !contextOwner || !contextResult) {
       console.error('Canvas NOT supported!');
       return;
     }
-    this.contextResult = new CanvasContext(contextResult);
     this.contextBroadcast = new CanvasContext(contextBroadcast);
-    this.contextEmit = new CanvasContext(contextEmit);
+    this.contextOwner = new CanvasContext(contextOwner);
+    this.contextResult = new CanvasContext(contextResult);
   }
 
   private applyCanvasSize() {
-    this.contextResult.applyCanvasSize(this.canvasSize);
     this.contextBroadcast.applyCanvasSize(this.canvasSize);
-    this.contextEmit.applyCanvasSize(this.canvasSize);
+    this.contextOwner.applyCanvasSize(this.canvasSize);
+    this.contextResult.applyCanvasSize(this.canvasSize);
   }
 
   private handleBroadcast() {
@@ -152,7 +139,9 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
   }
 
   private updateBroadcastEventsBuffer() {
-    let events = this.broadcast.events.map((event) => translateEvent(event, ...this.getCanvasCenter('broadcast')));
+    let events = this.broadcast.events.map((event) =>
+      translateEvent(event, ...getCanvasCenter(this.canvasSize, 'broadcast'))
+    );
     if (this.broadcast.animate) {
       events = mapToDrawEventsAnimated(events);
     }
@@ -236,50 +225,8 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
     return this.drawMode === 'brush' ? 'previous' : 'first';
   }
 
-  pointerStart(magnetized: CanvasPoint, original: CanvasPoint) {
-    if (this.drawMode === 'selection') {
-      this.handleSelectionStart(original);
-      return;
-    }
-    this.contextEmit.drawPoint(magnetized, this.drawOptions); // ! FIXME: is it better not to draw this point ?
-  }
-
-  pointerMove(magnetized: number[], original: number[]) {
-    this.contextEmit.drawClear(this.canvasSizeAsLine);
-    if (this.drawMode === 'selection') {
-      this.handleSelectionMove(magnetized, original);
-      return;
-    }
-    switch (this.drawMode) {
-      case 'brush': {
-        this.contextEmit.drawLineSerie(magnetized, this.drawOptions);
-        break;
-      }
-      case 'line': {
-        this.contextEmit.drawLine([...magnetized.slice(0, 2), ...magnetized.slice(-2)] as CanvasLine, this.drawOptions);
-        break;
-      }
-      case 'rectangle': {
-        this.contextEmit.drawRectangle(
-          [...magnetized.slice(0, 2), ...magnetized.slice(-2)] as CanvasLine,
-          this.drawOptions
-        );
-        break;
-      }
-      case 'ellipse': {
-        this.contextEmit.drawEllipse(
-          [...magnetized.slice(0, 2), ...magnetized.slice(-2)] as CanvasLine,
-          this.drawOptions
-        );
-        break;
-      }
-    }
-  }
-
   pointerEnd(magnetized: number[], original: number[]) {
-    this.contextEmit.drawClear(this.canvasSizeAsLine);
     if (this.drawMode === 'selection') {
-      this.handleSelectionEnd(magnetized, original);
       return;
     }
     let event: DrawEvent | undefined = undefined;
@@ -310,79 +257,7 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
       }
     }
     this.handleResult(event);
-    this.draw.emit(translateEvent(event, ...this.getCanvasCenter('emit')));
-  }
-
-  private handleSelectionStart(original: CanvasPoint) {
-    const eventsId = this.contextResult.getSelectedEventsId(...original);
-    if (eventsId.length) {
-      this.skipUnselect = this.service?.addSelection(eventsId);
-    }
-    const action = this.contextResult.getSelectedAction(...original);
-    if (action?.action === 'resize') {
-      this.canResizeSelection = action;
-    } else {
-      this.canTranslateSelection = !!(action?.action === 'translate' || eventsId.length);
-    }
-  }
-
-  private handleSelectionMove(magnetized: number[], original: number[]) {
-    if (this.canTranslateSelection) {
-      this.ngZone.run(() => {
-        const [fromX, fromY, toX, toY] = magnetized.slice(-4);
-        this.service?.translateSelection(toX - fromX, toY - fromY);
-      });
-    } else if (this.canResizeSelection) {
-      this.ngZone.run(() => {
-        const { origin, scale } = this.getResizeConfig(magnetized);
-        this.service?.resizeSelection(origin, scale);
-      });
-    } else {
-      this.contextEmit.drawRectangle(
-        [...original.slice(0, 2), ...original.slice(-2)] as CanvasLine,
-        getSelectionMoveDrawOptions()
-      );
-    }
-  }
-
-  private handleSelectionEnd(magnetized: number[], original: number[]) {
-    switch (original.length) {
-      case 2: {
-        if (this.skipUnselect) {
-          break;
-        }
-        const eventsId = this.contextResult.getSelectedEventsId(...(original as CanvasPoint));
-        if (eventsId.length) {
-          this.service?.removeSelection(eventsId);
-        } else {
-          this.service?.clearSelection();
-        }
-        break;
-      }
-      default: {
-        if (this.canTranslateSelection) {
-          const [fromX, fromY, toX, toY] = [...magnetized.slice(0, 2), ...magnetized.slice(-2)] as CanvasLine;
-          this.service?.emitTranslatedSelection(toX - fromX, toY - fromY);
-          break;
-        }
-        if (this.canResizeSelection) {
-          const { origin, scale } = this.getResizeConfig(magnetized);
-          this.service?.emitResizedSelection(origin, scale);
-          break;
-        }
-        const canvasLine = [...original.slice(0, 2), ...original.slice(-2)] as CanvasLine;
-        const eventsId = this.contextResult.getSelectedEventsIdInArea(canvasLine);
-        if (eventsId.length) {
-          this.service?.addSelection(eventsId);
-        } else {
-          this.service?.clearSelection();
-        }
-        break;
-      }
-    }
-    this.skipUnselect = false;
-    this.canTranslateSelection = false;
-    this.canResizeSelection = undefined;
+    this.draw.emit(translateEvent(event, ...getCanvasCenter(this.canvasSize, 'emit')));
   }
 
   private getCompleteEvent(data: number[], options: DrawOptions, forceDrawType?: DrawType): DrawEvent {
@@ -395,40 +270,7 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
     } as DrawEvent;
   }
 
-  private getCanvasCenter(target: 'emit' | 'broadcast'): [number, number] {
-    const factor = target === 'emit' ? -1 : 1;
-    return [factor * Math.floor(this.canvasSize.width / 2), factor * Math.floor(this.canvasSize.height / 2)];
-  }
-
   private get canvasSizeAsLine(): CanvasLine {
     return [0, 0, this.canvasSize.width, this.canvasSize.height];
-  }
-
-  private getResizeConfig(magnetized: number[]): { origin: CanvasPoint; scale: [number, number] } {
-    const { bounding, corner } = this.canResizeSelection as ResizeAction;
-
-    const [fromX, fromY, toX, toY] = bounding;
-
-    const boundingOriginX = ['topRight', 'bottomRight'].includes(corner) ? fromX : toX;
-    const boundingOriginY = ['bottomLeft', 'bottomRight'].includes(corner) ? fromY : toY;
-
-    const [centerX, centerY] = this.getCanvasCenter('emit');
-    const originX = Math.floor(boundingOriginX + centerX);
-    const originY = Math.floor(boundingOriginY + centerY);
-
-    const w = toX - fromX;
-    const h = toY - fromY;
-
-    const shiftRect = [...magnetized.slice(0, 2), ...magnetized.slice(-2)] as CanvasLine;
-    const shiftW = shiftRect[2] - shiftRect[0];
-    const shiftH = shiftRect[3] - shiftRect[1];
-
-    const factorX = ['topRight', 'bottomRight'].includes(corner) ? 1 : -1;
-    const factorY = ['bottomLeft', 'bottomRight'].includes(corner) ? 1 : -1;
-
-    const scaleX = (w + shiftW * factorX) / w;
-    const scaleY = (h + shiftH * factorY) / h;
-
-    return { origin: [originX, originY], scale: [scaleX, scaleY] };
   }
 }

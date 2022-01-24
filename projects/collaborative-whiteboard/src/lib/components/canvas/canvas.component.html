@@ -14,7 +14,7 @@
 <canvas #canvasBroadcast class="cw-canvas__preview"></canvas>
 
 <canvas
-  #canvasEmit
+  #canvasOwner
   class="cw-canvas__preview"
   [class.cw-canvas__preview--readonly]="drawDisabled"
   cwPointer
@@ -22,7 +22,12 @@
   [cwPointerMagnetShift]="pointerMagnetShift"
   [cwPointerSensitivity]="pointerSensitivity"
   [cwPointerSensitivityOrigin]="pointerSensitivityOrigin"
-  (cwPointerStart)="drawDisabled || pointerStart($event[0], $event[1])"
-  (cwPointerMove)="drawDisabled || pointerMove($event[0], $event[1])"
   (cwPointerEnd)="drawDisabled || pointerEnd($event[0], $event[1])"
+  cwEmitPreview
+  cwSelectionPreview
+  [cwCanvasSize]="canvasSize"
+  [cwContextOwner]="contextOwner"
+  [cwContextResult]="contextResult"
+  [cwDrawMode]="drawMode"
+  [cwDrawOptions]="drawOptions"
 ></canvas>

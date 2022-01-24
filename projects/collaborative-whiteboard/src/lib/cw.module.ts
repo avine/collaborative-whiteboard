@@ -17,10 +17,10 @@ import {
   CwToolGroupComponent,
   CwWhiteboardComponent,
 } from './components';
-import { CwPointerDirective } from './directives';
+import { CwEmitPreviewDirective, CwPointerDirective, CwSelectionPreviewDirective } from './directives';
 import { CwStorageService } from './services';
 
-const features = [
+const components = [
   CwCanvasComponent,
   CwColorPickerComponent,
   CwDrawModeComponent,
@@ -31,13 +31,14 @@ const features = [
   CwToolContentComponent,
   CwToolGroupComponent,
   CwWhiteboardComponent,
-  CwPointerDirective,
 ];
 
+const directives = [CwEmitPreviewDirective, CwPointerDirective, CwSelectionPreviewDirective];
+
 @NgModule({
-  declarations: [features],
   imports: [CommonModule, FormsModule, DragDropModule, OverlayModule, PortalModule],
-  exports: [features],
+  declarations: [components, directives],
+  exports: [components, directives],
   entryComponents: [CwToolContentComponent],
 })
 export class CwModule {
