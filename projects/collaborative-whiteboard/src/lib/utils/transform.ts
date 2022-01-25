@@ -1,4 +1,4 @@
-import { CanvasLine, DrawEvent } from '../cw.types';
+import { DrawEvent } from '../cw.types';
 
 export const translateEvent = (event: DrawEvent, x: number, y: number): DrawEvent => {
   const result: DrawEvent = { ...event };
@@ -23,24 +23,25 @@ export const resizeEvent = (
     return result;
   }
   switch (result.type) {
-    case 'line':
-    case 'rectangle':
-    case 'ellipse': {
-      const [fromX, fromY, toX, toY] = result.dataSnapshot as CanvasLine;
-      result.data = [
-        originX + (fromX - originX) * scaleX,
-        originY + (fromY - originY) * scaleY,
-        originX + (fromX - originX) * scaleX + Math.round((toX - fromX) * scaleX),
-        originY + (fromY - originY) * scaleY + Math.round((toY - fromY) * scaleY),
-      ];
-      break;
-    }
     case 'point': {
-      // TODO: NOT IMPLEMENTED YET...
+      const [fromX, fromY] = result.dataSnapshot ?? result.data;
+      result.data = [originX + (fromX - originX) * scaleX, originY + (fromY - originY) * scaleY];
       break;
     }
-    case 'lineSerie': {
-      // TODO: NOT IMPLEMENTED YET...
+    default: {
+      const data = result.dataSnapshot ?? result.data;
+      result.data = [];
+      for (let i = 0; i < data.length; i += 4) {
+        const [fromX, fromY, toX, toY] = data.slice(i, i + 4);
+        result.data.push(
+          ...[
+            originX + (fromX - originX) * scaleX,
+            originY + (fromY - originY) * scaleY,
+            originX + (fromX - originX) * scaleX + Math.round((toX - fromX) * scaleX),
+            originY + (fromY - originY) * scaleY + Math.round((toY - fromY) * scaleY),
+          ]
+        );
+      }
       break;
     }
   }

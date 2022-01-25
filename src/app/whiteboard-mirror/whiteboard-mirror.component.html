@@ -1,13 +1,15 @@
 <cw-whiteboard
-  class="whiteboard__left"
+  class="whiteboard whiteboard--left"
   dragBoundarySelector=".main"
   #left
-  (emit)="right.broadcast = $event"
+  onwer="left"
+  (emit)="right.broadcast = clone($event)"
   ></cw-whiteboard>
 
   <cw-whiteboard
-  class="whiteboard__right"
+  class="whiteboard whiteboard--right"
   dragBoundarySelector=".main"
   #right
-  (emit)="left.broadcast = $event"
+  onwer="right"
+  (emit)="left.broadcast = clone($event)"
 ></cw-whiteboard>

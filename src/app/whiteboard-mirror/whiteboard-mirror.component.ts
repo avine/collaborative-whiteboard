@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { DrawTransport } from '@collaborative-whiteboard';
 
 @Component({
   selector: 'app-whiteboard-mirror',
@@ -6,4 +7,14 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
   styleUrls: ['./whiteboard-mirror.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class WhiteboardMirrorComponent {}
+export class WhiteboardMirrorComponent {
+  clone(drawTransport: DrawTransport): DrawTransport {
+    if (drawTransport.action === 'add') {
+      return {
+        ...drawTransport,
+        events: drawTransport.events.map((event) => ({ ...event })),
+      };
+    }
+    return drawTransport;
+  }
+}

@@ -244,8 +244,11 @@ export class CwService {
     this.redraw();
   }
 
-  private broadcastResize(eventsId: string[]) {
-    // TODO...
+  private broadcastResize(eventsId: string[], origin: [number, number], scale: [number, number]) {
+    this.resizeDrawEvents(this.mapEventsIdToDrawEvents(eventsId), origin, scale);
+    this.emitHistory();
+    this.emitSelection();
+    this.redraw();
   }
 
   /**
@@ -266,7 +269,7 @@ export class CwService {
         break;
       }
       case 'resize': {
-        this.broadcastResize(transport.eventsId);
+        this.broadcastResize(transport.eventsId, transport.origin, transport.scale);
         break;
       }
       default: {
