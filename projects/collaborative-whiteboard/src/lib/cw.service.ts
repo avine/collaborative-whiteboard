@@ -206,6 +206,11 @@ export class CwService {
     }
   }
 
+  private broadcastBackground(background: Background) {
+    this.background$$.next(background);
+    this.redraw();
+  }
+
   private broadcastAdd(events: DrawEvent[]) {
     events.forEach((event) => this.pushHistory(event));
     const ownerDrawEvents = this.getOwnerDrawEvents(events);
@@ -248,6 +253,10 @@ export class CwService {
    */
   broadcast(transport: DrawTransport) {
     switch (transport.action) {
+      case 'background': {
+        this.broadcastBackground(transport.background);
+        break;
+      }
       case 'add': {
         this.broadcastAdd(transport.events);
         break;
@@ -366,6 +375,7 @@ export class CwService {
 
   setBackground(background: Background) {
     this.background$$.next(background);
+    this.emit$$.next({ action: 'background', background });
     this.redraw();
   }
 

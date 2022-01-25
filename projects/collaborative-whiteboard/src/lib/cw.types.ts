@@ -110,10 +110,15 @@ export interface DrawEventsBroadcast {
   events: DrawEvent[];
 }
 
-export type DrawTransportAction = 'add' | 'remove' | 'translate' | 'resize';
+export type DrawTransportAction = 'background' | 'add' | 'remove' | 'translate' | 'resize';
 
 export interface DrawTransportBase {
   action: DrawTransportAction;
+}
+
+export interface DrawTransportBackground extends DrawTransportBase {
+  action: 'background';
+  background: Background;
 }
 
 export interface DrawTransportAdd extends DrawTransportBase {
@@ -139,4 +144,9 @@ export interface DrawTransportResize extends DrawTransportBase {
   scale: [number, number];
 }
 
-export type DrawTransport = DrawTransportAdd | DrawTransportRemove | DrawTransportTranslate | DrawTransportResize;
+export type DrawTransport =
+  | DrawTransportBackground
+  | DrawTransportAdd
+  | DrawTransportRemove
+  | DrawTransportTranslate
+  | DrawTransportResize;
