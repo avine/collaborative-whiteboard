@@ -153,48 +153,56 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
   }
 
   private flushBroadcastEventsBuffer() {
-    const id = ++this.broadcastId; // Do this on top (and NOT inside the `else` statement)
+    const id = ++this.broadcastId; // Do this on top (NOT inside `flushWithAnim`)
     if (!this.broadcast.animate || !this.document.defaultView) {
-      this.contextBroadcast.drawClear(this.canvasSizeAsLine);
-      while (this.broadcastEventsBuffer.length) {
-        this.handleResult(this.broadcastEventsBuffer.shift() as DrawEvent);
-      }
+      this.flushBroadcastEventsBufferWithoutAnim();
     } else {
-      const steps = this.broadcastEventsBuffer.length;
-      const frameRate = getAnimFrameRate(steps);
-      const step = () => {
-        if (id !== this.broadcastId) {
-          return;
-        }
-        if (!this.broadcastEventsBuffer.length) {
-          // Because we are using `ChangeDetectionStrategy.OnPush`, the end of the
-          // animation (which occurs asynchronously) is NOT detected by Angular.
-          // For this reason, we have to detect this change manually.
-          this.changeDetectorRef.detectChanges();
-          return;
-        }
-        const flushCount = getAnimFlushCount(this.broadcastEventsBuffer.length, steps);
-        for (let i = 0; i < flushCount; i++) {
-          const event = this.broadcastEventsBuffer.shift() as DrawEvent | DrawEventAnimated;
-          if (!isDrawEventAnimated(event)) {
-            this.handleResult(event);
-            continue;
-          }
-          this.contextBroadcast.drawClear(this.canvasSizeAsLine);
-          if (event.animate) {
-            this.contextBroadcast.handleEvent(event);
-          } else {
-            this.handleResult(event);
-          }
-        }
-        if (frameRate) {
-          setTimeout(() => this.document.defaultView?.requestAnimationFrame(step), frameRate);
-        } else {
-          this.document.defaultView?.requestAnimationFrame(step);
-        }
-      };
-      this.document.defaultView.requestAnimationFrame(step);
+      this.flushBroadcastEventsBufferWithAnim(id);
     }
+  }
+
+  private flushBroadcastEventsBufferWithoutAnim() {
+    this.contextBroadcast.drawClear(this.canvasSizeAsLine);
+    while (this.broadcastEventsBuffer.length) {
+      this.handleResult(this.broadcastEventsBuffer.shift() as DrawEvent);
+    }
+  }
+
+  private flushBroadcastEventsBufferWithAnim(id: number) {
+    const steps = this.broadcastEventsBuffer.length;
+    const frameRate = getAnimFrameRate(steps);
+    const step = () => {
+      if (id !== this.broadcastId) {
+        return;
+      }
+      if (!this.broadcastEventsBuffer.length) {
+        // Because we are using `ChangeDetectionStrategy.OnPush`, the end of the
+        // animation (which occurs asynchronously) is NOT detected by Angular.
+        // For this reason, we have to detect this change manually.
+        this.changeDetectorRef.detectChanges();
+        return;
+      }
+      const flushCount = getAnimFlushCount(this.broadcastEventsBuffer.length, steps);
+      for (let i = 0; i < flushCount; i++) {
+        const event = this.broadcastEventsBuffer.shift() as DrawEvent | DrawEventAnimated;
+        if (!isDrawEventAnimated(event)) {
+          this.handleResult(event);
+          continue;
+        }
+        this.contextBroadcast.drawClear(this.canvasSizeAsLine);
+        if (event.animate) {
+          this.contextBroadcast.handleEvent(event);
+        } else {
+          this.handleResult(event);
+        }
+      }
+      if (frameRate) {
+        setTimeout(() => this.document.defaultView?.requestAnimationFrame(step), frameRate);
+      } else {
+        this.document.defaultView?.requestAnimationFrame(step);
+      }
+    };
+    this.document.defaultView?.requestAnimationFrame(step);
   }
 
   private handleResult(event: DrawEvent) {
