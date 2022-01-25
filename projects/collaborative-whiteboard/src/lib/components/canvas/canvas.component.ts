@@ -120,9 +120,9 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
   private handleBroadcastBackground() {
     const backgroundEvents: DrawEvent[] = [];
     const drawTypesInOrder: DrawType[] = ['clear', 'background', 'background'];
-    for (let i = 0; i < drawTypesInOrder.length; i++) {
+    for (const drawType of drawTypesInOrder) {
       const currFirstEvent = this.broadcast.events[0];
-      if (currFirstEvent?.type !== drawTypesInOrder[i] || !isEmptyCanvasLine(currFirstEvent?.data as CanvasLine)) {
+      if (currFirstEvent?.type !== drawType || !isEmptyCanvasLine(currFirstEvent?.data as CanvasLine)) {
         break;
       }
       backgroundEvents.push(this.broadcast.events.shift() as DrawEvent);

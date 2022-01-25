@@ -66,39 +66,10 @@ export class CwSelectionPreviewDirective {
       return;
     }
     this.cwContextOwner.drawClear(this.canvasSizeAsLine);
-    switch (original.length) {
-      case 2: {
-        if (this.skipUnselect) {
-          break;
-        }
-        const eventsId = this.cwContextResult.getSelectedEventsId(...(original as CanvasPoint));
-        if (eventsId.length) {
-          this.service?.removeSelection(eventsId);
-        } else {
-          this.service?.clearSelection();
-        }
-        break;
-      }
-      default: {
-        if (this.canTranslateSelection) {
-          const [fromX, fromY, toX, toY] = [...magnetized.slice(0, 2), ...magnetized.slice(-2)] as CanvasLine;
-          this.service?.emitTranslatedSelection(toX - fromX, toY - fromY);
-          break;
-        }
-        if (this.canResizeSelection) {
-          const { origin, scale } = this.getResizeConfig(magnetized);
-          this.service?.emitResizedSelection(origin, scale);
-          break;
-        }
-        const canvasLine = [...original.slice(0, 2), ...original.slice(-2)] as CanvasLine;
-        const eventsId = this.cwContextResult.getSelectedEventsIdInArea(canvasLine);
-        if (eventsId.length) {
-          this.service?.addSelection(eventsId);
-        } else {
-          this.service?.clearSelection();
-        }
-        break;
-      }
+    if (original.length === 2) {
+      this.handlePointSelection(original as CanvasPoint);
+    } else {
+      this.handleLineSerieSelection(magnetized, original);
     }
     this.skipUnselect = false;
     this.canTranslateSelection = false;
@@ -117,6 +88,38 @@ export class CwSelectionPreviewDirective {
 
   private get canvasSizeAsLine(): CanvasLine {
     return [0, 0, this.cwCanvasSize.width, this.cwCanvasSize.height];
+  }
+
+  private handlePointSelection(original: CanvasPoint) {
+    if (this.skipUnselect) {
+      return;
+    }
+    const eventsId = this.cwContextResult.getSelectedEventsId(...original);
+    if (eventsId.length) {
+      this.service?.removeSelection(eventsId);
+    } else {
+      this.service?.clearSelection();
+    }
+  }
+
+  private handleLineSerieSelection(magnetized: number[], original: number[]) {
+    if (this.canTranslateSelection) {
+      const [fromX, fromY, toX, toY] = [...magnetized.slice(0, 2), ...magnetized.slice(-2)] as CanvasLine;
+      this.service?.emitTranslatedSelection(toX - fromX, toY - fromY);
+      return;
+    }
+    if (this.canResizeSelection) {
+      const { origin, scale } = this.getResizeConfig(magnetized);
+      this.service?.emitResizedSelection(origin, scale);
+      return;
+    }
+    const canvasLine = [...original.slice(0, 2), ...original.slice(-2)] as CanvasLine;
+    const eventsId = this.cwContextResult.getSelectedEventsIdInArea(canvasLine);
+    if (eventsId.length) {
+      this.service?.addSelection(eventsId);
+    } else {
+      this.service?.clearSelection();
+    }
   }
 
   private getResizeConfig(magnetized: number[]): { origin: CanvasPoint; scale: [number, number] } {
