@@ -119,7 +119,7 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
 
   private handleBroadcastBackground() {
     const backgroundEvents: DrawEvent[] = [];
-    const drawTypesInOrder: DrawType[] = ['clear', 'fillBackground', 'fillBackground'];
+    const drawTypesInOrder: DrawType[] = ['clear', 'background', 'background'];
     for (let i = 0; i < drawTypesInOrder.length; i++) {
       const currFirstEvent = this.broadcast.events[0];
       if (currFirstEvent?.type !== drawTypesInOrder[i] || !isEmptyCanvasLine(currFirstEvent?.data as CanvasLine)) {
@@ -198,7 +198,7 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
   }
 
   private handleResult(event: DrawEvent) {
-    if ((event.type === 'fillBackground' || event.type === 'clear') && isEmptyCanvasLine(event.data)) {
+    if ((event.type === 'background' || event.type === 'clear') && isEmptyCanvasLine(event.data)) {
       this.contextResult.handleEvent({ ...event, data: this.canvasSizeAsLine });
     } else {
       this.contextResult.handleEvent(event);

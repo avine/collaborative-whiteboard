@@ -18,7 +18,7 @@ import {
 
 import { getDefaultCanvasSize, getDefaultDrawOptions } from '../../cw.config';
 import { CwService } from '../../cw.service';
-import { DrawMode, DrawTransport, FillBackground, Owner } from '../../cw.types';
+import { Background, DrawMode, DrawTransport, Owner } from '../../cw.types';
 import { addStorageKeySuffix, CwStorageService, StorageKey } from '../../services';
 
 @Component({
@@ -85,7 +85,7 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
       this.fitCanvasSizeToParentElement();
     }
 
-    this.initFillBackground();
+    this.initBackground();
     this.initDrawMode();
   }
 
@@ -149,16 +149,16 @@ export class CwWhiteboardComponent implements OnInit, OnDestroy {
     this.changeDetectorRef.detectChanges();
   }
 
-  private initFillBackground() {
-    const fillBackground = this.storageService.getLocal<FillBackground>(StorageKey.FillBackground);
-    if (fillBackground) {
-      this.service.setFillBackground(fillBackground);
+  private initBackground() {
+    const background = this.storageService.getLocal<Background>(StorageKey.Background);
+    if (background) {
+      this.service.setBackground(background);
     }
   }
 
-  updateFillBackground(fillBackground: FillBackground) {
-    this.service.setFillBackground(fillBackground);
-    this.storageService.setLocal(StorageKey.FillBackground, fillBackground);
+  updateBackground(background: Background) {
+    this.service.setBackground(background);
+    this.storageService.setLocal(StorageKey.Background, background);
   }
 
   private initDrawMode() {

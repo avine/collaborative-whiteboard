@@ -10,7 +10,7 @@ export const getCanvasContextHandler: Record<
   lineSerie: 'drawLineSerie',
   rectangle: 'drawRectangle',
   ellipse: 'drawEllipse',
-  fillBackground: 'drawFillBackground',
+  background: 'drawBackground',
   clear: 'drawClear',
 };
 

@@ -1,6 +1,6 @@
 export type Owner = number | string;
 
-export interface FillBackground {
+export interface Background {
   owner: Owner;
   transparent: boolean;
   color: string;
@@ -26,7 +26,7 @@ export type DrawType =
   | 'lineSerie'
   | 'rectangle'
   | 'ellipse'
-  | 'fillBackground'
+  | 'background'
   | 'clear'
   | 'selection'
   | 'boundingSelection';
@@ -72,8 +72,8 @@ export interface DrawEllipse extends DrawBase {
   data: CanvasLine;
 }
 
-export interface DrawFillBackground extends DrawBase {
-  type: 'fillBackground';
+export interface DrawBackground extends DrawBase {
+  type: 'background';
   data: CanvasLine;
 }
 
@@ -98,7 +98,7 @@ export type DrawEvent =
   | DrawLineSerie
   | DrawRectangle
   | DrawEllipse
-  | DrawFillBackground
+  | DrawBackground
   | DrawClear
   | DrawSelection
   | DrawBoundingSelection;

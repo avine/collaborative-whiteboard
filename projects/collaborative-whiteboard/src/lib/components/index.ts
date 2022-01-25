@@ -1,8 +1,8 @@
+export { CwBackgroundComponent } from './background/background.component';
 export { CwCanvasComponent } from './canvas/canvas.component';
 export { CwColorPickerComponent } from './color-picker/color-picker.component';
 export { CwDrawModeComponent } from './draw-mode/draw-mode.component';
 export { CwDrawSettingsComponent } from './draw-settings/draw-settings.component';
-export { CwFillBackgroundComponent } from './fill-background/fill-background.component';
 export { CwIconComponent } from './icon/icon.component';
 export { CwToolContentComponent } from './tool-content/tool-content.component';
 export { CwToolGroupComponent } from './tool-group/tool-group.component';

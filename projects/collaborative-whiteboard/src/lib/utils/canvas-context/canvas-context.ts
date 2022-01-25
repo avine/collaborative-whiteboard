@@ -163,7 +163,7 @@ export class CanvasContext implements ICanvasContext {
     return path2D;
   }
 
-  drawFillBackground(canvasLine: CanvasLine, options: DrawOptions) {
+  drawBackground(canvasLine: CanvasLine, options: DrawOptions) {
     this.applyDrawOptions(options);
     this.context.fillRect(...canvasLine);
   }

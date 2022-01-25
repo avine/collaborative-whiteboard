@@ -3,21 +3,13 @@ import { map } from 'rxjs/operators';
 
 import { Injectable } from '@angular/core';
 
-import { DEFAULT_DRAW_MODE, DEFAULT_OWNER, getDefaultFillBackground } from './cw.config';
-import {
-  DrawEvent,
-  DrawEventsBroadcast,
-  DrawFillBackground,
-  DrawMode,
-  DrawTransport,
-  FillBackground,
-  Owner,
-} from './cw.types';
+import { DEFAULT_DRAW_MODE, DEFAULT_OWNER, getDefaultBackground } from './cw.config';
+import { Background, DrawBackground, DrawEvent, DrawEventsBroadcast, DrawMode, DrawTransport, Owner } from './cw.types';
 import {
   defineEventDataSnapshot,
   deleteEventDataSnapshot,
+  getBackgroundEvent,
   getClearEvent,
-  getFillBackgroundEvent,
   getSelectionEvents,
   resizeEvent,
   translateEvent,
@@ -30,7 +22,7 @@ export class CwService {
 
   private drawMode$$ = new BehaviorSubject<DrawMode>(DEFAULT_DRAW_MODE);
 
-  private fillBackground$$ = new BehaviorSubject<FillBackground>(getDefaultFillBackground());
+  private background$$ = new BehaviorSubject<Background>(getDefaultBackground());
 
   private historyMap = new Map<string, DrawEvent>();
 
@@ -56,7 +48,7 @@ export class CwService {
 
   drawMode$ = this.drawMode$$.asObservable();
 
-  fillBackground$ = this.fillBackground$$.asObservable();
+  background$ = this.background$$.asObservable();
 
   history$ = this.history$$.asObservable();
 
@@ -372,19 +364,19 @@ export class CwService {
     this.broadcast$$.next({ events, animate });
   }
 
-  setFillBackground(fillBackground: FillBackground) {
-    this.fillBackground$$.next(fillBackground);
+  setBackground(background: Background) {
+    this.background$$.next(background);
     this.redraw();
   }
 
-  private get backgroundEvents(): DrawFillBackground[] {
-    const events: DrawFillBackground[] = [];
-    const { transparent, color, opacity } = this.fillBackground$$.value;
+  private get backgroundEvents(): DrawBackground[] {
+    const events: DrawBackground[] = [];
+    const { transparent, color, opacity } = this.background$$.value;
     if (!transparent) {
-      events.push(getFillBackgroundEvent('255, 255, 255', 1, this.owner));
+      events.push(getBackgroundEvent('255, 255, 255', 1, this.owner));
     }
     if (color) {
-      events.push(getFillBackgroundEvent(color, opacity, this.owner));
+      events.push(getBackgroundEvent(color, opacity, this.owner));
     }
     return events;
   }

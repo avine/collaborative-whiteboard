@@ -1,5 +1,5 @@
 export type IconAlias =
-  | 'fillBackground'
+  | 'background'
   | 'palette'
   | 'selection'
   | 'brush'

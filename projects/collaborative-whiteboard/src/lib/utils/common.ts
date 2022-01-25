@@ -1,15 +1,15 @@
 import { DEFAULT_OWNER } from '../cw.config';
-import { CanvasLine, CanvasSize, DrawClear, DrawFillBackground, DrawType } from '../cw.types';
+import { CanvasLine, CanvasSize, DrawBackground, DrawClear, DrawType } from '../cw.types';
 import { getDrawEventUID } from './id';
 
 export const getEmptyCanvasLine = (): CanvasLine => [0, 0, 0, 0];
 
 export const isEmptyCanvasLine = ([fromX, fromY, toX, toY]: CanvasLine) => toX === fromX && toY === fromY;
 
-export const getFillBackgroundEvent = (color: string, fillOpacity = 1, owner = DEFAULT_OWNER): DrawFillBackground => ({
+export const getBackgroundEvent = (color: string, fillOpacity = 1, owner = DEFAULT_OWNER): DrawBackground => ({
   id: getDrawEventUID(),
   owner,
-  type: 'fillBackground',
+  type: 'background',
   data: getEmptyCanvasLine(),
   options: { lineWidth: 0, color, opacity: 0, fillOpacity }, // Note: `lineWidth` and  `opacity` are not relevant in this case
 });

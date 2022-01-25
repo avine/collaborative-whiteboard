@@ -6,11 +6,11 @@ import { ModuleWithProviders, NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import {
+  CwBackgroundComponent,
   CwCanvasComponent,
   CwColorPickerComponent,
   CwDrawModeComponent,
   CwDrawSettingsComponent,
-  CwFillBackgroundComponent,
   CwIconComponent,
   CwToolComponent,
   CwToolContentComponent,
@@ -21,11 +21,11 @@ import { CwEmitPreviewDirective, CwPointerDirective, CwSelectionPreviewDirective
 import { CwStorageService } from './services';
 
 const components = [
+  CwBackgroundComponent,
   CwCanvasComponent,
   CwColorPickerComponent,
   CwDrawModeComponent,
   CwDrawSettingsComponent,
-  CwFillBackgroundComponent,
   CwIconComponent,
   CwToolComponent,
   CwToolContentComponent,

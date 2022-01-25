@@ -4,9 +4,9 @@
   </div>
 
   <div class="cw-control__block">
-    <input type="range" min="0.2" max="1" step="0.05" [(ngModel)]="fillBackground.opacity" (ngModelChange)="emit()" />
+    <input type="range" min="0.2" max="1" step="0.05" [(ngModel)]="background.opacity" (ngModelChange)="emit()" />
 
-    <span class="cw-control__number cw-control__number--large">{{ fillBackground.opacity | percent }}</span>
+    <span class="cw-control__number cw-control__number--large">{{ background.opacity | percent }}</span>
   </div>
 </div>
 
@@ -17,8 +17,8 @@
 
   <cw-color-picker
     [colors]="colors"
-    [(color)]="fillBackground.color"
-    [opacity]="fillBackground.opacity"
+    [(color)]="background.color"
+    [opacity]="background.opacity"
     (colorChange)="emit()"
   ></cw-color-picker>
 </div>
@@ -29,7 +29,7 @@
   </div>
 
   <div class="cw-control__block">
-    <input [id]="checkboxId" type="checkbox" [(ngModel)]="fillBackground.transparent" (ngModelChange)="emit()" />
+    <input [id]="checkboxId" type="checkbox" [(ngModel)]="background.transparent" (ngModelChange)="emit()" />
 
     <label [for]="checkboxId" class="cw-control__label">Preserve</label>
   </div>
