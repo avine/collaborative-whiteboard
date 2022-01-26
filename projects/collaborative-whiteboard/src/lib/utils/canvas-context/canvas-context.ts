@@ -2,6 +2,7 @@ import { getDefaultCanvasSize } from '../../cw.config';
 import { CanvasLine, CanvasLineSerie, CanvasPoint, CanvasSize, DrawEvent, DrawOptions } from '../../cw.types';
 import {
   BOUNDING_SELECTION_LINE_DASH,
+  CANVAS_POINT_FAT,
   getBoundingSelectionDrawOptions,
   getSelectionDrawOptions,
   RESIZE_ACTION_WIDTH,
@@ -10,18 +11,18 @@ import {
 } from './canvas-context.config';
 import {
   DrawEventAction,
-  DrawEventPath,
+  DrawEventInfo,
   ICanvasContext,
   ResizeAction,
   ResizeCorner,
   TranslateAction,
 } from './canvas-context.types';
-import { getBounding, getCanvasContextHandler } from './canvas-context.utils';
+import { getBounding, getCanvasContextHandler, normalizeCanvasLine } from './canvas-context.utils';
 
 export class CanvasContext implements ICanvasContext {
   private canvasSize = getDefaultCanvasSize();
 
-  private drawEventPaths: DrawEventPath[] = []; // TODO: use path2DMap to redraw paths when possible...
+  private drawEventInfos: DrawEventInfo[] = []; // TODO: use path2DMap to redraw paths when possible...
 
   private drawBoundingSelectionPaths: DrawEventAction[] = [];
 
@@ -58,37 +59,43 @@ export class CanvasContext implements ICanvasContext {
         break;
       }
       default: {
-        const path2D = this[getCanvasContextHandler[type]](data as any, options as any);
-        if (path2D) {
-          this.drawEventPaths.push({ path2D, eventId });
+        const info = this[getCanvasContextHandler[type]](data as any, options as any);
+        if (info) {
+          this.drawEventInfos.push({ ...info, eventId });
         }
         break;
       }
     }
   }
 
-  drawPoint([x, y]: CanvasPoint, options: DrawOptions) {
+  drawPoint([x, y]: CanvasPoint, options: DrawOptions): Omit<DrawEventInfo, 'eventId'> {
     this.applyDrawOptions(options);
     const offset = this.getOffset(options);
     const path2D = new Path2D();
     path2D.arc(x + offset, y + offset, 1, 0, Math.PI * 2, true);
     this.context.stroke(path2D);
-    return path2D;
+    return {
+      path2D,
+      bounding: normalizeCanvasLine([
+        x + offset - CANVAS_POINT_FAT,
+        y + offset - CANVAS_POINT_FAT,
+        x + offset + CANVAS_POINT_FAT,
+        y + offset + CANVAS_POINT_FAT,
+      ]),
+    };
   }
 
-  // !FIXME: when lineWidth is odd, line can not be selected
-  drawLine([fromX, fromY, toX, toY]: CanvasLine, options: DrawOptions) {
+  drawLine([fromX, fromY, toX, toY]: CanvasLine, options: DrawOptions): Omit<DrawEventInfo, 'eventId'> {
     this.applyDrawOptions(options);
     const offset = this.getOffset(options);
     const path2D = new Path2D();
     path2D.moveTo(fromX + offset, fromY + offset);
     path2D.lineTo(toX + offset, toY + offset);
     this.context.stroke(path2D);
-    return path2D;
+    return { path2D, bounding: normalizeCanvasLine([fromX + offset, fromY + offset, toX + offset, toY + offset]) };
   }
 
-  // !FIXME: when lineWidth is odd, lineSerie can not be selected
-  drawLineSerie(serie: CanvasLineSerie, options: DrawOptions) {
+  drawLineSerie(serie: CanvasLineSerie, options: DrawOptions): Omit<DrawEventInfo, 'eventId'> {
     this.applyDrawOptions(options);
     const offset = this.getOffset(options);
     const path2D = new Path2D();
@@ -98,10 +105,10 @@ export class CanvasContext implements ICanvasContext {
       path2D.lineTo(serie[i] + offset, serie[i + 1] + offset);
     }
     this.context.stroke(path2D);
-    return path2D;
+    return { path2D, bounding: getBounding(serie.map((n) => n + offset)) };
   }
 
-  drawRectangle([fromX, fromY, toX, toY]: CanvasLine, options: DrawOptions) {
+  drawRectangle([fromX, fromY, toX, toY]: CanvasLine, options: DrawOptions): Omit<DrawEventInfo, 'eventId'> {
     this.applyDrawOptions(options);
     const offset = this.getOffset(options);
     const x = fromX + offset;
@@ -128,10 +135,10 @@ export class CanvasContext implements ICanvasContext {
       path2D.addPath(fill);
       this.context.fill(fill);
     }
-    return path2D;
+    return { path2D, bounding: normalizeCanvasLine([fromX + offset, fromY + offset, toX + offset, toY + offset]) };
   }
 
-  drawEllipse([fromX, fromY, toX, toY]: CanvasLine, options: DrawOptions) {
+  drawEllipse([fromX, fromY, toX, toY]: CanvasLine, options: DrawOptions): Omit<DrawEventInfo, 'eventId'> {
     const shiftX = Math.round((toX - fromX) / 2);
     const shiftY = Math.round((toY - fromY) / 2);
     const x = fromX + shiftX;
@@ -160,7 +167,7 @@ export class CanvasContext implements ICanvasContext {
       this.applyDrawOptions(options);
       this.context.fill(fill);
     }
-    return path2D;
+    return { path2D, bounding: normalizeCanvasLine([fromX + offset, fromY + offset, toX + offset, toY + offset]) };
   }
 
   drawBackground(canvasLine: CanvasLine, options: DrawOptions) {
@@ -200,9 +207,8 @@ export class CanvasContext implements ICanvasContext {
     this.context.setLineDash(BOUNDING_SELECTION_LINE_DASH);
     this.context.stroke(translatePath);
     this.context.setLineDash([]);
-    const translateAction: Omit<TranslateAction, 'eventId'> = { path2D: translatePath, action: 'translate' };
-
     const bounding: CanvasLine = [fromX + offset, fromY + offset, toX + offset, toY + offset];
+    const translateAction: Omit<TranslateAction, 'eventId'> = { path2D: translatePath, bounding, action: 'translate' };
 
     const a = RESIZE_ACTION_WIDTH; // Just an alias...
     const resizeAreas: Array<{ area: [number, number, number, number]; corner: ResizeCorner }> = [
@@ -222,35 +228,19 @@ export class CanvasContext implements ICanvasContext {
     return [translateAction, ...resizeActions];
   }
 
-  // !FIXME: this function has performance issues...
   getSelectedEventsIdInArea(canvasLine: CanvasLine): string[] {
-    const fromX = Math.min(canvasLine[0], canvasLine[2]);
-    const toX = Math.max(canvasLine[0], canvasLine[2]);
-    const fromY = Math.min(canvasLine[1], canvasLine[3]);
-    const toY = Math.max(canvasLine[1], canvasLine[3]);
-    let buffer = [...this.drawEventPaths];
-    const eventsId = new Set<string>();
-    loop: for (let x = fromX; x <= toX; x++) {
-      for (let y = fromY; y <= toY; y++) {
-        buffer = buffer.filter(({ path2D, eventId }) => {
-          if (this.context.isPointInPath(path2D, x, y)) {
-            eventsId.add(eventId);
-            return false;
-          } else {
-            return true;
-          }
-        });
-        if (!buffer.length) {
-          break loop;
-        }
-      }
-    }
-    return Array.from(eventsId);
+    const [fromOuterX, fromOuterY, toOuterX, toOuterY] = normalizeCanvasLine(canvasLine);
+    return this.drawEventInfos
+      .filter(
+        ({ bounding: [fromInnerX, fromInnerY, toInnerX, toInnerY] }) =>
+          fromOuterX <= fromInnerX && toOuterX >= toInnerX && fromOuterY <= fromInnerY && toOuterY >= toInnerY
+      )
+      .map(({ eventId }) => eventId);
   }
 
   getSelectedEventsId(x: number, y: number): string[] {
-    return this.drawEventPaths
-      .filter(({ path2D }) => this.context.isPointInPath(path2D, x, y))
+    return this.drawEventInfos
+      .filter(({ bounding: [fromX, fromY, toX, toY] }) => x >= fromX && x <= toX && y >= fromY && y <= toY)
       .map(({ eventId }) => eventId);
   }
 
@@ -259,7 +249,7 @@ export class CanvasContext implements ICanvasContext {
   }
 
   resetPaths() {
-    this.drawEventPaths = [];
+    this.drawEventInfos = [];
     this.drawBoundingSelectionPaths = [];
   }
 

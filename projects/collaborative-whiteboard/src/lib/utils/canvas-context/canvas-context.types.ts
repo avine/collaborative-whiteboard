@@ -1,27 +1,28 @@
 import { CanvasLine, CanvasLineSerie, CanvasPoint, DrawOptions } from '../../cw.types';
 
 export interface ICanvasContext {
-  drawPoint: (data: CanvasPoint, options: DrawOptions) => Path2D;
-  drawLine: (data: CanvasLine, options: DrawOptions) => Path2D;
-  drawLineSerie: (data: CanvasLineSerie, options: DrawOptions) => Path2D;
-  drawRectangle: (data: CanvasLine, options: DrawOptions) => Path2D;
-  drawEllipse: (data: CanvasLine, options: DrawOptions) => Path2D;
+  drawPoint: (data: CanvasPoint, options: DrawOptions) => Omit<DrawEventInfo, 'eventId'>;
+  drawLine: (data: CanvasLine, options: DrawOptions) => Omit<DrawEventInfo, 'eventId'>;
+  drawLineSerie: (data: CanvasLineSerie, options: DrawOptions) => Omit<DrawEventInfo, 'eventId'>;
+  drawRectangle: (data: CanvasLine, options: DrawOptions) => Omit<DrawEventInfo, 'eventId'>;
+  drawEllipse: (data: CanvasLine, options: DrawOptions) => Omit<DrawEventInfo, 'eventId'>;
   drawBackground: (data: CanvasLine, options: DrawOptions) => void;
   drawClear: (data: CanvasLine, options: DrawOptions) => void;
 }
 
-export interface DrawEventPath {
+export interface DrawEventInfo {
   path2D: Path2D;
+  bounding: CanvasLine;
   eventId: string;
 }
 
-export interface TranslateAction extends DrawEventPath {
+export interface TranslateAction extends DrawEventInfo {
   action: 'translate';
 }
 
-export interface ResizeAction extends DrawEventPath {
+export interface ResizeAction extends DrawEventInfo {
   action: 'resize';
-  bounding: CanvasLine;
+  // bounding: CanvasLine;
   corner: ResizeCorner;
 }
 
