@@ -33,13 +33,13 @@ export const resizeEvent = (
       result.data = [];
       for (let i = 0; i < data.length; i += 4) {
         const [fromX, fromY, toX, toY] = data.slice(i, i + 4);
+        result.data.push(originX + (fromX - originX) * scaleX, originY + (fromY - originY) * scaleY);
+        if (toX === undefined && toY === undefined) {
+          break;
+        }
         result.data.push(
-          ...[
-            originX + (fromX - originX) * scaleX,
-            originY + (fromY - originY) * scaleY,
-            originX + (fromX - originX) * scaleX + Math.round((toX - fromX) * scaleX),
-            originY + (fromY - originY) * scaleY + Math.round((toY - fromY) * scaleY),
-          ]
+          originX + (fromX - originX) * scaleX + Math.round((toX - fromX) * scaleX),
+          originY + (fromY - originY) * scaleY + Math.round((toY - fromY) * scaleY)
         );
       }
       break;

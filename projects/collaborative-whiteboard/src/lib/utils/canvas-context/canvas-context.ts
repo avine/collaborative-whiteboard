@@ -24,7 +24,7 @@ export class CanvasContext implements ICanvasContext {
 
   private drawEventInfos: DrawEventInfo[] = []; // TODO: use path2DMap to redraw paths when possible...
 
-  private drawBoundingSelectionPaths: DrawEventAction[] = [];
+  private drawEventActions: DrawEventAction[] = [];
 
   constructor(private context: CanvasRenderingContext2D) {}
 
@@ -55,7 +55,7 @@ export class CanvasContext implements ICanvasContext {
       }
       case 'boundingSelection': {
         const actions = this.drawBoundingSelection(data as CanvasLine, options);
-        this.drawBoundingSelectionPaths.push(...actions.map((action) => ({ ...action, eventId } as DrawEventAction)));
+        this.drawEventActions.push(...actions.map((action) => ({ ...action, eventId } as DrawEventAction)));
         break;
       }
       default: {
@@ -156,8 +156,7 @@ export class CanvasContext implements ICanvasContext {
     this.context.stroke(stroke);
 
     const isComplete = options.angle === undefined;
-    // Hack: we need to always fill the ellispe otherwise it can not be selected using `context.isPointInPath()`
-    if (isComplete /*&& options.fillOpacity*/) {
+    if (isComplete && options.fillOpacity) {
       const fillRadiusX = Math.max(0, radiusX - options.lineWidth / 2);
       const fillRadiusY = Math.max(0, radiusY - options.lineWidth / 2);
 
@@ -245,12 +244,12 @@ export class CanvasContext implements ICanvasContext {
   }
 
   getSelectedAction(x: number, y: number): DrawEventAction | undefined {
-    return this.drawBoundingSelectionPaths.filter(({ path2D }) => this.context.isPointInPath(path2D, x, y))[0];
+    return this.drawEventActions.filter(({ path2D }) => this.context.isPointInPath(path2D, x, y))[0];
   }
 
   resetPaths() {
     this.drawEventInfos = [];
-    this.drawBoundingSelectionPaths = [];
+    this.drawEventActions = [];
   }
 
   private applyDrawOptions({ color, opacity, fillOpacity, lineWidth }: DrawOptions, withFillStyle = true) {
