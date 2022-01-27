@@ -144,8 +144,8 @@ export class CwSelectionPreviewDirective {
     const factorX = ['topRight', 'bottomRight'].includes(corner) ? 1 : -1;
     const factorY = ['bottomLeft', 'bottomRight'].includes(corner) ? 1 : -1;
 
-    const scaleX = (w + shiftW * factorX) / w;
-    const scaleY = (h + shiftH * factorY) / h;
+    const scaleX = w ? (w + shiftW * factorX) / w : 1;
+    const scaleY = h ? (h + shiftH * factorY) / h : 1;
 
     return { origin: [originX, originY], scale: [scaleX, scaleY] };
   }
