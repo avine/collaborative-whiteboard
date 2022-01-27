@@ -22,7 +22,7 @@ export const getClearEvent = (owner = DEFAULT_OWNER): DrawClear => ({
   options: { lineWidth: 0, color: '', opacity: 0, fillOpacity: 0 }, // Note: `options` is not relevant in this case
 });
 
-export const inferBasicDrawType = (dataLength: number): DrawType =>
+export const inferBasicDrawType = (dataLength: number): Extract<DrawType, 'point' | 'line' | 'lineSerie'> =>
   dataLength === 2 ? 'point' : dataLength === 4 ? 'line' : 'lineSerie';
 
 export const getCanvasCenter = (canvasSize: CanvasSize, target: 'emit' | 'broadcast'): [number, number] => {

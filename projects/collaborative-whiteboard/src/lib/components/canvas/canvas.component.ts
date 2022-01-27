@@ -242,30 +242,17 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
       return;
     }
     let event: DrawEvent | undefined = undefined;
-    switch (this.drawMode) {
-      case 'brush': {
-        event = this.getCompleteEvent(magnetized, this.drawOptions);
-        break;
-      }
-      case 'line': {
-        event = this.getCompleteEvent([...magnetized.slice(0, 2), ...magnetized.slice(-2)], this.drawOptions);
-        break;
-      }
-      case 'rectangle': {
-        event = this.getCompleteEvent(
-          [...magnetized.slice(0, 2), ...magnetized.slice(-2)],
-          this.drawOptions,
-          'rectangle'
-        );
-        break;
-      }
-      case 'ellipse': {
-        event = this.getCompleteEvent(
-          [...magnetized.slice(0, 2), ...magnetized.slice(-2)],
-          this.drawOptions,
-          'ellipse'
-        );
-        break;
+    if (this.drawMode === 'brush') {
+      event = this.getCompleteEvent(magnetized, this.drawOptions);
+    } else {
+      const [fromX, fromY, toX, toY] = [...magnetized.slice(0, 2), ...magnetized.slice(-2)];
+      // At this point, `this.drawMode` can be: 'line' | 'rectangle' | 'ellipse'
+      if (fromX === toX && fromY === toY) {
+        event = this.getCompleteEvent([fromX, fromY], this.drawOptions, 'point');
+      } else if (fromX === toX || fromY === toY) {
+        event = this.getCompleteEvent([fromX, fromY, toX, toY], this.drawOptions, 'line');
+      } else {
+        event = this.getCompleteEvent([fromX, fromY, toX, toY], this.drawOptions, this.drawMode);
       }
     }
     this.handleResult(event);
