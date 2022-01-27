@@ -50,8 +50,10 @@ export class CwSelectionPreviewDirective {
       });
     } else if (this.canResizeSelection) {
       this.ngZone.run(() => {
-        const { origin, scale } = this.getResizeConfig(magnetized);
-        this.service?.resizeSelection(origin, scale);
+        const config = this.getResizeConfig(magnetized);
+        if (config) {
+          this.service?.resizeSelection(config.origin, config.scale);
+        }
       });
     } else {
       this.cwContextOwner.drawRectangle(
@@ -109,8 +111,10 @@ export class CwSelectionPreviewDirective {
       return;
     }
     if (this.canResizeSelection) {
-      const { origin, scale } = this.getResizeConfig(magnetized);
-      this.service?.emitResizedSelection(origin, scale);
+      const config = this.getResizeConfig(magnetized);
+      if (config) {
+        this.service?.emitResizedSelection(config.origin, config.scale);
+      }
       return;
     }
     const canvasLine = [...original.slice(0, 2), ...original.slice(-2)] as CanvasLine;
@@ -122,7 +126,7 @@ export class CwSelectionPreviewDirective {
     }
   }
 
-  private getResizeConfig(magnetized: number[]): { origin: CanvasPoint; scale: [number, number] } {
+  private getResizeConfig(magnetized: number[]): { origin: CanvasPoint; scale: [number, number] } | void {
     const { bounding, corner } = this.canResizeSelection as ResizeAction;
 
     const [fromX, fromY, toX, toY] = bounding;
@@ -136,6 +140,10 @@ export class CwSelectionPreviewDirective {
 
     const w = toX - fromX;
     const h = toY - fromY;
+
+    if (!w && !h) {
+      return;
+    }
 
     const shiftRect = [...magnetized.slice(0, 2), ...magnetized.slice(-2)] as CanvasLine;
     const shiftW = shiftRect[2] - shiftRect[0];
