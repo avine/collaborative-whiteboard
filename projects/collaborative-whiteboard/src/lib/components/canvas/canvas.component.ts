@@ -35,7 +35,7 @@ import {
   mapToDrawEventsAnimated,
   translateEvent,
 } from '../../utils';
-import { getAnimFlushCount, getAnimFrameRate } from './canvas.utils';
+import { getAnimFlushCount } from './canvas.utils';
 
 @Component({
   selector: 'cw-canvas',
@@ -170,7 +170,6 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
 
   private flushBroadcastEventsBufferWithAnim(id: number) {
     const steps = this.broadcastEventsBuffer.length;
-    const frameRate = getAnimFrameRate(steps);
     const step = () => {
       if (id !== this.broadcastId) {
         return;
@@ -196,11 +195,7 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
           this.handleResult(event);
         }
       }
-      if (frameRate) {
-        setTimeout(() => this.document.defaultView?.requestAnimationFrame(step), frameRate);
-      } else {
-        this.document.defaultView?.requestAnimationFrame(step);
-      }
+      this.document.defaultView?.requestAnimationFrame(step);
     };
     this.document.defaultView?.requestAnimationFrame(step);
   }
