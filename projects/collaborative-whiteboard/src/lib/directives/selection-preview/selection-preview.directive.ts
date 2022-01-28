@@ -27,7 +27,7 @@ export class CwSelectionPreviewDirective {
     }
     const eventsId = this.cwContextResult.getSelectedEventsId(...original);
     if (eventsId.length) {
-      this.skipUnselect = this.service?.addSelection(eventsId);
+      this.skipUnselect = this.service?.selectOne(eventsId);
     }
     const action = this.cwContextResult.getSelectedAction(...original);
     if (action?.action === 'resize') {

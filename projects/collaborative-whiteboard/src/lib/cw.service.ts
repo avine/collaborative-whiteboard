@@ -153,6 +153,31 @@ export class CwService {
     return true;
   }
 
+  private _selectOne(eventsId: string[]): boolean {
+    if (eventsId.length === 0 || (eventsId.length === 1 && this.selectionSet.has(eventsId[0]))) {
+      return false;
+    }
+    let lastIndex = -1;
+    eventsId.forEach((eventId, index) => {
+      if (this.selectionSet.has(eventId)) {
+        lastIndex = index;
+      }
+    });
+    this.selectionSet.clear();
+    const index = lastIndex === -1 ? 0 : (lastIndex + 1) % eventsId.length;
+    this.selectionSet.add(eventsId[index]);
+    return true;
+  }
+
+  selectOne(eventsId: string[]): boolean {
+    if (!this._selectOne(eventsId)) {
+      return false;
+    }
+    this.emitSelection();
+    this.redraw();
+    return true;
+  }
+
   removeSelection(eventsId: string[]): boolean {
     if (!this.updateSelection('delete', eventsId)) {
       return false;
