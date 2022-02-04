@@ -1,0 +1,39 @@
+{
+  "projectType": "library",
+  "root": "libs/collaborative-whiteboard",
+  "sourceRoot": "libs/collaborative-whiteboard/src",
+  "prefix": "cw",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/angular:package",
+      "outputs": ["dist/libs/collaborative-whiteboard"],
+      "options": {
+        "project": "libs/collaborative-whiteboard/ng-package.json"
+      },
+      "configurations": {
+        "production": {
+          "tsConfig": "libs/collaborative-whiteboard/tsconfig.lib.prod.json"
+        },
+        "development": {
+          "tsConfig": "libs/collaborative-whiteboard/tsconfig.lib.json"
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/libs/collaborative-whiteboard"],
+      "options": {
+        "jestConfig": "libs/collaborative-whiteboard/jest.config.js",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": ["libs/collaborative-whiteboard/src/**/*.ts", "libs/collaborative-whiteboard/src/**/*.html"]
+      }
+    }
+  },
+  "tags": []
+}

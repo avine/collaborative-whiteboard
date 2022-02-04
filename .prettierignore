@@ -1,3 +1,5 @@
-/.angular/cache
+# Add files here to ignore them from prettier formatting
+
+/.angular
 /dist
-/docs
+/coverage

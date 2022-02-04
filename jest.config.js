@@ -1,4 +1,5 @@
+const { getJestProjects } = require('@nrwl/jest');
+
 module.exports = {
-  preset: 'jest-preset-angular',
-  setupFilesAfterEnv: ['<rootDir>/setup-jest.ts'],
+  projects: getJestProjects(),
 };

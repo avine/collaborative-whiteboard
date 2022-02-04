@@ -2,7 +2,7 @@
 MIT
 The MIT License
 
-Copyright (c) 2021 Google LLC.
+Copyright (c) 2022 Google LLC.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -37,6 +37,8 @@ MIT
 
 @angular/router
 MIT
+
+@collaborative-whiteboard/lib
 
 @fortawesome/angular-fontawesome
 MIT
@@ -138,8 +140,6 @@ trademarks does not indicate endorsement of the trademark holder by Font
 Awesome, nor vice versa. **Please do not use brand logos for any purpose except
 to represent the company, product, or service to which they refer.**
 
-
-collaborative-whiteboard
 
 rxjs
 Apache-2.0
