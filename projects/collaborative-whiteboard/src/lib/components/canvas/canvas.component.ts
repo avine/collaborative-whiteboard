@@ -18,9 +18,11 @@ import { DEFAULT_DRAW_MODE, DEFAULT_OWNER, getDefaultCanvasSize, getDefaultDrawO
 import {
   CanvasLine,
   CanvasPoint,
+  CanvasSize,
   DrawEvent,
   DrawEventAnimated,
   DrawEventsBroadcast,
+  DrawMode,
   DrawOptions,
   DrawType,
 } from '../../cw.types';
@@ -208,28 +210,25 @@ export class CwCanvasComponent implements OnChanges, AfterViewInit {
     }
   }
 
-  get pointerMagnetShift(): CanvasPoint {
-    if (!this.pointerMagnet) {
+  pointerMagnetShift(pointerMagnet: number, canvasSize: CanvasSize): CanvasPoint {
+    if (!pointerMagnet) {
       return [0, 0];
     }
-    return [
-      Math.round((this.canvasSize.width / 2) % this.pointerMagnet),
-      Math.round((this.canvasSize.height / 2) % this.pointerMagnet),
-    ];
+    return [Math.round((canvasSize.width / 2) % pointerMagnet), Math.round((canvasSize.height / 2) % pointerMagnet)];
   }
 
-  get pointerSensitivity() {
-    const lineWidthRatio = Math.round(this.drawOptions.lineWidth / 3);
-    if (this.pointerMagnet !== 0) {
-      return Math.min(this.pointerMagnet, lineWidthRatio);
+  pointerSensitivity(pointerMagnet: number, drawOptions: DrawOptions) {
+    const lineWidthRatio = Math.round(drawOptions.lineWidth / 3);
+    if (pointerMagnet !== 0) {
+      return Math.min(pointerMagnet, lineWidthRatio);
     }
     const SENSITIVITY_MIN = 3;
     const SENSITIVITY_MAX = 9;
     return Math.min(Math.max(SENSITIVITY_MIN, lineWidthRatio), SENSITIVITY_MAX);
   }
 
-  get pointerSensitivityOrigin(): PointerSensitivityOrigin {
-    return this.drawMode === 'brush' ? 'previous' : 'first';
+  pointerSensitivityOrigin(drawMode: DrawMode): PointerSensitivityOrigin {
+    return drawMode === 'brush' ? 'previous' : 'first';
   }
 
   pointerEnd(magnetized: number[], original: number[]) {

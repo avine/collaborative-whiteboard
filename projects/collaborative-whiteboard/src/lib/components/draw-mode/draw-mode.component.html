@@ -29,7 +29,7 @@
       max="40"
       step="10"
       [(ngModel)]="pointerMagnet"
-      (ngModelChange)="pointerMagnetChange.emit(this.pointerMagnet)"
+      (ngModelChange)="pointerMagnetChange.emit(pointerMagnet)"
     />
 
     <span class="cw-control__number cw-control__number--large">{{ pointerMagnet }}px</span>

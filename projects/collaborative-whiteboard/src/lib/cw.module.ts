@@ -18,6 +18,7 @@ import {
   CwWhiteboardComponent,
 } from './components';
 import { CwEmitPreviewDirective, CwPointerDirective, CwSelectionPreviewDirective } from './directives';
+import { CwPurifyPipe } from './pipes';
 import { CwStorageService } from './services';
 
 const components = [
@@ -35,10 +36,12 @@ const components = [
 
 const directives = [CwEmitPreviewDirective, CwPointerDirective, CwSelectionPreviewDirective];
 
+const pipes = [CwPurifyPipe];
+
 @NgModule({
   imports: [CommonModule, FormsModule, DragDropModule, OverlayModule, PortalModule],
-  declarations: [components, directives],
-  exports: [components, directives],
+  declarations: [components, directives, pipes],
+  exports: [components, directives, pipes],
   entryComponents: [CwToolContentComponent],
 })
 export class CwModule {

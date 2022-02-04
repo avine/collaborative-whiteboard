@@ -19,9 +19,9 @@
   [class.cw-canvas__preview--readonly]="drawDisabled"
   cwPointer
   [cwPointerMagnet]="pointerMagnet"
-  [cwPointerMagnetShift]="pointerMagnetShift"
-  [cwPointerSensitivity]="pointerSensitivity"
-  [cwPointerSensitivityOrigin]="pointerSensitivityOrigin"
+  [cwPointerMagnetShift]="pointerMagnetShift | cwPurify : pointerMagnet : canvasSize"
+  [cwPointerSensitivity]="pointerSensitivity | cwPurify : pointerMagnet : drawOptions"
+  [cwPointerSensitivityOrigin]="pointerSensitivityOrigin | cwPurify : drawMode"
   (cwPointerEnd)="drawDisabled || pointerEnd($event[0], $event[1])"
   cwEmitPreview
   cwSelectionPreview
